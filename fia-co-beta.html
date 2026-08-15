@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FIA&CO — Beta</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e4e7ec;--accent:#315efb;--accent2:#1839a6}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+a{color:inherit}.wrap{max-width:1120px;margin:auto;padding:0 22px}
+nav{height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+.logo{font-weight:800;letter-spacing:-.04em;font-size:22px}.logo span{color:var(--accent)}
+.navlinks{display:flex;gap:20px;font-size:14px}.navlinks a{text-decoration:none;color:var(--muted)}
+.btn{display:inline-block;border:0;border-radius:12px;padding:12px 18px;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;cursor:pointer}.btn.alt{background:#eef2ff;color:var(--accent2)}
+.hero{padding:76px 0 55px;background:linear-gradient(180deg,#fff 0%,#f6f7fb 100%)}
+.badge{display:inline-block;background:#eef2ff;color:var(--accent2);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800}
+h1{font-size:clamp(42px,7vw,76px);line-height:.98;letter-spacing:-.06em;margin:18px 0}.lead{font-size:20px;max-width:720px;color:var(--muted)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.section{padding:62px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}.card h3{margin-top:0}.muted{color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}.num{font-size:13px;font-weight:800;color:var(--accent)}
+.demo{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}.status{display:inline-flex;padding:6px 10px;border-radius:999px;background:#e9f8ef;color:#16794c;font-size:12px;font-weight:800}
+.field{margin:14px 0}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}.field textarea{min-height:90px}
+footer{padding:35px 0;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+@media(max-width:800px){.grid,.steps,.demo{grid-template-columns:1fr}.navlinks{display:none}.hero{padding-top:52px}}
+</style>
+</head>
+<body>
+<nav><div class="wrap" style="display:flex;width:100%;justify-content:space-between;align-items:center">
+<div class="logo">FIA<span>&</span>CO</div>
+<div class="navlinks"><a href="#como">Cómo funciona</a><a href="#valor">Propuesta</a><a href="#demo">Demo</a></div>
+<a class="btn" href="#contacto">Hablar con nosotros</a>
+</div></nav>
+
+<header class="hero">
+<div class="wrap">
+<span class="badge">BETA · ESPAÑA · HASTA 1.000 €</span>
+<h1>Acuerda.<br>Paga.<br>Comprueba.<br>Libera.</h1>
+<p class="lead">FIA&CO es una plataforma de transacciones condicionadas entre particulares. Estructuramos la operación para que el dinero se libere conforme a las condiciones acordadas, utilizando infraestructura financiera autorizada.</p>
+<div class="actions">
+<a class="btn" href="#demo">Probar la demo</a>
+<a class="btn alt" href="#financiero">Soy entidad financiera</a>
+</div>
+</div>
+</header>
+
+<section id="como" class="section"><div class="wrap">
+<h2>El problema de la confianza</h2><p class="muted">El comprador no quiere pagar sin saber si recibirá lo acordado. El vendedor no quiere trabajar sin saber si cobrará.</p>
+<div class="steps">
+<div class="step"><div class="num">01 · ACUERDO</div><h3>Definid las condiciones</h3><p class="muted">Importe, partes, fecha y condición de liberación.</p></div>
+<div class="step"><div class="num">02 · PAGO</div><h3>Se inicia la operación</h3><p class="muted">El pago se realiza mediante la infraestructura financiera integrada.</p></div>
+<div class="step"><div class="num">03 · COMPRUEBA</div><h3>Se cumple lo acordado</h3><p class="muted">La operación queda registrada con su estado e historial.</p></div>
+<div class="step"><div class="num">04 · LIBERA</div><h3>Se completa la operación</h3><p class="muted">La liberación se ejecuta conforme al mecanismo acordado.</p></div>
+</div></div></section>
+
+<section id="valor" class="section"><div class="wrap">
+<div class="grid">
+<div class="card"><h3>Seguridad</h3><p class="muted">Diseñada para integrarse con una entidad o proveedor de pagos autorizado.</p></div>
+<div class="card"><h3>Transparencia</h3><p class="muted">Cada operación muestra importe, partes, condición y estado.</p></div>
+<div class="card"><h3>Trazabilidad</h3><p class="muted">Un identificador y un historial acompañan la operación de principio a fin.</p></div>
+</div></div></section>
+
+<section id="demo" class="section"><div class="wrap">
+<h2>Demo de operación</h2>
+<p class="muted">Esta beta es una maqueta funcional de interfaz. No mueve dinero real.</p>
+<div class="demo">
+<div class="panel">
+<span class="status">OPERACIÓN EN CURSO</span>
+<div class="field"><label>Pagador</label><input id="payer" value="Usuario A"></div>
+<div class="field"><label>Beneficiario</label><input id="beneficiary" value="Usuario B"></div>
+<div class="field"><label>Importe (€)</label><input id="amount" type="number" value="700"></div>
+<div class="field"><label>Condición de liberación</label><textarea id="condition">Confirmación del pagador tras comprobar el cumplimiento del servicio.</textarea></div>
+<button class="btn" onclick="saveDemo()">Guardar demo</button>
+</div>
+<div class="panel">
+<h3>Estado</h3>
+<p><strong>Fondos:</strong> <span id="funds">Recibidos</span></p>
+<p><strong>Operación:</strong> <span id="op">#FIA-10284</span></p>
+<p><strong>Importe:</strong> <span id="showAmount">700 €</span></p>
+<hr style="border:0;border-top:1px solid var(--line)">
+<p class="muted">El prototipo guarda los cambios en este navegador mediante almacenamiento local.</p>
+<a class="btn alt" href="#contacto">Solicitar piloto</a>
+</div>
+</div></div></section>
+
+<section id="financiero" class="section"><div class="wrap">
+<div class="card"><h2>Buscamos socio financiero</h2>
+<p class="muted">Queremos estudiar con una entidad autorizada la estructura jurídica, el flujo de fondos, KYC/AML, API, conciliación, reembolsos, costes y un posible piloto controlado.</p>
+<div class="actions"><a class="btn" href="mailto:contacto@fiaandco.example?subject=FIA%26CO%20-%20Reunión%20socio%20financiero">Solicitar reunión</a></div>
+</div></div></section>
+
+<section id="contacto" class="section"><div class="wrap">
+<h2>FIA&CO</h2>
+<p class="muted">Una infraestructura de confianza para operaciones de pequeño importe entre particulares.</p>
+<a class="btn" href="mailto:contacto@fiaandco.example?subject=Quiero%20conocer%20FIA%26CO">Contactar</a>
+</div></section>
+
+<footer><div class="wrap">Beta conceptual. FIA&CO no pretende prestar directamente servicios de pago ni custodiar fondos sin la autorización y estructura regulatoria que corresponda.</div></footer>
+
+<script>
+function saveDemo(){
+ const a=document.getElementById('amount').value||0;
+ document.getElementById('showAmount').textContent=Number(a).toLocaleString('es-ES')+' €';
+ localStorage.setItem('fia_demo',JSON.stringify({
+ payer:payer.value,beneficiary:beneficiary.value,amount:a,condition:condition.value
+ }));
+ alert('Cambios guardados en este navegador.');
+}
+(function(){
+ const x=localStorage.getItem('fia_demo'); if(!x)return;
+ try{const d=JSON.parse(x); payer.value=d.payer;beneficiary.value=d.beneficiary;amount.value=d.amount;condition.value=d.condition;document.getElementById('showAmount').textContent=Number(d.amount).toLocaleString('es-ES')+' €';}catch(e){}
+})();
+</script>
+</body></html>
