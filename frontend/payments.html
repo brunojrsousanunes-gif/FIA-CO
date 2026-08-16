@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Arquitectura de pagos y transacciones de FIA&CO en entorno de demostración.">
+<title>FIA&CO — Pagos y transacciones</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav><div class="wrap nav-inner"><div class="logo">FIA<span>&</span>CO</div><div class="navlinks"><a href="index.html">Inicio</a><a href="products.html">Casos</a><a href="cart.html">Carrito</a></div><a class="btn" href="index.html#pagos">Volver</a></div></nav>
+<header class="hero"><div class="wrap"><span class="badge">ARQUITECTURA DE PAGOS · DEMO</span><h1>Un motor para muchos medios de pago.</h1><p class="lead">La plataforma estará preparada para integrar distintas vías de pago sin asumir que todas son válidas para todas las operaciones. Cada opción deberá pasar por reglas de elegibilidad, seguridad, trazabilidad y marco jurídico.</p></div></header>
+<section class="section"><div class="wrap"><div class="grid">
+<div class="card"><h3>Transferencias bancarias</h3><p class="muted">SEPA, transferencias inmediatas y otras vías bancarias compatibles mediante proveedores autorizados.</p></div>
+<div class="card"><h3>Tarjetas</h3><p class="muted">Integración futura a través de adquirentes o proveedores de servicios de pago, sin almacenar datos completos de tarjeta en FIA&CO.</p></div>
+<div class="card"><h3>Wallets y apps</h3><p class="muted">Pagos móviles, enlaces, QR y wallets cuando el proveedor, territorio y tipo de operación sean compatibles.</p></div>
+<div class="card"><h3>Open Banking</h3><p class="muted">Iniciación de pagos o conexión bancaria mediante servicios autorizados y consentimientos adecuados.</p></div>
+<div class="card"><h3>Criptoactivos</h3><p class="muted">Integración modular con proveedores autorizados cuando corresponda. Sin claves privadas ni custodia de activos en el frontend.</p></div>
+<div class="card"><h3>Nuevos métodos</h3><p class="muted">El núcleo permitirá incorporar nuevas modalidades mediante conectores versionados, sin rehacer la lógica completa.</p></div>
+</div></div></section>
+<section class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Decisión automática</span><h2>Qué comprobará FIA&CO antes de mostrar un método</h2></div>
+<div class="timeline">
+<div class="step"><span>1</span><div><strong>Tipo de operación</strong><p>Compraventa, vehículo, servicio, conciliación u otro supuesto.</p></div></div>
+<div class="step"><span>2</span><div><strong>Partes</strong><p>Particulares, profesionales, empresas, residencia y condiciones relevantes.</p></div></div>
+<div class="step"><span>3</span><div><strong>Cuantía y acumulación</strong><p>Importe total, pagos relacionados y reglas aplicables al medio de pago.</p></div></div>
+<div class="step"><span>4</span><div><strong>Territorio y regulación</strong><p>UE, España, Galicia, Lugo y cualquier otra jurisdicción que resulte aplicable.</p></div></div>
+<div class="step"><span>5</span><div><strong>Proveedor autorizado</strong><p>Solo se conectará dinero real cuando exista un proveedor válido y revisado para ese servicio.</p></div></div>
+<div class="step"><span>6</span><div><strong>Riesgo y trazabilidad</strong><p>La operación debe poder dejar evidencias suficientes de autorización, estado, incidencias y cierre.</p></div></div>
+</div>
+<div class="notice top-gap"><strong>En esta versión:</strong> todas las opciones son informativas y simuladas. FIA&CO no mueve, custodia ni liquida fondos reales.</div>
+</div></section>
+<section class="section"><div class="wrap"><div class="section-head"><span class="eyebrow">Estados de una transacción</span><h2>No reduciremos una operación a “pagado / no pagado”</h2></div><div class="flow"><span>Creada</span><b>→</b><span>Validada</span><b>→</b><span>Autorizada</span><b>→</b><span>Pendiente</span><b>→</b><span>Confirmada</span><b>→</b><span>Finalizada</span></div><p class="lead top-gap">También se contemplarán incidencias, rechazo, cancelación, reversión cuando jurídicamente y técnicamente proceda, duplicados y reconciliación.</p></div></section>
+<footer><div class="wrap">FIA&CO · Arquitectura informativa. Ningún método mostrado implica que esté habilitado para uso real.</div></footer>
+</body>
+</html>
