@@ -1,16 +1,29 @@
 const FIA_CART_KEY='fia_cart_v1';
+const FIA_CART_MAX_ITEMS=50;
+const FIA_CART_MAX_QUANTITY=20;
+
+function fiaNormalizeQuantity(value){
+  const n=Number(value);
+  if(!Number.isFinite(n)) return 1;
+  return Math.min(FIA_CART_MAX_QUANTITY,Math.max(1,Math.floor(n)));
+}
 
 function fiaLoadCart(){
   try{
     const raw=localStorage.getItem(FIA_CART_KEY);
     const parsed=raw?JSON.parse(raw):[];
     if(!Array.isArray(parsed)) return [];
-    return parsed.filter(item=>item&&typeof item.productId==='string'&&Number.isInteger(item.quantity)&&item.quantity>0&&item.quantity<=20);
+    return parsed
+      .filter(item=>item&&typeof item.productId==='string'&&/^[a-z0-9-]{1,40}$/.test(item.productId)&&Number.isInteger(item.quantity)&&item.quantity>0&&item.quantity<=FIA_CART_MAX_QUANTITY)
+      .slice(0,FIA_CART_MAX_ITEMS);
   }catch(_){return []}
 }
 
 function fiaSaveCart(items){
-  const safe=items.map(item=>({productId:String(item.productId),quantity:Math.min(20,Math.max(1,Number(item.quantity)||1))}));
+  const safe=(Array.isArray(items)?items:[])
+    .filter(item=>item&&typeof item.productId==='string'&&/^[a-z0-9-]{1,40}$/.test(item.productId))
+    .slice(0,FIA_CART_MAX_ITEMS)
+    .map(item=>({productId:item.productId,quantity:fiaNormalizeQuantity(item.quantity)}));
   localStorage.setItem(FIA_CART_KEY,JSON.stringify(safe));
 }
 
@@ -19,8 +32,12 @@ function fiaAddToCart(productId,quantity=1){
   if(!product) return false;
   const cart=fiaLoadCart();
   const existing=cart.find(item=>item.productId===productId);
-  if(existing) existing.quantity=Math.min(20,existing.quantity+quantity);
-  else cart.push({productId,quantity:Math.min(20,Math.max(1,quantity))});
+  const safeQuantity=fiaNormalizeQuantity(quantity);
+  if(existing) existing.quantity=Math.min(FIA_CART_MAX_QUANTITY,existing.quantity+safeQuantity);
+  else {
+    if(cart.length>=FIA_CART_MAX_ITEMS) return false;
+    cart.push({productId,quantity:safeQuantity});
+  }
   fiaSaveCart(cart);
   return true;
 }
