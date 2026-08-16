@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [fia-development, legal-use-cases]
+    branches: [fia-development, legal-use-cases, wallet-crypto-demo]
 
 permissions:
   contents: read
@@ -30,3 +30,4 @@ jobs:
           node tests/run-tests.mjs
           node tests/identity-demo.mjs
           node tests/brand-beta-tests.mjs
+          node tests/wallet-demo-tests.mjs
