@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FIA&CO — Carrito demo</title><link rel="stylesheet" href="css/style.css"></head>
+<body>
+<nav><div class="wrap nav-inner"><div class="logo">FIA<span>&</span>CO</div><div class="navlinks"><a href="index.html">Inicio</a><a href="products.html">Catálogo</a><a href="cart.html">Carrito</a></div></div></nav>
+<section class="section"><div class="wrap"><h1 style="font-size:44px">Carrito</h1><div class="notice">Demo local: este carrito no representa una orden ni un compromiso de pago.</div><div id="items" style="margin-top:20px"></div><div id="summary" class="card" style="margin-top:20px"></div></div></section>
+<footer><div class="wrap">FIA&CO · Los totales mostrados en esta demo no son autoridad financiera.</div></footer>
+<script src="js/products.js"></script><script src="js/cart.js"></script>
+<script>
+function render(){
+ const items=document.getElementById('items'),summary=document.getElementById('summary');items.textContent='';summary.textContent='';
+ const cart=fiaCartSnapshot();
+ if(!cart.length){const p=document.createElement('p');p.className='muted';p.textContent='El carrito está vacío.';items.appendChild(p);const a=document.createElement('a');a.className='btn';a.href='products.html';a.textContent='Ir al catálogo';summary.appendChild(a);return}
+ cart.forEach(item=>{const row=document.createElement('div');row.className='card';row.style.marginBottom='12px';const title=document.createElement('h3');title.textContent=item.name;const info=document.createElement('p');info.className='muted';info.textContent=`Cantidad: ${item.quantity} · ${fiaMoney(item.lineTotal,item.currency)}`;const btn=document.createElement('button');btn.className='btn danger';btn.type='button';btn.textContent='Quitar';btn.addEventListener('click',()=>{fiaRemoveFromCart(item.productId);render()});row.append(title,info,btn);items.appendChild(row)});
+ const total=document.createElement('div');total.className='summary-row total';total.innerHTML='<span>Total demo</span>';const amount=document.createElement('span');amount.textContent=fiaMoney(fiaCartTotal());total.appendChild(amount);const checkout=document.createElement('a');checkout.className='btn';checkout.href='checkout.html';checkout.textContent='Continuar al checkout demo';checkout.style.marginTop='16px';summary.append(total,checkout);
+}
+render();
+</script>
+</body></html>

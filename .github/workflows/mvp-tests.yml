@@ -1,0 +1,29 @@
+name: MVP tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [fia-development]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Setup Node
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          for file in frontend/js/*.js tests/*.mjs; do
+            node --check "$file"
+          done
+      - name: Run automated battery
+        run: node tests/run-tests.mjs
