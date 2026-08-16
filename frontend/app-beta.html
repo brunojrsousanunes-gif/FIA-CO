@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Beta móvil FIA&CO: pagos entre particulares, acuerdos, identidad y operaciones condicionadas en modo demo."><title>FIA&CO — App beta</title><link rel="stylesheet" href="css/style.css"></head>
+<body class="app-demo-body"><main class="phone-shell">
+<header class="app-head"><img src="assets/fia-co-balance.svg" alt="FIA&CO" class="app-logo"><button class="icon-btn" aria-label="Menú">☰</button></header>
+<section class="app-screen"><p class="muted small">BETA · SIN DINERO REAL</p><h1 class="app-title">Hola, usuario</h1><div class="balance-card"><span>Saldo demo</span><strong>1.250,00 €</strong><small>Cuenta FIA&CO Demo</small></div>
+<div class="quick-grid"><button data-demo="Enviar">↗<span>Enviar</span></button><button data-demo="Solicitar">↓<span>Solicitar</span></button><button data-demo="Acuerdos">✓<span>Acuerdos</span></button><button data-demo="Historial">◷<span>Historial</span></button></div>
+<h2 class="app-section-title">Funciones beta</h2><div class="app-list">
+<button data-demo="Pago entre particulares"><b>↔</b><span><strong>Pago entre particulares</strong><small>Crear una operación y elegir medio de pago simulado.</small></span><i>›</i></button>
+<button data-demo="Compraventa"><b>▣</b><span><strong>Compraventa</strong><small>Particulares, vehículos, precio, acuerdo y evidencias.</small></span><i>›</i></button>
+<button data-demo="Conciliación"><b>⚖</b><span><strong>Conciliación</strong><small>Modalidad y límites según la regla aplicable.</small></span><i>›</i></button>
+<button data-demo="Biometría"><b>◎</b><span><strong>Verificación de identidad</strong><small>Huella, rostro y voz simulados; sin capturar biometría real.</small></span><i>›</i></button>
+<button data-demo="Operación condicionada"><b>✓</b><span><strong>Operación condicionada</strong><small>Acuerdo → pago → cumplimiento → cierre.</small></span><i>›</i></button></div>
+<h2 class="app-section-title">Operaciones recientes</h2><div class="transaction"><span>Acuerdo compraventa</span><strong class="positive">+500,00 €</strong></div><div class="transaction"><span>Pago demo a María P.</span><strong>-150,00 €</strong></div>
+<div class="notice app-notice" id="demoNotice"><strong>Modo seguro:</strong> ninguna acción mueve dinero, firma contratos reales ni procesa biometría.</div>
+</section><nav class="bottom-nav"><a href="index.html">⌂<span>Inicio</span></a><button data-demo="Pagos">↔<span>Pagos</span></button><button class="center-action" data-demo="Nueva operación">＋</button><button data-demo="Acuerdos">✓<span>Acuerdos</span></button><button data-demo="Perfil">○<span>Perfil</span></button></nav></main>
+<script>document.querySelectorAll('[data-demo]').forEach(b=>b.addEventListener('click',()=>{document.getElementById('demoNotice').innerHTML='<strong>'+b.dataset.demo+':</strong> función disponible en esta beta como simulación. No se solicitan datos sensibles ni se ejecutan operaciones reales.';document.getElementById('demoNotice').scrollIntoView({behavior:'smooth',block:'nearest'})}));</script></body></html>
