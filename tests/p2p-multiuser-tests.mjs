@@ -13,7 +13,7 @@ const page=fs.readFileSync(new URL('../frontend/two-clients.html',import.meta.ur
 process.env.FIA_DEMO_SECRET_A='test-secret-a-very-long';process.env.FIA_DEMO_SECRET_B='test-secret-b-very-long';process.env.FIA_DEMO_ALLOWED_ORIGINS='https://demo.example';resetDemoState();const server=createDemoServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port,base=`http://127.0.0.1:${port}`;
 const common={'content-type':'application/json','origin':'https://demo.example'};
 async function login(clientId,secret){const r=await fetch(base+'/session',{method:'POST',headers:common,body:JSON.stringify({clientId,secret})});eq(r.status,201);return (await r.json()).token}
-await test('backend no expone credenciales demo',async()=>eq((await fetch(base+'/demo-credentials')).status,403));
+await test('backend no expone credenciales demo',async()=>eq((await fetch(base+'/demo-credentials',{headers:{origin:'https://demo.example'}})).status,401));
 await test('origen no autorizado se bloquea',async()=>eq((await fetch(base+'/state',{headers:{origin:'https://evil.example'}})).status,403));
 await test('login incorrecto se rechaza',async()=>eq((await fetch(base+'/session',{method:'POST',headers:common,body:JSON.stringify({clientId:'A',secret:'mala'})})).status,401));
 const tokenA=await login('A',process.env.FIA_DEMO_SECRET_A),tokenB=await login('B',process.env.FIA_DEMO_SECRET_B);const headersA={...common,authorization:`Bearer ${tokenA}`},headersB={...common,authorization:`Bearer ${tokenB}`};
