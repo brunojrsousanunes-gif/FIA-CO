@@ -16,6 +16,7 @@ const secrets=()=>({A:process.env.FIA_DEMO_SECRET_A||'',B:process.env.FIA_DEMO_S
 const allowedOrigins=()=>new Set((process.env.FIA_DEMO_ALLOWED_ORIGINS||'').split(',').map(v=>v.trim()).filter(Boolean));
 const same=(a,b)=>{const aa=Buffer.from(String(a)),bb=Buffer.from(String(b));return aa.length===bb.length&&crypto.timingSafeEqual(aa,bb)};
 function securityHeaders(res){res.setHeader('cache-control','no-store');res.setHeader('x-content-type-options','nosniff');res.setHeader('x-frame-options','DENY');res.setHeader('referrer-policy','no-referrer');res.setHeader('content-security-policy',"default-src 'none'; frame-ancestors 'none'; base-uri 'none'")}
+function corsHeaders(req,res){const origin=req.headers.origin;if(origin&&allowedOrigins().has(origin)){res.setHeader('access-control-allow-origin',origin);res.setHeader('vary','Origin');res.setHeader('access-control-allow-methods','GET, POST, OPTIONS');res.setHeader('access-control-allow-headers','Authorization, Content-Type');res.setHeader('access-control-max-age','600')}}
 const json=(res,code,data)=>{securityHeaders(res);res.setHeader('content-type','application/json; charset=utf-8');res.statusCode=code;if(code===204)return res.end();res.end(JSON.stringify(data))};
 function checkOrigin(req){const origin=req.headers.origin;if(!origin)return true;const allow=allowedOrigins();return allow.size>0&&allow.has(origin)}
 function throttle(req){const key=req.socket.remoteAddress||'unknown',t=now();let rec=rate.get(key);if(!rec||t-rec.start>=RATE_WINDOW_MS)rec={start:t,count:0};rec.count++;rate.set(key,rec);return rec.count<=RATE_MAX}
@@ -32,6 +33,8 @@ export async function createDemoServer({stateFile=process.env.FIA_DEMO_STATE_FIL
   const server=http.createServer(async(req,res)=>{try{
     if(!throttle(req))return json(res,429,{error:'RATE_LIMITED'});
     if(!checkOrigin(req))return json(res,403,{error:'ORIGIN_FORBIDDEN'});
+    corsHeaders(req,res);
+    if(req.method==='OPTIONS')return json(res,204,{});
     if(req.method==='GET'&&req.url==='/health')return json(res,200,{ok:true,mode:'demo',realFunds:false,persistent:store.persistent});
     if(req.method==='POST'&&req.url==='/session'){
       const p=await body(req),id=safe(p.clientId),secret=String(p.secret||''),cfg=secrets(),state=store.snapshotAll();client(state,id);
