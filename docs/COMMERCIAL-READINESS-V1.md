@@ -26,13 +26,47 @@ FIA&CO organiza el proceso de una operación entre partes para que cada paso, ev
 
 ## 2. Pricing y unit economics
 
-No publicar precio definitivo sin validar costes, regulación y disposición a pagar. Piloto recomendado para test comercial:
+### Tarifa de introducción
+Hipótesis comercial para pilotos y lanzamiento, sujeta a validación jurídica, fiscal y de unit economics:
 
-- Plan Base: tarifa fija por operación.
-- Plan Asistido: tarifa fija superior por acompañamiento operativo.
-- Profesional: precio por volumen, pendiente de pilotos B2B.
+- hasta 2.999 €: 2,9% del valor, mínimo 0,99 € y máximo 19,90 €;
+- desde 3.000 €: la operación pasa a modalidad **FIA&CO Plus / Alto Valor**, con controles adicionales y tarifa específica.
 
-Antes de fijar importes registrar por operación: ingreso, minutos de soporte, coste de proveedores, coste de verificación, incidencias, reembolsos y margen bruto. Criterio: no escalar adquisición pagada hasta demostrar margen de contribución positivo en una cohorte piloto.
+### FIA&CO Plus / Alto Valor
+Objetivo: monetizar el trabajo y riesgo operativo adicional sin perder el posicionamiento de precio bajo.
+
+Hipótesis inicial:
+
+- 3.000–4.999 €: 0,95%, mínimo 24,90 €, máximo 39,90 €;
+- 5.000–9.999 €: 0,75%, mínimo 39,90 €, máximo 59,90 €;
+- 10.000–24.999 €: 0,55%, mínimo 59,90 €, máximo 99,90 €;
+- 25.000 € o más: 0,35%, mínimo 99,90 €, con tope promocional inicial de 199,90 €.
+
+Los porcentajes decrecen con el valor para evitar que la comisión crezca desproporcionadamente. Estos precios son hipótesis de penetración, no tarifas definitivas.
+
+### Controles adicionales para Alto Valor
+La modalidad Plus debe exigir, cuando sea legal y técnicamente aplicable:
+
+- verificación reforzada de identidad de las partes mediante proveedor adecuado;
+- comprobación reforzada de evidencias/documentación del expediente;
+- revisión de coherencia entre titularidad declarada, activo y contraparte cuando proceda;
+- doble confirmación en hitos críticos;
+- revisión humana antes de liberar cualquier instrucción crítica;
+- registro de auditoría reforzado;
+- detección y bloqueo de duplicidades/anomalías;
+- canal de soporte prioritario durante la operación;
+- checklist específico según categoría del activo;
+- escalado obligatorio de incidencias de identidad, titularidad, fraude o documentación.
+
+“Garantía adicional” significa controles y asistencia adicionales; no debe comercializarse como garantía financiera, seguro, custodia o garantía de buen fin salvo que exista cobertura contractual/regulatoria específica.
+
+### Benchmark y regla competitiva
+La tarifa no debe publicitarse genéricamente como “más barata que todo el mercado”. Como referencias públicas actuales, Vinted indica una tasa de protección que suele ser 5% + 0,70 €, mientras Milanuncios Express publica 7% + 0,10 €, mínimo 1,70 € y máximo 30 €, pero sus servicios, límites y categorías no son equivalentes a FIA&CO. Por ello, toda comparación comercial deberá hacerse sobre servicios comparables y actualizarse antes de campaña.
+
+Milanuncios Express publica actualmente un máximo de valor de artículo de 2.400 €, por lo que el tramo FIA&CO desde 3.000 € debe tratarse como una propuesta de alto valor distinta y no como comparación directa.
+
+### Unit economics
+Antes de activar precios reales registrar por operación: ingreso, minutos de soporte, coste de PSP/proveedores, KYC/verificación, revisión humana, incidencias, fraude/reembolsos y margen bruto. No escalar adquisición pagada hasta demostrar margen de contribución positivo.
 
 ## 3. Funnel
 
@@ -62,7 +96,8 @@ Checklist mínima antes de una operación real:
 - aceptar términos vigentes;
 - registrar incidencias/conflictos;
 - crear expediente con identificador no sensible;
-- impedir avance si falta un requisito obligatorio.
+- impedir avance si falta un requisito obligatorio;
+- activar automáticamente el checklist Plus si el valor es >= 3.000 €.
 
 No usar documentación real en la demo pública.
 
@@ -108,6 +143,7 @@ Vista mínima por expediente:
 
 - ID de operación;
 - estado;
+- valor y nivel Base/Plus;
 - partes/roles (sin exponer más datos de los necesarios);
 - responsable interno;
 - evidencias requeridas/recibidas;
@@ -117,7 +153,7 @@ Vista mínima por expediente:
 - siguiente acción y fecha objetivo;
 - resultado de cierre.
 
-Colas recomendadas: Nuevas, Esperando cliente, Revisión, Bloqueadas, Listas para avanzar, Cerradas.
+Colas recomendadas: Nuevas, Esperando cliente, Revisión, Alto Valor/Plus, Bloqueadas, Listas para avanzar, Cerradas.
 
 ## 8. Métricas
 
@@ -134,8 +170,9 @@ Instrumentar desde el piloto:
 - incidencias por operación;
 - tasa de bloqueo/cancelación;
 - ticket medio;
+- mix Base/Plus;
 - ingreso y coste variable por operación;
-- margen de contribución;
+- margen de contribución por tramo de valor;
 - CAC cuando exista inversión;
 - repetición y recomendación.
 
@@ -152,6 +189,7 @@ Preparar y mantener alineados:
 - FAQ de confianza/seguridad;
 - explicación del proceso;
 - pricing cuando esté validado;
+- explicación transparente de Plus/Alto Valor y sus controles;
 - plantilla de propuesta;
 - seguimiento comercial;
 - registro de objeciones.
@@ -160,7 +198,7 @@ Pitch de trabajo: “FIA&CO convierte una compraventa entre partes en un proceso
 
 ## 10. Pilotos
 
-Antes de promoción abierta ejecutar 3–5 pilotos controlados. Cada piloto debe tener consentimiento adecuado, alcance definido, responsable y retrospectiva.
+Antes de promoción abierta ejecutar 3–5 pilotos controlados, incluyendo si es viable al menos un caso simulado de Alto Valor. Cada piloto debe tener consentimiento adecuado, alcance definido, responsable y retrospectiva.
 
 Registrar: objeciones, pasos confusos, documentos solicitados, intervenciones manuales, incidencias, tiempo por etapa, disposición a pagar y recomendación.
 
@@ -173,7 +211,7 @@ GO solo cuando:
 1. propuesta y segmento inicial estén definidos;
 2. funnel y responsable de seguimiento estén operativos;
 3. onboarding tenga checklist y política de datos;
-4. pricing haya sido contrastado en pilotos;
+4. pricing Base y Plus haya sido contrastado en pilotos;
 5. revisión jurídica haya aprobado el alcance comercial real;
 6. revisión técnica haya aprobado el uso de datos reales;
 7. métricas y backoffice permitan detectar fallos;
