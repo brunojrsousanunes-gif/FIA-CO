@@ -116,7 +116,7 @@ await test('más de 50 líneas se rechazan al crear orden',()=>{
   return rejects("fiaCreateOrderDemo(many,{name:'Ana',email:'a@b.com'},'bank')");
 });
 
-const htmlFiles=['index.html','products.html','product.html','cart.html','checkout.html'];
+const htmlFiles=['index.html','products.html','product.html','cart.html','checkout.html','payments.html'];
 for(const html of htmlFiles){
   await test(`${html} existe y declara viewport`,()=>{
     const source=fs.readFileSync(new URL(`../frontend/${html}`,import.meta.url),'utf8');
@@ -136,6 +136,11 @@ await test('checkout advierte que no procesa pagos reales',()=>{
 await test('checkout no contiene campos de tarjeta, IBAN o clave privada',()=>{
   const source=fs.readFileSync(new URL('../frontend/checkout.html',import.meta.url),'utf8').toLowerCase();
   for(const forbidden of ['card-number','cvv','iban-input','private-key','seed-phrase']) ok(!source.includes(forbidden),`campo prohibido: ${forbidden}`);
+});
+await test('página de pagos deja claro que todo sigue simulado',()=>{
+  const source=fs.readFileSync(new URL('../frontend/payments.html',import.meta.url),'utf8').toLowerCase();
+  ok(source.includes('simuladas'));
+  ok(source.includes('no mueve, custodia ni liquida fondos reales'));
 });
 await test('frontend no contiene patrones obvios de secretos',()=>{
   const files=[...htmlFiles.map(f=>`../frontend/${f}`),'../frontend/js/products.js','../frontend/js/cart.js','../frontend/js/product.js','../frontend/js/api.js'];
