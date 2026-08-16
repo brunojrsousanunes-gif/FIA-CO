@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" role="img" aria-labelledby="title desc">
+<title id="title">FIA&amp;CO</title><desc id="desc">Balanza clásica: FIA en el platillo izquierdo, CO en el derecho y el signo ampersand forma el cuerpo central.</desc>
+<defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6f4d1f"/><stop offset=".45" stop-color="#c39a54"/><stop offset="1" stop-color="#7c5727"/></linearGradient></defs>
+<g fill="none" stroke="url(#gold)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M260 34v34M126 76h268M260 69v130"/><path d="M126 76l-54 98M126 76l54 98M394 76l-54 98M394 76l54 98"/>
+<path d="M56 174h140c-10 24-34 36-70 36s-60-12-70-36z"/><path d="M324 174h140c-10 24-34 36-70 36s-60-12-70-36z"/>
+<path d="M206 229h108M226 205h68M240 188h40"/>
+</g>
+<text x="126" y="169" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="62" font-weight="700" fill="#173d2c">FIA</text>
+<text x="394" y="169" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="62" font-weight="700" fill="#173d2c">CO</text>
+<text x="260" y="180" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="150" fill="url(#gold)">&amp;</text>
+</svg>
