@@ -8,6 +8,7 @@ ok(index.includes('fia-co-balance.svg'),'la portada debe usar el logo FIA&CO');
 ok(app.includes('name="viewport"'),'la app beta debe ser móvil');
 ok(app.includes('SIN DINERO REAL'),'la app beta debe declarar el modo demo');
 ok(app.includes('Huella')&&app.includes('rostro')&&app.includes('voz'),'la app beta debe explicar biometría simulada');
+ok(app.includes('two-clients.html')&&app.includes('backend HTTPS separado'),'la app beta debe enlazar y aislar la demo multiusuario');
 ok(!/card-number|cvv|private-key|seed-phrase|iban-input/i.test(app),'la app beta no debe pedir secretos financieros');
 ok(logo.includes('FIA')&&logo.includes('CO')&&logo.includes('&amp;'),'el logo debe contener FIA, ampersand y CO');
-console.log('PASS branding y beta móvil: 7 comprobaciones');
+console.log('PASS branding y beta móvil: 8 comprobaciones');

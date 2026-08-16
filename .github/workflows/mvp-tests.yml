@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [fia-development, legal-use-cases, wallet-crypto-demo]
+    branches: [fia-development, legal-use-cases, wallet-crypto-demo, multiuser-demo, multiuser-hardened]
 
 permissions:
   contents: read
@@ -22,7 +22,7 @@ jobs:
           node-version: '22'
       - name: Check JavaScript syntax
         run: |
-          for file in frontend/js/*.js tests/*.mjs; do
+          for file in frontend/js/*.js tests/*.mjs server/*.mjs; do
             node --check "$file"
           done
       - name: Run automated battery
@@ -31,3 +31,4 @@ jobs:
           node tests/identity-demo.mjs
           node tests/brand-beta-tests.mjs
           node tests/wallet-demo-tests.mjs
+          node tests/p2p-multiuser-tests.mjs
