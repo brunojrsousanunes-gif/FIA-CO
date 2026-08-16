@@ -16,6 +16,7 @@ Esta rama prepara una demostración P2P con dos clientes sin fondos reales. No e
 - Persistencia opcional con escritura serializada, fichero temporal y renombrado atómico.
 - Fichero persistente creado con permisos `0600`.
 - Auditoría de sesiones y cambios de operación.
+- El frontend no incorpora secretos; cada tester introduce su código demo temporal manualmente y el código no se persiste.
 
 ## Requisitos antes de conectar dos móviles por Internet
 
