@@ -26,4 +26,6 @@ jobs:
             node --check "$file"
           done
       - name: Run automated battery
-        run: node tests/run-tests.mjs
+        run: |
+          node tests/run-tests.mjs
+          node tests/identity-demo.mjs
