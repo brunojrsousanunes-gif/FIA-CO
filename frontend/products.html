@@ -13,9 +13,11 @@ FIA_PRODUCTS.forEach(p=>{
  const h=document.createElement('h3');h.textContent=p.name;
  const d=document.createElement('p');d.className='muted';d.textContent=p.description;
  const price=document.createElement('p');price.className='price';price.textContent=fiaMoney(p.price,p.currency);
+ const actions=document.createElement('div');actions.className='actions';
+ const view=document.createElement('a');view.className='btn alt';view.href='product.html?id='+encodeURIComponent(p.id);view.textContent='Ver detalle';
  const b=document.createElement('button');b.className='btn';b.type='button';b.textContent='Añadir al carrito';
  b.addEventListener('click',()=>{if(fiaAddToCart(p.id,1)){b.textContent='Añadido ✓';setTimeout(()=>b.textContent='Añadir al carrito',1200)}});
- card.append(h,d,price,b);grid.appendChild(card);
+ actions.append(view,b);card.append(h,d,price,actions);grid.appendChild(card);
 });
 </script>
 </body></html>
