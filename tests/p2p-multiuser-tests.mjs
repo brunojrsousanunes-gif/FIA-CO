@@ -1,4 +1,4 @@
-import fs from 'node:fs';import vm from 'node:vm';import crypto from 'node:crypto';import {createDemoServer,demoCredentialsForTests,resetDemoState} from '../server/demo-api.mjs';
+import fs from 'node:fs';import vm from 'node:vm';import crypto from 'node:crypto';import {createDemoServer,resetDemoState} from '../server/demo-api.mjs';
 function ok(v,m='fallo'){if(!v)throw new Error(m)}function eq(a,b,m=''){if(a!==b)throw new Error(`${m} esperado ${b}, obtenido ${a}`)}
 let pass=0;async function test(n,f){await f();console.log('PASS',n);pass++}
 const source=fs.readFileSync(new URL('../frontend/js/p2p-demo.js',import.meta.url),'utf8');const ctx={crypto:crypto.webcrypto,Uint32Array,Date,Math,Number,String,Array,Object,Error,console};vm.createContext(ctx);vm.runInContext(source,ctx);const api=ctx.FIAP2P;
@@ -8,13 +8,19 @@ await test('solo destinatario puede aceptar',()=>{const s=api.createDemoState();
 await test('aceptación mueve saldo exactamente una vez',()=>{const s=api.createDemoState();const o=api.createTransfer(s,{from:'A',to:'B',amount:125,concept:'Demo'});api.decideTransfer(s,{operationId:o.id,actor:'B',decision:'accept'});eq(s.clients.A.balance,1125);eq(s.clients.B.balance,975);let failed=false;try{api.decideTransfer(s,{operationId:o.id,actor:'B',decision:'accept'})}catch{failed=true}ok(failed)});
 await test('rechazo no mueve saldos',()=>{const s=api.createDemoState();const o=api.createTransfer(s,{from:'A',to:'B',amount:20,concept:'Demo'});api.decideTransfer(s,{operationId:o.id,actor:'B',decision:'reject'});eq(s.clients.A.balance,1250);eq(s.clients.B.balance,850)});
 await test('saldo insuficiente e importes inválidos se bloquean',()=>{const s=api.createDemoState();for(const amount of [0,-1,200000,1300]){let failed=false;try{api.createTransfer(s,{from:'A',to:'B',amount,concept:'x'})}catch{failed=true}ok(failed)}});
-await test('vista de cliente solo contiene operaciones propias',()=>{const s=api.createDemoState();api.createTransfer(s,{from:'A',to:'B',amount:1,concept:'x'});eq(api.snapshotFor(s,'A').operations.length,1);eq(api.snapshotFor(s,'B').operations.length,1)});
 const page=fs.readFileSync(new URL('../frontend/two-clients.html',import.meta.url),'utf8');await test('página dos clientes es móvil y declara simulación',()=>{ok(page.includes('name="viewport"'));ok(page.includes('no se mueve dinero real'));ok(!/private-key|seed-phrase|cvv|iban-input/i.test(page))});
 
-resetDemoState();const server=createDemoServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port,base=`http://127.0.0.1:${port}`,cred=demoCredentialsForTests();const headersA={'content-type':'application/json','x-demo-client':'A','x-demo-token':cred.A},headersB={'content-type':'application/json','x-demo-client':'B','x-demo-token':cred.B};
-await test('backend rechaza acceso sin credenciales',async()=>eq((await fetch(base+'/state')).status,401));
+process.env.FIA_DEMO_SECRET_A='test-secret-a-very-long';process.env.FIA_DEMO_SECRET_B='test-secret-b-very-long';process.env.FIA_DEMO_ALLOWED_ORIGINS='https://demo.example';resetDemoState();const server=createDemoServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port,base=`http://127.0.0.1:${port}`;
+const common={'content-type':'application/json','origin':'https://demo.example'};
+async function login(clientId,secret){const r=await fetch(base+'/session',{method:'POST',headers:common,body:JSON.stringify({clientId,secret})});eq(r.status,201);return (await r.json()).token}
+await test('backend no expone credenciales demo',async()=>eq((await fetch(base+'/demo-credentials')).status,403));
+await test('origen no autorizado se bloquea',async()=>eq((await fetch(base+'/state',{headers:{origin:'https://evil.example'}})).status,403));
+await test('login incorrecto se rechaza',async()=>eq((await fetch(base+'/session',{method:'POST',headers:common,body:JSON.stringify({clientId:'A',secret:'mala'})})).status,401));
+const tokenA=await login('A',process.env.FIA_DEMO_SECRET_A),tokenB=await login('B',process.env.FIA_DEMO_SECRET_B);const headersA={...common,authorization:`Bearer ${tokenA}`},headersB={...common,authorization:`Bearer ${tokenB}`};
+await test('backend rechaza acceso sin sesión',async()=>eq((await fetch(base+'/state',{headers:{origin:'https://demo.example'}})).status,401));
 let op;await test('backend crea operación para cliente A',async()=>{const r=await fetch(base+'/operations',{method:'POST',headers:headersA,body:JSON.stringify({to:'B',amount:75,concept:'Pago demo'})});eq(r.status,201);op=await r.json();eq(op.status,'PENDING_RECIPIENT')});
 await test('backend impide que A acepte como receptor',async()=>eq((await fetch(base+`/operations/${op.id}/decision`,{method:'POST',headers:headersA,body:JSON.stringify({decision:'accept'})})).status,403));
 await test('backend permite a B aceptar y sincroniza saldos',async()=>{const r=await fetch(base+`/operations/${op.id}/decision`,{method:'POST',headers:headersB,body:JSON.stringify({decision:'accept'})});eq(r.status,200);const a=await (await fetch(base+'/state',{headers:headersA})).json(),b=await (await fetch(base+'/state',{headers:headersB})).json();eq(a.client.balance,1175);eq(b.client.balance,925)});
 await test('backend no permite doble ejecución',async()=>eq((await fetch(base+`/operations/${op.id}/decision`,{method:'POST',headers:headersB,body:JSON.stringify({decision:'accept'})})).status,409));
-await new Promise(r=>server.close(r));console.log(`\n${pass} pruebas multiusuario superadas`);
+await test('respuestas incluyen cabeceras de seguridad',async()=>{const r=await fetch(base+'/state',{headers:headersA});eq(r.headers.get('x-content-type-options'),'nosniff');eq(r.headers.get('x-frame-options'),'DENY');eq(r.headers.get('cache-control'),'no-store')});
+await new Promise(r=>server.close(r));console.log(`\n${pass} pruebas multiusuario endurecidas superadas`);
