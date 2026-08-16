@@ -20,5 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          for file in frontend/js/*.js tests/*.mjs; do
+            node --check "$file"
+          done
       - name: Run automated battery
         run: node tests/run-tests.mjs
