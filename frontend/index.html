@@ -3,13 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FIA&CO — MVP seguro</title>
+<meta name="description" content="FIA&CO — demostración de operaciones, contratos, conciliación y pagos con seguridad por diseño.">
+<title>FIA&CO — Operaciones seguras y trazables</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<nav><div class="wrap nav-inner"><div class="logo">FIA<span>&</span>CO</div><div class="navlinks"><a href="index.html">Inicio</a><a href="products.html">Catálogo</a><a href="cart.html">Carrito</a></div><a class="btn" href="products.html">Probar MVP</a></div></nav>
-<header class="hero"><div class="wrap"><span class="badge">MVP · DEMO · SIN DINERO REAL</span><h1>Confianza primero.<br>Pago después.</h1><p class="lead">Un flujo demostrativo para validar operaciones condicionadas con trazabilidad, separación de estados y una arquitectura preparada para integrar proveedores financieros autorizados.</p><div class="actions"><a class="btn" href="products.html">Ver casos de uso</a><a class="btn alt" href="../index.html">Ver beta conceptual</a></div></div></header>
-<section class="section"><div class="wrap"><div class="grid"><div class="card"><h3>Seguridad por diseño</h3><p class="muted">El navegador no decide estados financieros ni conserva secretos.</p></div><div class="card"><h3>Coste mínimo</h3><p class="muted">Este ciclo funciona sin infraestructura de pago ni servicios premium.</p></div><div class="card"><h3>Preparada para backend</h3><p class="muted">La interfaz usa una capa API sustituible para evitar rehacer el producto cuando llegue la integración real.</p></div></div></div></section>
-<footer><div class="wrap">FIA&CO · Entorno de demostración. No procesa ni custodia fondos reales.</div></footer>
+<nav><div class="wrap nav-inner"><div class="logo">FIA<span>&</span>CO</div><div class="navlinks"><a href="#casos">Casos</a><a href="#pagos">Pagos</a><a href="#juridico">Marco</a><a href="products.html">Catálogo</a><a href="cart.html">Carrito</a></div><a class="btn" href="products.html">Probar demo</a></div></nav>
+
+<header class="hero"><div class="wrap">
+<span class="badge">MVP · DEMO · SIN DINERO REAL</span>
+<h1>Operaciones claras.<br>Seguridad primero.</h1>
+<p class="lead">FIA&CO organiza contratos, pagos, transferencias, conciliaciones y evidencias en un recorrido trazable. La demo permite validar la experiencia sin custodiar ni mover fondos reales.</p>
+<div class="actions"><a class="btn" href="#casos">Explorar casos de uso</a><a class="btn alt" href="payments.html">Ver medios de pago</a></div>
+</div></header>
+
+<section class="section compact"><div class="wrap"><div class="metric-grid">
+<div class="metric"><strong>0 €</strong><span>coste adicional del MVP</span></div>
+<div class="metric"><strong>34/34</strong><span>pruebas automáticas superadas</span></div>
+<div class="metric"><strong>UE → ES → Galicia → Lugo</strong><span>capas jurídicas previstas</span></div>
+<div class="metric"><strong>Simulado</strong><span>pagos, firma y transferencias</span></div>
+</div></div></section>
+
+<section id="casos" class="section"><div class="wrap"><div class="section-head"><span class="eyebrow">Casos de uso</span><h2>Una misma estructura para operaciones distintas</h2><p class="lead">Cada caso activa sus propios datos, controles, documentación y límites jurídicos. La cuantía no se confunde con el límite del medio de pago.</p></div>
+<div class="grid">
+<article class="card"><span class="icon">↔</span><h3>Compraventa entre particulares</h3><p class="muted">Objeto, precio, consentimiento, pago, entrega y evidencias de cierre.</p><span class="pill">Contrato privado</span></article>
+<article class="card"><span class="icon">🚗</span><h3>Compraventa de vehículos</h3><p class="muted">Contrato, vehículo, fecha y hora, ITP, entrega y seguimiento del cambio de titularidad.</p><span class="pill">Flujo documental</span></article>
+<article class="card"><span class="icon">⚖</span><h3>Conciliación</h3><p class="muted">La modalidad aplicable determina materia, requisitos y cuantía máxima. Si la ley no fija máximo, FIA&CO no inventa uno.</p><span class="pill">Reglas versionadas</span></article>
+<article class="card"><span class="icon">✓</span><h3>Operaciones condicionadas</h3><p class="muted">Separación entre acuerdo, autorización, pago, entrega, incidencia y finalización.</p><span class="pill">Estados trazables</span></article>
+<article class="card"><span class="icon">▣</span><h3>Servicios y encargos</h3><p class="muted">Pedidos, hitos, aceptación y comprobación previa al cierre.</p><span class="pill">Evidencia de cumplimiento</span></article>
+<article class="card"><span class="icon">◎</span><h3>Nuevas modalidades</h3><p class="muted">Arquitectura modular para incorporar futuros casos sin convertir el navegador en autoridad financiera.</p><span class="pill">Extensible</span></article>
+</div></div></section>
+
+<section id="pagos" class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Pagos y transacciones</span><h2>Multimétodo, pero no indiscriminado</h2><p class="lead">FIA&CO mostrará únicamente medios compatibles con el tipo de operación, las partes, la cuantía, el territorio y la regulación aplicable.</p></div>
+<div class="payment-grid">
+<div class="payment-item"><strong>Transferencia</strong><span>SEPA, inmediata y transferencias bancarias compatibles.</span></div>
+<div class="payment-item"><strong>Tarjeta</strong><span>Integración futura mediante proveedores autorizados.</span></div>
+<div class="payment-item"><strong>Wallets y apps</strong><span>Pagos móviles, enlaces y QR cuando el proveedor y la operación lo permitan.</span></div>
+<div class="payment-item"><strong>Open Banking</strong><span>Iniciación de pagos y conexión bancaria mediante servicios autorizados.</span></div>
+<div class="payment-item"><strong>Criptoactivos</strong><span>Solo cuando el activo, proveedor, usuario y operación sean compatibles con el marco aplicable.</span></div>
+<div class="payment-item"><strong>Futuros métodos</strong><span>Conector modular para añadir nuevas vías sin rehacer el núcleo.</span></div>
+</div>
+<div class="actions top-gap"><a class="btn" href="payments.html">Ver arquitectura de pagos</a></div>
+</div></section>
+
+<section id="juridico" class="section"><div class="wrap"><div class="section-head"><span class="eyebrow">Marco jurídico</span><h2>Reglas por capas, no una cifra fija para todo</h2></div>
+<div class="timeline">
+<div class="step"><span>1</span><div><strong>Unión Europea</strong><p>Normas europeas aplicables a pagos, datos, servicios digitales y criptoactivos.</p></div></div>
+<div class="step"><span>2</span><div><strong>España</strong><p>Normativa civil, mercantil, fiscal, pagos, prevención y procedimientos aplicables.</p></div></div>
+<div class="step"><span>3</span><div><strong>Galicia</strong><p>Reglas autonómicas cuando la Comunidad Autónoma tenga competencia sobre el supuesto.</p></div></div>
+<div class="step"><span>4</span><div><strong>Lugo</strong><p>Domicilio previsto y capa local cuando exista una norma, trámite o competencia relevante.</p></div></div>
+<div class="step"><span>5</span><div><strong>Operación concreta</strong><p>Partes, materia, cuantía, medio de pago y territorio determinan la regla final.</p></div></div>
+</div>
+<div class="notice top-gap"><strong>Importante:</strong> la demo no emite por sí sola una conclusión jurídica vinculante. Las reglas se documentan, versionan y deben revisarse antes de activar operaciones reales.</div>
+</div></section>
+
+<section class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Flujo FIA&CO</span><h2>De la intención al cierre, sin saltos invisibles</h2></div>
+<div class="flow"><span>Identificar operación</span><b>→</b><span>Aplicar reglas</span><b>→</b><span>Contrato / condiciones</span><b>→</b><span>Pago autorizado</span><b>→</b><span>Entrega / cumplimiento</span><b>→</b><span>Evidencias</span><b>→</b><span>Cierre</span></div>
+</div></section>
+
+<section class="section"><div class="wrap"><div class="cta"><div><span class="eyebrow">Entorno de demostración</span><h2>Prueba el recorrido desde el móvil</h2><p class="muted">No introduzcas datos bancarios, claves privadas, credenciales ni información especialmente sensible.</p></div><a class="btn" href="products.html">Abrir demo</a></div></div></section>
+
+<footer><div class="wrap">FIA&CO · Entorno de demostración. No procesa ni custodia fondos reales. Domicilio previsto del proyecto: Lugo, Galicia.</div></footer>
 </body>
 </html>
