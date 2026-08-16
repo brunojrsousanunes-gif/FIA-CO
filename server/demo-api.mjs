@@ -1,0 +1,21 @@
+import http from 'node:http';
+import crypto from 'node:crypto';
+
+const MAX_BODY=16_384;
+const MAX_AMOUNT=100_000;
+const state={clients:{A:{id:'A',name:'Cliente A',balance:1250},B:{id:'B',name:'Cliente B',balance:850}},operations:[],audit:[]};
+const tokens={A:crypto.randomBytes(24).toString('hex'),B:crypto.randomBytes(24).toString('hex')};
+const safe=s=>String(s??'').trim().replace(/[<>]/g,'').slice(0,120);
+const ref=()=>`FIA-P2P-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
+const json=(res,code,data)=>{res.writeHead(code,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(data))};
+const auth=req=>{const id=req.headers['x-demo-client'];const token=req.headers['x-demo-token'];return id&&tokens[id]===token?id:null};
+async function body(req){let size=0,chunks=[];for await(const c of req){size+=c.length;if(size>MAX_BODY)throw new Error('BODY_TOO_LARGE');chunks.push(c)}return JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}')}
+function client(id){if(!state.clients[id])throw new Error('BAD_CLIENT');return state.clients[id]}
+function snapshot(id){client(id);return {client:{...state.clients[id]},operations:state.operations.filter(o=>o.from===id||o.to===id),audit:state.audit.filter(a=>state.operations.some(o=>o.id===a.operationId&&(o.from===id||o.to===id)))}}
+function createOperation(actor,p){const to=safe(p.to);if(actor===to)throw new Error('SAME_CLIENT');client(to);const amount=Math.round(Number(p.amount)*100)/100;if(!Number.isFinite(amount)||amount<=0||amount>MAX_AMOUNT)throw new Error('BAD_AMOUNT');if(client(actor).balance<amount)throw new Error('NO_BALANCE');const concept=safe(p.concept);if(!concept)throw new Error('BAD_CONCEPT');const op={id:ref(),from:actor,to,amount,concept,status:'PENDING_RECIPIENT',createdAt:new Date().toISOString()};state.operations.unshift(op);state.audit.push({operationId:op.id,actor,event:'CREATED',at:new Date().toISOString()});return op}
+function decide(actor,id,decision){const op=state.operations.find(o=>o.id===id);if(!op)throw new Error('NOT_FOUND');if(op.to!==actor)throw new Error('FORBIDDEN');if(op.status!=='PENDING_RECIPIENT')throw new Error('ALREADY_DECIDED');if(decision==='reject'){op.status='REJECTED';state.audit.push({operationId:id,actor,event:'REJECTED',at:new Date().toISOString()});return op}if(decision!=='accept')throw new Error('BAD_DECISION');const sender=client(op.from),receiver=client(op.to);if(sender.balance<op.amount)throw new Error('NO_BALANCE');sender.balance=Math.round((sender.balance-op.amount)*100)/100;receiver.balance=Math.round((receiver.balance+op.amount)*100)/100;op.status='CONFIRMED_DEMO';op.acceptedAt=new Date().toISOString();state.audit.push({operationId:id,actor,event:'ACCEPTED',at:new Date().toISOString()},{operationId:id,actor:'SYSTEM',event:'BALANCES_UPDATED_DEMO',at:new Date().toISOString()});return op}
+
+export function createDemoServer(){return http.createServer(async(req,res)=>{try{if(req.method==='GET'&&req.url==='/health')return json(res,200,{ok:true,mode:'demo',realFunds:false});if(req.method==='GET'&&req.url==='/demo-credentials')return json(res,200,{warning:'SOLO DESARROLLO LOCAL',clients:[{id:'A',token:tokens.A},{id:'B',token:tokens.B}]});const actor=auth(req);if(!actor)return json(res,401,{error:'UNAUTHORIZED'});if(req.method==='GET'&&req.url==='/state')return json(res,200,snapshot(actor));if(req.method==='POST'&&req.url==='/operations')return json(res,201,createOperation(actor,await body(req)));const m=req.url?.match(/^\/operations\/([A-Z0-9-]+)\/decision$/);if(req.method==='POST'&&m)return json(res,200,decide(actor,m[1],(await body(req)).decision));return json(res,404,{error:'NOT_FOUND'})}catch(e){const map={BODY_TOO_LARGE:413,BAD_CLIENT:400,SAME_CLIENT:400,BAD_AMOUNT:400,NO_BALANCE:409,BAD_CONCEPT:400,NOT_FOUND:404,FORBIDDEN:403,ALREADY_DECIDED:409,BAD_DECISION:400};return json(res,map[e.message]||400,{error:e.message||'BAD_REQUEST'})}})}
+export function demoCredentialsForTests(){return {...tokens}}
+export function resetDemoState(){state.clients.A.balance=1250;state.clients.B.balance=850;state.operations.length=0;state.audit.length=0}
+if(import.meta.url===`file://${process.argv[1]}`){const port=Number(process.env.PORT||8787);createDemoServer().listen(port,'127.0.0.1',()=>console.log(`FIA&CO demo API en http://127.0.0.1:${port}`))}
