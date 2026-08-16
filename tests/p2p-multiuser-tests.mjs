@@ -17,6 +17,7 @@ const common={'content-type':'application/json','origin':'https://demo.example'}
 async function login(clientId,secret){const r=await fetch(base+'/session',{method:'POST',headers:common,body:JSON.stringify({clientId,secret})});eq(r.status,201);return (await r.json()).token}
 await test('backend no expone credenciales demo',async()=>eq((await fetch(base+'/demo-credentials',{headers:{origin:'https://demo.example'}})).status,401));
 await test('origen no autorizado se bloquea',async()=>eq((await fetch(base+'/state',{headers:{origin:'https://evil.example'}})).status,403));
+await test('preflight CORS solo autoriza origen permitido',async()=>{const r=await fetch(base+'/session',{method:'OPTIONS',headers:{origin:'https://demo.example','access-control-request-method':'POST','access-control-request-headers':'content-type'}});eq(r.status,204);eq(r.headers.get('access-control-allow-origin'),'https://demo.example');ok((r.headers.get('access-control-allow-headers')||'').includes('Authorization'))});
 await test('login incorrecto se rechaza',async()=>eq((await fetch(base+'/session',{method:'POST',headers:common,body:JSON.stringify({clientId:'A',secret:'mala'})})).status,401));
 let tokenA=await login('A',process.env.FIA_DEMO_SECRET_A),tokenB=await login('B',process.env.FIA_DEMO_SECRET_B);let headersA={...common,authorization:`Bearer ${tokenA}`},headersB={...common,authorization:`Bearer ${tokenB}`};
 await test('backend rechaza acceso sin sesión',async()=>eq((await fetch(base+'/state',{headers:{origin:'https://demo.example'}})).status,401));
