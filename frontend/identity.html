@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Demo de verificación de identidad y autorización biométrica simulada de FIA&CO.">
+<title>FIA&CO — Identidad y biometría</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav><div class="wrap nav-inner"><div class="logo">FIA<span>&</span>CO</div><div class="navlinks"><a href="index.html">Inicio</a><a href="payments.html">Pagos</a><a href="products.html">Casos</a></div><a class="btn" href="index.html">Volver</a></div></nav>
+<header class="hero"><div class="wrap"><span class="badge">IDENTIDAD · DEMO · BIOMETRÍA SIMULADA</span><h1>Verifica a la persona.<br>Autoriza la operación.</h1><p class="lead">Esta experiencia demuestra cómo FIA&CO podrá combinar identidad, biometría y confirmación de pagos entre particulares sin almacenar huellas, imágenes faciales ni muestras de voz en esta demo.</p></div></header>
+<section class="section"><div class="wrap"><div class="section-head"><span class="eyebrow">Factores biométricos</span><h2>Tres vías, una misma regla: mínimo dato necesario</h2></div><div class="grid">
+<article class="card"><span class="icon">☝</span><h3>Huella dactilar</h3><p class="muted">En producción se priorizará la validación local del dispositivo o terminal. FIA&CO recibiría una confirmación de autenticación, no la huella en bruto.</p><button class="btn demo-factor" data-factor="Huella dactilar">Simular verificación</button></article>
+<article class="card"><span class="icon">◉</span><h3>Reconocimiento facial</h3><p class="muted">La cámara frontal podrá servir a un proveedor o mecanismo compatible para verificar identidad, con controles anti-suplantación y minimización de datos.</p><button class="btn demo-factor" data-factor="Reconocimiento facial">Simular verificación</button></article>
+<article class="card"><span class="icon">◖</span><h3>Biometría de voz</h3><p class="muted">Pensada para canales telefónicos o asistidos. Su uso real requerirá evaluación específica de necesidad, riesgo, consentimiento/base jurídica y protección reforzada.</p><button class="btn demo-factor" data-factor="Biometría de voz">Simular verificación</button></article>
+</div><div id="factor-result" class="notice top-gap" aria-live="polite"><strong>Estado:</strong> aún no se ha simulado ningún factor.</div></div></section>
+<section class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Pago entre particulares</span><h2>La biometría no sustituye el resto de controles</h2><p class="lead">La autorización de una operación combinará identidad, contexto de la transacción y un segundo factor cuando corresponda. La persona deberá ver qué autoriza antes de confirmar.</p></div>
+<div class="card"><div class="summary-row"><span>Operación</span><strong>Compraventa entre particulares</strong></div><div class="summary-row"><span>Beneficiario demo</span><strong>María G.</strong></div><div class="summary-row"><span>Importe demo</span><strong>480,00 €</strong></div><div class="summary-row"><span>Medio</span><strong>Transferencia · simulada</strong></div><div class="summary-row"><span>Identidad</span><strong id="identity-state">Pendiente</strong></div><div class="summary-row total"><span>Autorización</span><span id="payment-state">No autorizada</span></div><div class="actions top-gap"><button id="authorize-demo" class="btn" disabled>Autorizar pago demo</button><button id="reset-demo" class="btn alt">Reiniciar</button></div></div>
+<div id="payment-result" class="notice top-gap"><strong>Importante:</strong> no hay movimiento de fondos, captura biométrica real ni conexión con un proveedor financiero.</div></div></section>
+<section class="section"><div class="wrap"><div class="section-head"><span class="eyebrow">Flujo previsto</span><h2>Identidad → consentimiento → autorización → evidencia</h2></div><div class="flow"><span>Identidad</span><b>→</b><span>Factor biométrico</span><b>→</b><span>Revisión de operación</span><b>→</b><span>Segundo factor / reglas</span><b>→</b><span>Autorización</span><b>→</b><span>Evidencia</span></div><div class="notice top-gap"><strong>Privacidad por diseño:</strong> en la arquitectura futura se priorizará que la plantilla biométrica permanezca en el dispositivo o en un proveedor especializado. FIA&CO conservará únicamente los datos mínimos necesarios para acreditar la autenticación y la operación.</div></div></section>
+<footer><div class="wrap">FIA&CO · Demo biométrica simulada. No captura ni almacena biometría real.</div></footer>
+<script>
+(()=>{
+  let verified=false;
+  const factorResult=document.getElementById('factor-result');
+  const identityState=document.getElementById('identity-state');
+  const paymentState=document.getElementById('payment-state');
+  const authorize=document.getElementById('authorize-demo');
+  document.querySelectorAll('.demo-factor').forEach(btn=>btn.addEventListener('click',()=>{
+    verified=true;
+    identityState.textContent='Verificada (simulación)';
+    factorResult.innerHTML='<strong>Estado:</strong> '+btn.dataset.factor+' verificada en modo demostración. No se ha accedido a ningún sensor ni se ha capturado biometría.';
+    authorize.disabled=false;
+  }));
+  authorize.addEventListener('click',()=>{
+    if(!verified)return;
+    paymentState.textContent='Autorizada · DEMO';
+    document.getElementById('payment-result').innerHTML='<strong>Operación autorizada en simulación.</strong> Se ha demostrado el flujo de consentimiento, pero no se ha enviado dinero ni datos biométricos.';
+    authorize.disabled=true;
+  });
+  document.getElementById('reset-demo').addEventListener('click',()=>{
+    verified=false;
+    identityState.textContent='Pendiente';
+    paymentState.textContent='No autorizada';
+    factorResult.innerHTML='<strong>Estado:</strong> aún no se ha simulado ningún factor.';
+    document.getElementById('payment-result').innerHTML='<strong>Importante:</strong> no hay movimiento de fondos, captura biométrica real ni conexión con un proveedor financiero.';
+    authorize.disabled=true;
+  });
+})();
+</script>
+</body>
+</html>

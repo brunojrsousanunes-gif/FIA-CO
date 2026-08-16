@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [fia-development]
+    branches: [fia-development, legal-use-cases]
 
 permissions:
   contents: read
@@ -26,4 +26,7 @@ jobs:
             node --check "$file"
           done
       - name: Run automated battery
-        run: node tests/run-tests.mjs
+        run: |
+          node tests/run-tests.mjs
+          node tests/identity-demo.mjs
+          node tests/brand-beta-tests.mjs
