@@ -34,6 +34,7 @@ jobs:
           node tests/p2p-multiuser-tests.mjs
           node tests/pricing.test.js
           node tests/agent-security.test.js
+          node tests/enterprise-flow.test.js
           node tests/commercial-dashboard.test.js
           node tests/launch-prep.test.js
           node tests/payment-adapters.test.js
