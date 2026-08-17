@@ -10,5 +10,5 @@ assert(i18n.includes("code==='ar'?'rtl':'ltr'"));
 assert(web.includes('fia-co-trust-compute.svg')&&app.includes('fia-co-trust-compute.svg'));
 assert(web.includes('js/i18n.js')&&app.includes('js/i18n.js'));
 assert(logo.includes('INFRAESTRUCTURA · CONFIANZA · VALOR'));
-assert(!web.includes('custodia fondos reales')||web.includes('No procesa ni custodia fondos reales'));
+assert(web.includes('no custodia ni mueve fondos reales')||web.includes('no procesa ni custodia fondos reales')||web.includes('no procesa ni custodia fondos reales'.toUpperCase()),'la portada debe dejar claro que FIA&CO no custodia/mueve fondos reales');
 console.log('brand/i18n tests passed');
