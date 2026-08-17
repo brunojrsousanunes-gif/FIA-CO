@@ -35,3 +35,4 @@ jobs:
           node tests/pricing.test.js
           node tests/commercial-dashboard.test.js
           node tests/launch-prep.test.js
+          node tests/payment-adapters.test.js
