@@ -1,0 +1,13 @@
+const fs=require('fs');const assert=require('assert');
+const index=fs.readFileSync('frontend/index.html','utf8');
+const app=fs.readFileSync('frontend/app-beta.html','utf8');
+const legal=fs.readFileSync('frontend/legal-center.html','utf8');
+assert(index.includes('id="acciones"'));
+['action=send','action=request','action=sale','action=conditional','action=conciliation','legal-center.html'].forEach(x=>assert(index.includes(x),x));
+assert(app.includes('Índice de acciones'));
+['data-direct="sale"','data-direct="conditional"','data-direct="conciliation"','new URLSearchParams(location.search)'].forEach(x=>assert(app.includes(x),x));
+['Derechos e intereses legítimos de FIA&CO','Obligaciones cuando resulten aplicables','Gate fotográfico antes de habilitar el pago','Derechos y obligaciones correlativas','Fuentes oficiales'].forEach(x=>assert(legal.includes(x),x));
+assert(legal.includes('www.boe.es')&&legal.includes('eur-lex.europa.eu')&&legal.includes('poderjudicial.es'));
+assert(/no convierte a FIA&CO en perito, transportista, asegurador ni garante/i.test(legal));
+assert(/validación jurídica|validación profesional/i.test(legal));
+console.log('action index and legal center tests passed');
