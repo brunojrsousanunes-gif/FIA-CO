@@ -1,0 +1,13 @@
+const assert=require('assert');
+require('../frontend/js/provider-guard.js');
+const g=globalThis.FIACOProviderGuard;
+const p=g.policy({externalProviderEnabled:false,maxRetries:1,maxActionsPerManagement:2,maxEstimatedCostEurPerManagement:0});
+assert.strictEqual(g.authorize({action:'CLASSIFY',provider:'LOCAL_MOCK'},p,{actionsUsed:0,estimatedCostUsedEur:0}).allowed,true);
+assert.strictEqual(g.authorize({action:'MOVE_FUNDS',provider:'LOCAL_MOCK'},p,{}).reason,'ACTION_NOT_ALLOWED');
+assert.strictEqual(g.authorize({action:'CLASSIFY',provider:'EXTERNAL_DEMO'},p,{}).reason,'EXTERNAL_PROVIDER_DISABLED');
+assert.strictEqual(g.authorize({action:'CLASSIFY',provider:'LOCAL_MOCK',retryCount:2},p,{}).reason,'RETRY_LIMIT_EXCEEDED');
+assert.strictEqual(g.authorize({action:'CLASSIFY',provider:'LOCAL_MOCK'},p,{actionsUsed:2}).reason,'ACTION_LIMIT_EXCEEDED');
+assert.strictEqual(g.authorize({action:'CLASSIFY',provider:'LOCAL_MOCK',estimatedCostEur:0.01},p,{}).reason,'BUDGET_LIMIT_EXCEEDED');
+const risk=g.authorize({action:'DRAFT_REPLY',provider:'LOCAL_MOCK',riskFlag:true},p,{});
+assert.strictEqual(risk.allowed,false);assert.strictEqual(risk.requiresHuman,true);assert.strictEqual(risk.reason,'HUMAN_ESCALATION_REQUIRED');
+console.log('provider guard tests passed');

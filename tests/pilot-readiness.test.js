@@ -1,0 +1,16 @@
+const assert=require('assert');
+require('../frontend/js/pilot-readiness.js');
+const p=globalThis.FIACOPilotReadiness;
+const ready=p.evaluate({operations:20,securityBaselineReady:true,incidentProcessReady:true,metricsDefinitionReady:true,salesOwnerFounder:true,supportOwnerFounder:true,legalCommercialReviewReady:true});
+assert.strictEqual(ready.status,'READY_FOR_FOUNDER_PILOT_REVIEW');
+assert.strictEqual(ready.minimumOperations,15);
+assert.strictEqual(ready.baseTargetOperations,20);
+assert.strictEqual(ready.realCustomerEngagementEnabled,false);
+assert.strictEqual(ready.realMoneyAllowed,false);
+assert.strictEqual(ready.realPiiAllowed,false);
+assert.strictEqual(ready.newAuthorizationRequiredForRealPilot,true);
+const low=p.evaluate({operations:10,securityBaselineReady:true,incidentProcessReady:true,metricsDefinitionReady:true,salesOwnerFounder:true,supportOwnerFounder:true,legalCommercialReviewReady:true});
+assert.strictEqual(low.status,'PREPARE_PILOT');
+assert(low.missing.includes('MINIMUM_OPERATIONS_NOT_MET'));
+assert.throws(()=>p.evaluate({operations:20,email:'x@example.com'}));
+console.log('pilot readiness tests passed');

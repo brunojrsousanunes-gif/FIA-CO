@@ -1,0 +1,6 @@
+(function(global){'use strict';
+const VERSION='0.1-demo';
+const CHECKS=['legalReady','licensedPaymentPartnerReady','privacyReviewReady','threatModelReady','externalSecurityReviewReady','secretsBackendReady','incidentResponseReady','backupRestoreReady','monitoringReady','dataRetentionReady','termsAndContractsReady'];
+function evaluate(input){input=input||{};const checks={};CHECKS.forEach(k=>checks[k]=input[k]===true);const missing=CHECKS.filter(k=>!checks[k]);const prerequisitesReady=missing.length===0;return {version:VERSION,status:prerequisitesReady?'READY_FOR_EXPLICIT_PRODUCTION_AUTHORIZATION':'BLOCKED_DEMO_ONLY',prerequisitesReady,checks,missing,productionExecutionEnabled:false,realFundsEnabled:false,realPiiEnabled:false,customerAuthenticationEnabled:false,billingEnabled:false,autonomousFinancialAuthority:false,licensedPartnerRequired:true,explicitFounderAuthorizationRequired:true,newAuthorizationRequired:prerequisitesReady,nextAuthorizationScope:prerequisitesReady?'PRODUCTION_SECRETS_PSP_KYC_REAL_FUNDS_AND_BINDING_TERMS':'COMPLETE_PREREQUISITES_FIRST',noAutomaticActivation:true,noFinancialCommitment:true,persistentStorage:false,containsPersonalData:false};}
+global.FIACOProductionGate={version:VERSION,checks:CHECKS,evaluate};
+})(typeof window!=='undefined'?window:globalThis);

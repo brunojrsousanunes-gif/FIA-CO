@@ -1,0 +1,16 @@
+const assert=require('assert');
+require('../frontend/js/investor-readiness-pack.js');
+const p=globalThis.FIACOInvestorReadinessPack;
+const strategy={state:'PREPARE_GROWTH_FINANCING',consolidated:true,metrics:{dataSource:'OBSERVED',observedRevenueMonths:6,activeBusinesses:20,retentionPct:75,monthlyOperatingResult:1500,cashCoverageMonths:5,growthDemandPct:30}};
+const capital={status:'READY_FOR_JOINT_CAPITAL_RESEARCH',budget:{product:10000,commercial:5000,securityCompliance:3000,operations:2000},plannedCapitalNeed:22000};
+const ready=p.build(strategy,capital,{problem:'Problema operativo empresarial validado con métricas agregadas.',whyNow:'Automatización segura y demanda observada justifican preparar crecimiento.',milestones:['Validar recurrencia','Automatizar operaciones repetitivas','Escalar manteniendo seguridad']});
+assert.strictEqual(ready.status,'INTERNAL_PACK_READY');
+assert.strictEqual(ready.investorOutreachAllowed,false);
+assert.strictEqual(ready.bindingTermsAllowed,false);
+assert.strictEqual(ready.termAcceptanceOwner,'FOUNDER');
+assert.strictEqual(ready.valuationRecommendationProvided,false);
+assert.strictEqual(ready.containsPersonalData,false);
+assert.strictEqual(ready.persistentStorage,false);
+const early=p.build({state:'STAY_FOUNDER_LED',consolidated:false,metrics:{}},{status:'WAIT_FOR_CONSOLIDATION'},{problem:'x',whyNow:'y',milestones:[]});
+assert.strictEqual(early.status,'WAIT_FOR_CAPITAL_GATE');
+console.log('investor readiness pack tests passed');
