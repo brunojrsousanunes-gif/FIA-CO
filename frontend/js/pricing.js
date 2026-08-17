@@ -1,10 +1,13 @@
 (function (global) {
   'use strict';
 
-  const PRICING_VERSION = 'beta-2026-08-v2';
+  const PRICING_VERSION = 'beta-2026-08-v3';
   const PILOT_RATE = 0.029;
   const PILOT_MIN = 0.99;
   const PILOT_MAX = 19.90;
+  const DEFAULT_TARGET_MARGIN_PCT = 15;
+  const REGULATORY_MODE = 'DEMO_ONLY';
+
   const PLANS = {
     STANDARD: {
       tier: 'STANDARD',
@@ -40,6 +43,7 @@
     amount = Number(amount);
     if (!Number.isFinite(amount) || amount <= 0) throw new Error('Importe no válido');
     options = options || {};
+
     if (options.cancelledBeforeExecution === true) {
       return {
         tier: 'CANCELLED',
@@ -49,9 +53,11 @@
         cancelledBeforeExecution: true,
         pilot: true,
         promotional: true,
-        productionBillingEnabled: false
+        productionBillingEnabled: false,
+        regulatoryMode: REGULATORY_MODE
       };
     }
+
     const plan = options.controlPlus === true ? PLANS.CONTROL_PLUS : PLANS.STANDARD;
     return {
       tier: plan.tier,
@@ -61,24 +67,64 @@
       cancelledBeforeExecution: false,
       pilot: plan.pilot,
       promotional: plan.promotional,
-      productionBillingEnabled: plan.productionBillingEnabled
+      productionBillingEnabled: plan.productionBillingEnabled,
+      regulatoryMode: REGULATORY_MODE
     };
   }
 
   function economics(amount, costs, options) {
+    amount = Number(amount);
     const q = quote(amount, options);
     costs = costs || {};
-    const paymentCost = round2((q.fee * Number(costs.paymentRate || 0)) + Number(costs.paymentFixed || 0));
-    const variableCost = round2(Number(costs.variable || 0) + Number(costs.support || 0) + Number(costs.security || 0) + paymentCost);
-    const contribution = round2(q.fee - variableCost);
-    const margin = q.fee ? round2((contribution / q.fee) * 100) : 0;
+    options = options || {};
+
+    // PSP percentage costs are modeled on GMV/transaction amount, not on FIA-CO's fee.
+    const paymentCost = round2((amount * Number(costs.paymentRate || 0)) + Number(costs.paymentFixed || 0));
+    const directCost = round2(
+      Number(costs.variable || 0) +
+      Number(costs.support || 0) +
+      Number(costs.security || 0) +
+      Number(costs.compliance || 0) +
+      paymentCost
+    );
+    const taxes = round2(Number(costs.taxes || 0));
+    const totalCost = round2(directCost + taxes);
+    const contribution = round2(q.fee - totalCost);
+    const contributionMarginPct = q.fee ? round2((contribution / q.fee) * 100) : 0;
+
+    const targetMarginPct = Number.isFinite(Number(options.targetMarginPct))
+      ? Number(options.targetMarginPct)
+      : DEFAULT_TARGET_MARGIN_PCT;
+    if (targetMarginPct < 0 || targetMarginPct >= 100) throw new Error('Margen objetivo no válido');
+
+    const requiredFeeForTargetMargin = round2(totalCost / (1 - (targetMarginPct / 100)));
+    const targetMarginMet = contribution > 0 && contributionMarginPct >= targetMarginPct;
+    const capAllowsTargetMargin = requiredFeeForTargetMargin <= PILOT_MAX;
+    const legalReady = options.legalReady === true;
+    const licensedPaymentPartnerReady = options.licensedPaymentPartnerReady === true;
+
+    // Pilot/demo may be evaluated economically, but production charging remains blocked.
+    const scaleEligible = targetMarginMet && capAllowsTargetMargin && legalReady && licensedPaymentPartnerReady;
+    const decision = scaleEligible ? 'VALIDATE_FOR_SCALE' : 'NO_SCALE';
+
     return Object.assign({}, q, {
-      amount: Number(amount),
+      amount,
       paymentCost,
-      variableCost,
+      directCost,
+      taxes,
+      totalCost,
       contribution,
-      contributionMarginPct: margin,
-      profitable: contribution >= 0
+      contributionMarginPct,
+      profitable: contribution > 0,
+      targetMarginPct,
+      targetMarginMet,
+      requiredFeeForTargetMargin,
+      capAllowsTargetMargin,
+      legalReady,
+      licensedPaymentPartnerReady,
+      scaleEligible,
+      scaleDecision: decision,
+      productionBillingEnabled: false
     });
   }
 
@@ -88,8 +134,12 @@
       rate: PILOT_RATE,
       min: PILOT_MIN,
       max: PILOT_MAX,
+      targetMarginPct: DEFAULT_TARGET_MARGIN_PCT,
       promotional: true,
-      productionBillingEnabled: false
+      regulatoryMode: REGULATORY_MODE,
+      productionBillingEnabled: false,
+      requiresLegalValidation: true,
+      requiresLicensedPaymentPartner: true
     },
     plans: PLANS,
     quote,
