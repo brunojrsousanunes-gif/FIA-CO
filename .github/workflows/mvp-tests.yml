@@ -38,6 +38,7 @@ jobs:
           node tests/ops-metrics.test.js
           node tests/runway-pilot.test.js
           node tests/enterprise-ops-dashboard.test.js
+          node tests/ops-hub.test.js
           node tests/commercial-dashboard.test.js
           node tests/launch-prep.test.js
           node tests/payment-adapters.test.js
