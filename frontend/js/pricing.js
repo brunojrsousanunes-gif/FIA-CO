@@ -1,7 +1,11 @@
 (function (global) {
   'use strict';
 
-  const PRICING_VERSION = 'pilot-2026-08';
+  const PRICING_VERSION = 'beta-2026-08-v1';
+  const PLANS = {
+    STANDARD: { tier: 'STANDARD', rate: 0.0085, min: 0.99, max: 12.90, enhancedControls: false },
+    CONTROL_PLUS: { tier: 'CONTROL_PLUS', rate: 0.0115, min: 0.99, max: 19.90, enhancedControls: true }
+  };
 
   function round2(value) {
     return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
@@ -11,25 +15,25 @@
     return Math.min(Math.max(value, min), max);
   }
 
-  function quote(amount) {
+  function quote(amount, options) {
     amount = Number(amount);
     if (!Number.isFinite(amount) || amount <= 0) throw new Error('Importe no válido');
-
-    if (amount < 3000) {
-      return { tier: 'BASE', rate: 0.029, fee: round2(clamp(amount * 0.029, 0.99, 19.90)), enhancedControls: false };
+    options = options || {};
+    if (options.cancelledBeforeExecution === true) {
+      return { tier: 'CANCELLED', rate: 0, fee: 0, enhancedControls: false, cancelledBeforeExecution: true };
     }
-
-    let rate, min, max;
-    if (amount < 5000) { rate = 0.0095; min = 24.90; max = 39.90; }
-    else if (amount < 10000) { rate = 0.0075; min = 39.90; max = 59.90; }
-    else if (amount < 25000) { rate = 0.0055; min = 59.90; max = 99.90; }
-    else { rate = 0.0035; min = 99.90; max = 199.90; }
-
-    return { tier: 'PLUS', rate, fee: round2(clamp(amount * rate, min, max)), enhancedControls: true };
+    const plan = options.controlPlus === true ? PLANS.CONTROL_PLUS : PLANS.STANDARD;
+    return {
+      tier: plan.tier,
+      rate: plan.rate,
+      fee: round2(clamp(amount * plan.rate, plan.min, plan.max)),
+      enhancedControls: plan.enhancedControls,
+      cancelledBeforeExecution: false
+    };
   }
 
-  function economics(amount, costs) {
-    const q = quote(amount);
+  function economics(amount, costs, options) {
+    const q = quote(amount, options);
     costs = costs || {};
     const paymentCost = round2((q.fee * Number(costs.paymentRate || 0)) + Number(costs.paymentFixed || 0));
     const variableCost = round2(Number(costs.variable || 0) + Number(costs.support || 0) + Number(costs.security || 0) + paymentCost);
@@ -38,5 +42,5 @@
     return Object.assign({}, q, { amount: Number(amount), paymentCost, variableCost, contribution, contributionMarginPct: margin, profitable: contribution >= 0 });
   }
 
-  global.FIACOPricing = { version: PRICING_VERSION, quote, economics };
+  global.FIACOPricing = { version: PRICING_VERSION, plans: PLANS, quote, economics };
 })(typeof window !== 'undefined' ? window : globalThis);
