@@ -40,6 +40,7 @@ jobs:
           node tests/enterprise-ops-dashboard.test.js
           node tests/ops-hub.test.js
           node tests/ops-automation.test.js
+          node tests/founder-capacity.test.js
           node tests/commercial-dashboard.test.js
           node tests/launch-prep.test.js
           node tests/payment-adapters.test.js
