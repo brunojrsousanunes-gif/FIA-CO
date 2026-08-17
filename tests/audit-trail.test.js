@@ -1,0 +1,14 @@
+const assert=require('assert');
+require('../frontend/js/audit-trail.js');
+const a=globalThis.FIACOAuditTrail;
+let log=[];
+log=a.append(log,{timestamp:1,entityId:'MGT-1',type:'FLOW_CREATED',status:'SIMULATED',reasonCode:'DEMO'});
+log=a.append(log,{timestamp:2,entityId:'MGT-1',type:'CLASSIFIED',status:'CHECKED',reasonCode:'RULESET'});
+assert.strictEqual(log.length,2);
+assert.strictEqual(log[0].containsPersonalData,false);
+assert.strictEqual(log[0].persistentStorage,false);
+assert.strictEqual(a.summarize(log).byType.CLASSIFIED,1);
+assert.throws(()=>a.event({type:'FLOW_CREATED',status:'SIMULATED',email:'x@example.com'}));
+assert.throws(()=>a.event({type:'UNKNOWN',status:'SIMULATED'}));
+assert.strictEqual(a.append(log,{type:'ESCALATED',status:'ESCALATED',entityId:'MGT-1'},2).length,2);
+console.log('audit trail tests passed');
