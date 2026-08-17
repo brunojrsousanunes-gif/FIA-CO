@@ -1,0 +1,15 @@
+const fs=require('fs');const assert=require('assert');
+const index=fs.readFileSync('frontend/index.html','utf8');
+const app=fs.readFileSync('frontend/app-beta.html','utf8');
+const legal=fs.readFileSync('frontend/legal-center.html','utf8');
+assert(index.includes('id="acciones"'));
+['action=send','action=request','action=sale','action=conditional','action=conciliation','legal-center.html'].forEach(x=>assert(index.includes(x),x));
+assert(app.includes('Índice de acciones'));
+['data-direct="sale"','data-direct="conditional"','data-direct="conciliation"','new URLSearchParams(location.search)'].forEach(x=>assert(app.includes(x),x));
+assert(legal.includes('Derechos, obligaciones y límites'));
+assert(legal.includes('ECLI:ES:TS:2026:70'));
+assert(legal.includes('ECLI:ES:AN:2023:5111'));
+assert(legal.includes('ECLI:ES:TS:2025:3585'));
+assert(legal.includes('www.boe.es')&&legal.includes('eur-lex.europa.eu')&&legal.includes('poderjudicial.es'));
+assert(/no procesa|no custodia|no mover o custodiar/i.test(legal));
+console.log('action index and legal center tests passed');
