@@ -8,24 +8,33 @@ vm.createContext(sandbox);
 vm.runInContext(code, sandbox);
 const pricing = sandbox.globalThis.FIACOPricing;
 
+assert.strictEqual(pricing.version, 'beta-2026-08-v1');
 assert.strictEqual(pricing.quote(10).fee, 0.99);
-assert.strictEqual(pricing.quote(350).fee, 10.15);
-assert.strictEqual(pricing.quote(1500).fee, 19.90);
-assert.strictEqual(pricing.quote(2999).tier, 'BASE');
-assert.strictEqual(pricing.quote(3000).tier, 'PLUS');
-assert.strictEqual(pricing.quote(3000).fee, 28.50);
-assert.strictEqual(pricing.quote(4000).fee, 38.00);
-assert.strictEqual(pricing.quote(8000).fee, 59.90);
-assert.strictEqual(pricing.quote(15000).fee, 82.50);
-assert.strictEqual(pricing.quote(30000).fee, 105.00);
-assert.strictEqual(pricing.quote(100000).fee, 199.90);
-assert.strictEqual(pricing.quote(3000).enhancedControls, true);
+assert.strictEqual(pricing.quote(100).fee, 0.99);
+assert.strictEqual(pricing.quote(250).fee, 2.13);
+assert.strictEqual(pricing.quote(500).fee, 4.25);
+assert.strictEqual(pricing.quote(1000).fee, 8.50);
+assert.strictEqual(pricing.quote(2000).fee, 12.90);
+assert.strictEqual(pricing.quote(10000).fee, 12.90);
+assert.strictEqual(pricing.quote(1000).tier, 'STANDARD');
+assert.strictEqual(pricing.quote(1000).enhancedControls, false);
 
-const healthy = pricing.economics(4000, { variable: 8, support: 5, security: 4, paymentRate: 0.015, paymentFixed: 0.25 });
+assert.strictEqual(pricing.quote(100, { controlPlus: true }).fee, 1.15);
+assert.strictEqual(pricing.quote(1000, { controlPlus: true }).fee, 11.50);
+assert.strictEqual(pricing.quote(2000, { controlPlus: true }).fee, 19.90);
+assert.strictEqual(pricing.quote(10000, { controlPlus: true }).fee, 19.90);
+assert.strictEqual(pricing.quote(1000, { controlPlus: true }).tier, 'CONTROL_PLUS');
+assert.strictEqual(pricing.quote(1000, { controlPlus: true }).enhancedControls, true);
+
+const cancelled = pricing.quote(1000, { cancelledBeforeExecution: true });
+assert.strictEqual(cancelled.fee, 0);
+assert.strictEqual(cancelled.tier, 'CANCELLED');
+
+const healthy = pricing.economics(1000, { variable: 2, support: 1, security: 1, paymentRate: 0.015, paymentFixed: 0.25 });
 assert.strictEqual(healthy.profitable, true);
 assert(healthy.contribution > 0);
 
-const loss = pricing.economics(350, { variable: 10, support: 5, security: 3, paymentRate: 0.015, paymentFixed: 0.25 });
+const loss = pricing.economics(100, { variable: 1, support: 1, security: 1, paymentRate: 0.015, paymentFixed: 0.25 });
 assert.strictEqual(loss.profitable, false);
 assert(loss.contribution < 0);
 
