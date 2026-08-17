@@ -35,6 +35,7 @@
 
   function round2(value) { return Math.round((Number(value) + Number.EPSILON) * 100) / 100; }
   function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value))); }
+  function valueOr(value, fallback) { return value === undefined || value === null || value === '' ? fallback : value; }
   function participant(value) { value = String(value || 'PERSON').toUpperCase(); return PARTICIPANTS.includes(value) ? value : 'PERSON'; }
   function relation(a, b) {
     a = participant(a); b = participant(b);
@@ -118,8 +119,8 @@
     const automationPct = clamp(Number(report.automationPct || 0), 0, 100);
     const totalManualMinutes = Math.max(0, Number(report.totalManualMinutes || 0));
     const manualMinutesPerManagement = totalManualMinutes > 0 ? round2(totalManualMinutes / operations) : FOUNDER_LED_DEFAULTS.minutesPerManagementBeforeAutomation;
-    const targetOperationsM12 = Math.max(operations, Math.round(Number(overrides.operationsM12 || FOUNDER_LED_DEFAULTS.operations[11])));
-    const targetAutomationM12 = clamp(Number(overrides.automationM12 == null ? FOUNDER_LED_DEFAULTS.automationPct[11] : overrides.automationM12), automationPct, 100);
+    const targetOperationsM12 = Math.max(operations, Math.round(Number(valueOr(overrides.operationsM12, FOUNDER_LED_DEFAULTS.operations[11]))));
+    const targetAutomationM12 = clamp(Number(valueOr(overrides.automationM12, FOUNDER_LED_DEFAULTS.automationPct[11])), automationPct, 100);
     return {
       source: 'PILOT_AGGREGATE',
       containsPersonalData: false,
@@ -141,9 +142,9 @@
     const revenuePerManagement = Number.isFinite(Number(options.revenuePerManagement)) ? Number(options.revenuePerManagement) : FOUNDER_LED_DEFAULTS.revenuePerManagement;
     const initialCash = Number.isFinite(Number(options.initialCash)) ? Number(options.initialCash) : FOUNDER_LED_DEFAULTS.initialCash;
     const minutesBase = Number.isFinite(Number(options.minutesPerManagementBeforeAutomation)) ? Number(options.minutesPerManagementBeforeAutomation) : FOUNDER_LED_DEFAULTS.minutesPerManagementBeforeAutomation;
-    const founderCashSalary = Math.max(0, Number(options.founderCashSalary || FOUNDER_LED_DEFAULTS.founderCashSalary));
-    const shadowHourly = Math.max(0, Number(options.founderShadowHourlyCost || FOUNDER_LED_DEFAULTS.founderShadowHourlyCost));
-    const humanOpsHourlyCashCost = Math.max(0, Number(options.humanOpsHourlyCashCost || FOUNDER_LED_DEFAULTS.humanOpsHourlyCashCost));
+    const founderCashSalary = Math.max(0, Number(valueOr(options.founderCashSalary, FOUNDER_LED_DEFAULTS.founderCashSalary)));
+    const shadowHourly = Math.max(0, Number(valueOr(options.founderShadowHourlyCost, FOUNDER_LED_DEFAULTS.founderShadowHourlyCost)));
+    const humanOpsHourlyCashCost = Math.max(0, Number(valueOr(options.humanOpsHourlyCashCost, FOUNDER_LED_DEFAULTS.humanOpsHourlyCashCost)));
     if (revenuePerManagement < 0 || minutesBase < 0) throw new Error('Supuestos founder-led no válidos');
 
     const months = [];
@@ -155,13 +156,13 @@
     for (let i = 0; i < 12; i += 1) {
       const operations = useDefaultPath
         ? Number(FOUNDER_LED_DEFAULTS.operations[i])
-        : Math.round(interpolate(Number(options.operationsM1 || 20), Number(options.operationsM12 || 300), i, 11));
+        : Math.round(interpolate(Number(valueOr(options.operationsM1, 20)), Number(valueOr(options.operationsM12, 300)), i, 11));
       const automationPct = useDefaultPath
         ? Number(FOUNDER_LED_DEFAULTS.automationPct[i])
-        : interpolate(Number(options.automationM1 || 20), Number(options.automationM12 || 85), i, 11);
+        : interpolate(Number(valueOr(options.automationM1, 20)), Number(valueOr(options.automationM12, 85)), i, 11);
       const operatingExpense = useDefaultPath
         ? Number(FOUNDER_LED_DEFAULTS.operatingExpense[i])
-        : interpolate(Number(options.expenseM1 || 600), Number(options.expenseM12 || 1325), i, 11);
+        : interpolate(Number(valueOr(options.expenseM1, 600)), Number(valueOr(options.expenseM12, 1325)), i, 11);
       const revenue = round2(operations * revenuePerManagement);
       const founderHours = round2((operations * minutesBase * (1 - (automationPct / 100))) / 60);
       const shadowFounderCost = round2(founderHours * shadowHourly);
@@ -173,22 +174,7 @@
       cash = round2(cash + operatingResult);
       if (breakEvenMonth === null && operatingResult >= 0) breakEvenMonth = i + 1;
       if (cashPositiveMonth === null && cash >= 0) cashPositiveMonth = i + 1;
-      months.push({
-        month: i + 1,
-        operations,
-        automationPct,
-        revenue,
-        operatingExpense,
-        founderCashSalary,
-        variableHumanCashCost,
-        cashExpense,
-        operatingResult,
-        economicResult,
-        cumulativeOperatingResult,
-        cash,
-        founderHours,
-        shadowFounderCost
-      });
+      months.push({month:i+1,operations,automationPct,revenue,operatingExpense,founderCashSalary,variableHumanCashCost,cashExpense,operatingResult,economicResult,cumulativeOperatingResult,cash,founderHours,shadowFounderCost});
     }
 
     const last = months[months.length - 1];
@@ -221,18 +207,5 @@
     };
   }
 
-  global.FIACOPricing = {
-    version: PRICING_VERSION,
-    regulatoryMode: REGULATORY_MODE,
-    productionBillingEnabled: false,
-    microPaymentsStrategy: MICRO_PAYMENTS_STRATEGY,
-    participants: PARTICIPANTS,
-    schedule: SCHEDULE,
-    founderLedDefaults: FOUNDER_LED_DEFAULTS,
-    relation: relation,
-    quote: quote,
-    economics: economics,
-    pilotToRunwayOptions: pilotToRunwayOptions,
-    founderLedSimulation: founderLedSimulation
-  };
+  global.FIACOPricing = {version:PRICING_VERSION,regulatoryMode:REGULATORY_MODE,productionBillingEnabled:false,microPaymentsStrategy:MICRO_PAYMENTS_STRATEGY,participants:PARTICIPANTS,schedule:SCHEDULE,founderLedDefaults:FOUNDER_LED_DEFAULTS,relation,quote,economics,pilotToRunwayOptions,founderLedSimulation};
 })(typeof window !== 'undefined' ? window : globalThis);
