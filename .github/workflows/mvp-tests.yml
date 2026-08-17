@@ -44,6 +44,7 @@ jobs:
           node tests/hiring-model.test.js
           node tests/hire-runway-gate.test.js
           node tests/founder-hiring-kit.test.js
+          node tests/growth-strategy.test.js
           node tests/commercial-dashboard.test.js
           node tests/launch-prep.test.js
           node tests/payment-adapters.test.js
