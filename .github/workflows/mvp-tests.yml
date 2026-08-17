@@ -34,3 +34,4 @@ jobs:
           node tests/p2p-multiuser-tests.mjs
           node tests/pricing.test.js
           node tests/commercial-dashboard.test.js
+          node tests/launch-prep.test.js
