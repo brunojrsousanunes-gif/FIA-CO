@@ -1,0 +1,13 @@
+const fs = require('fs');
+const vm = require('vm');
+const assert = require('assert');
+const code = fs.readFileSync('frontend/js/payment-adapters.js', 'utf8');
+const sandbox = { globalThis: {} }; vm.createContext(sandbox); vm.runInContext(code, sandbox);
+const a = sandbox.globalThis.FIACOPaymentAdapters;
+assert.strictEqual(a.getAdapter('GOOGLE_PAY').custody, false);
+assert.strictEqual(a.getAdapter('GOOGLE_PAY').mode, 'SANDBOX_ONLY');
+assert.strictEqual(a.canActivate('GOOGLE_PAY', {profitable:true}).ok, true);
+assert.strictEqual(a.canActivate('GOOGLE_PAY', {profitable:false}).reason, 'NEGATIVE_CONTRIBUTION');
+assert.strictEqual(a.canActivate('TIKTOK_SHOP', {profitable:true}).ok, false);
+assert.strictEqual(a.canActivate('META_COMMERCE', {profitable:true}).ok, false);
+console.log('payment adapter tests passed');
