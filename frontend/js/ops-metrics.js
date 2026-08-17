@@ -1,0 +1,7 @@
+(function(global){'use strict';
+const VERSION='0.1-demo';
+function empty(){return {operations:0,closed:0,humanEscalations:0,totalManualMinutes:0,totalHumanMinutes:0,totalAutomatedMinutes:0,riskEvents:0};}
+function add(bucket,summary){const b=Object.assign(empty(),bucket||{});if(!summary||!summary.metrics)return b;b.operations+=1;if(summary.state==='CLOSED_SIMULATED')b.closed+=1;if(summary.requiresHuman)b.humanEscalations+=1;b.totalManualMinutes+=Number(summary.metrics.estimatedManualMinutes||0);b.totalHumanMinutes+=Number(summary.metrics.estimatedHumanMinutes||0);b.totalAutomatedMinutes+=Number(summary.metrics.automatedMinutes||0);b.riskEvents+=Array.isArray(summary.riskFlags)?summary.riskFlags.length:0;return b;}
+function report(bucket){const b=Object.assign(empty(),bucket||{});const manual=b.totalManualMinutes||0;return {version:VERSION,operations:b.operations,closed:b.closed,closeRatePct:b.operations?Math.round((b.closed/b.operations)*100):0,humanEscalations:b.humanEscalations,escalationRatePct:b.operations?Math.round((b.humanEscalations/b.operations)*100):0,totalManualMinutes:b.totalManualMinutes,totalHumanMinutes:b.totalHumanMinutes,totalAutomatedMinutes:b.totalAutomatedMinutes,automationPct:manual?Math.round((b.totalAutomatedMinutes/manual)*100):0,humanHours:Math.round((b.totalHumanMinutes/60)*10)/10,riskEvents:b.riskEvents,containsPersonalData:false,persistentStorage:false};}
+global.FIACOOpsMetrics={version:VERSION,empty,add,report};
+})(typeof window!=='undefined'?window:globalThis);
