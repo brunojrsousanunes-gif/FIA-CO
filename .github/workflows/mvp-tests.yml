@@ -33,3 +33,4 @@ jobs:
           node tests/wallet-demo-tests.mjs
           node tests/p2p-multiuser-tests.mjs
           node tests/pricing.test.js
+          node tests/commercial-dashboard.test.js
