@@ -1,7 +1,7 @@
 (function (global) {
   'use strict';
 
-  const PRICING_VERSION = 'beta-2026-08-v5-founder-ai';
+  const PRICING_VERSION = 'beta-2026-08-v6-pilot-bridge';
   const REGULATORY_MODE = 'DEMO_ONLY';
   const DEFAULT_TARGET_MARGIN_PCT = 15;
   const PARTICIPANTS = ['PERSON', 'BUSINESS'];
@@ -26,6 +26,7 @@
     initialCash: 0,
     founderCashSalary: 0,
     founderShadowHourlyCost: 0,
+    humanOpsHourlyCashCost: 0,
     microPaymentsStrategy: MICRO_PAYMENTS_STRATEGY,
     customerSupportMode: 'FOUNDER_LED',
     commercialMode: 'FOUNDER_LED',
@@ -33,6 +34,8 @@
   };
 
   function round2(value) { return Math.round((Number(value) + Number.EPSILON) * 100) / 100; }
+  function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value))); }
+  function valueOr(value, fallback) { return value === undefined || value === null || value === '' ? fallback : value; }
   function participant(value) { value = String(value || 'PERSON').toUpperCase(); return PARTICIPANTS.includes(value) ? value : 'PERSON'; }
   function relation(a, b) {
     a = participant(a); b = participant(b);
@@ -109,14 +112,39 @@
     });
   }
 
+  function pilotToRunwayOptions(report, overrides) {
+    report = report || {}; overrides = overrides || {};
+    const operations = Math.max(0, Math.round(Number(report.operations || 0)));
+    if (!operations) throw new Error('La muestra piloto necesita al menos una gestión');
+    const automationPct = clamp(Number(report.automationPct || 0), 0, 100);
+    const totalManualMinutes = Math.max(0, Number(report.totalManualMinutes || 0));
+    const manualMinutesPerManagement = totalManualMinutes > 0 ? round2(totalManualMinutes / operations) : FOUNDER_LED_DEFAULTS.minutesPerManagementBeforeAutomation;
+    const targetOperationsM12 = Math.max(operations, Math.round(Number(valueOr(overrides.operationsM12, FOUNDER_LED_DEFAULTS.operations[11]))));
+    const targetAutomationM12 = clamp(Number(valueOr(overrides.automationM12, FOUNDER_LED_DEFAULTS.automationPct[11])), automationPct, 100);
+    return {
+      source: 'PILOT_AGGREGATE',
+      containsPersonalData: false,
+      useDefaultPath: false,
+      operationsM1: operations,
+      operationsM12: targetOperationsM12,
+      automationM1: automationPct,
+      automationM12: targetAutomationM12,
+      minutesPerManagementBeforeAutomation: manualMinutesPerManagement,
+      observedHumanMinutes: Math.max(0, Number(report.totalHumanMinutes || 0)),
+      observedEscalationRatePct: clamp(Number(report.escalationRatePct || 0), 0, 100),
+      observedRiskEvents: Math.max(0, Math.round(Number(report.riskEvents || 0)))
+    };
+  }
+
   function founderLedSimulation(options) {
     options = options || {};
     const useDefaultPath = options.useDefaultPath !== false;
     const revenuePerManagement = Number.isFinite(Number(options.revenuePerManagement)) ? Number(options.revenuePerManagement) : FOUNDER_LED_DEFAULTS.revenuePerManagement;
     const initialCash = Number.isFinite(Number(options.initialCash)) ? Number(options.initialCash) : FOUNDER_LED_DEFAULTS.initialCash;
     const minutesBase = Number.isFinite(Number(options.minutesPerManagementBeforeAutomation)) ? Number(options.minutesPerManagementBeforeAutomation) : FOUNDER_LED_DEFAULTS.minutesPerManagementBeforeAutomation;
-    const founderCashSalary = Math.max(0, Number(options.founderCashSalary || FOUNDER_LED_DEFAULTS.founderCashSalary));
-    const shadowHourly = Math.max(0, Number(options.founderShadowHourlyCost || FOUNDER_LED_DEFAULTS.founderShadowHourlyCost));
+    const founderCashSalary = Math.max(0, Number(valueOr(options.founderCashSalary, FOUNDER_LED_DEFAULTS.founderCashSalary)));
+    const shadowHourly = Math.max(0, Number(valueOr(options.founderShadowHourlyCost, FOUNDER_LED_DEFAULTS.founderShadowHourlyCost)));
+    const humanOpsHourlyCashCost = Math.max(0, Number(valueOr(options.humanOpsHourlyCashCost, FOUNDER_LED_DEFAULTS.humanOpsHourlyCashCost)));
     if (revenuePerManagement < 0 || minutesBase < 0) throw new Error('Supuestos founder-led no válidos');
 
     const months = [];
@@ -128,38 +156,25 @@
     for (let i = 0; i < 12; i += 1) {
       const operations = useDefaultPath
         ? Number(FOUNDER_LED_DEFAULTS.operations[i])
-        : Math.round(interpolate(Number(options.operationsM1 || 20), Number(options.operationsM12 || 300), i, 11));
+        : Math.round(interpolate(Number(valueOr(options.operationsM1, 20)), Number(valueOr(options.operationsM12, 300)), i, 11));
       const automationPct = useDefaultPath
         ? Number(FOUNDER_LED_DEFAULTS.automationPct[i])
-        : interpolate(Number(options.automationM1 || 20), Number(options.automationM12 || 85), i, 11);
+        : interpolate(Number(valueOr(options.automationM1, 20)), Number(valueOr(options.automationM12, 85)), i, 11);
       const operatingExpense = useDefaultPath
         ? Number(FOUNDER_LED_DEFAULTS.operatingExpense[i])
-        : interpolate(Number(options.expenseM1 || 600), Number(options.expenseM12 || 1325), i, 11);
+        : interpolate(Number(valueOr(options.expenseM1, 600)), Number(valueOr(options.expenseM12, 1325)), i, 11);
       const revenue = round2(operations * revenuePerManagement);
       const founderHours = round2((operations * minutesBase * (1 - (automationPct / 100))) / 60);
       const shadowFounderCost = round2(founderHours * shadowHourly);
-      const cashExpense = round2(operatingExpense + founderCashSalary);
+      const variableHumanCashCost = round2(founderHours * humanOpsHourlyCashCost);
+      const cashExpense = round2(operatingExpense + founderCashSalary + variableHumanCashCost);
       const operatingResult = round2(revenue - cashExpense);
       const economicResult = round2(operatingResult - shadowFounderCost);
       cumulativeOperatingResult = round2(cumulativeOperatingResult + operatingResult);
       cash = round2(cash + operatingResult);
       if (breakEvenMonth === null && operatingResult >= 0) breakEvenMonth = i + 1;
       if (cashPositiveMonth === null && cash >= 0) cashPositiveMonth = i + 1;
-      months.push({
-        month: i + 1,
-        operations,
-        automationPct,
-        revenue,
-        operatingExpense,
-        founderCashSalary,
-        cashExpense,
-        operatingResult,
-        economicResult,
-        cumulativeOperatingResult,
-        cash,
-        founderHours,
-        shadowFounderCost
-      });
+      months.push({month:i+1,operations,automationPct,revenue,operatingExpense,founderCashSalary,variableHumanCashCost,cashExpense,operatingResult,economicResult,cumulativeOperatingResult,cash,founderHours,shadowFounderCost});
     }
 
     const last = months[months.length - 1];
@@ -169,13 +184,14 @@
 
     return {
       strategy: 'FOUNDER_LED_AI',
+      dataSource: options.dataSource || (useDefaultPath ? 'PLANNING_BASELINE' : 'CUSTOM_ASSUMPTIONS'),
       customerSupportMode: 'FOUNDER_LED',
       commercialMode: 'FOUNDER_LED',
       operationsMode: 'AI_ASSISTED',
       microPaymentsStrategy: MICRO_PAYMENTS_STRATEGY,
       productionBillingEnabled: false,
       regulatoryMode: REGULATORY_MODE,
-      assumptions: { revenuePerManagement, initialCash, minutesPerManagementBeforeAutomation: minutesBase, founderCashSalary, founderShadowHourlyCost: shadowHourly, useDefaultPath },
+      assumptions: { revenuePerManagement, initialCash, minutesPerManagementBeforeAutomation: minutesBase, founderCashSalary, founderShadowHourlyCost: shadowHourly, humanOpsHourlyCashCost, useDefaultPath },
       months,
       breakEvenMonth,
       cashPositiveMonth,
@@ -191,17 +207,5 @@
     };
   }
 
-  global.FIACOPricing = {
-    version: PRICING_VERSION,
-    regulatoryMode: REGULATORY_MODE,
-    productionBillingEnabled: false,
-    microPaymentsStrategy: MICRO_PAYMENTS_STRATEGY,
-    participants: PARTICIPANTS,
-    schedule: SCHEDULE,
-    founderLedDefaults: FOUNDER_LED_DEFAULTS,
-    relation: relation,
-    quote: quote,
-    economics: economics,
-    founderLedSimulation: founderLedSimulation
-  };
+  global.FIACOPricing = {version:PRICING_VERSION,regulatoryMode:REGULATORY_MODE,productionBillingEnabled:false,microPaymentsStrategy:MICRO_PAYMENTS_STRATEGY,participants:PARTICIPANTS,schedule:SCHEDULE,founderLedDefaults:FOUNDER_LED_DEFAULTS,relation,quote,economics,pilotToRunwayOptions,founderLedSimulation};
 })(typeof window !== 'undefined' ? window : globalThis);
