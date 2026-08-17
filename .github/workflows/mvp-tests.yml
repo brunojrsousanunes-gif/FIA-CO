@@ -36,3 +36,4 @@ jobs:
           node tests/commercial-dashboard.test.js
           node tests/launch-prep.test.js
           node tests/payment-adapters.test.js
+          node tests/brand-i18n.test.js
