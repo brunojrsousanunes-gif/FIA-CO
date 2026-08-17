@@ -1,0 +1,14 @@
+const fs=require('fs');const assert=require('assert');
+const i18n=fs.readFileSync('frontend/js/i18n.js','utf8');
+const web=fs.readFileSync('frontend/index.html','utf8');
+const app=fs.readFileSync('frontend/app-beta.html','utf8');
+const logo=fs.readFileSync('frontend/assets/fia-co-trust-compute.svg','utf8');
+const expected=['es','en','zh-CN','hi','ar','fr','bn','pt','ru','id'];
+expected.forEach(code=>assert(i18n.includes(`['${code}'`)||i18n.includes(`,'${code}'`),`missing language ${code}`));
+assert(i18n.includes("localStorage.setItem('fiaco.language'"));
+assert(i18n.includes("code==='ar'?'rtl':'ltr'"));
+assert(web.includes('fia-co-trust-compute.svg')&&app.includes('fia-co-trust-compute.svg'));
+assert(web.includes('js/i18n.js')&&app.includes('js/i18n.js'));
+assert(logo.includes('INFRAESTRUCTURA · CONFIANZA · VALOR'));
+assert(!web.includes('custodia fondos reales')||web.includes('No procesa ni custodia fondos reales'));
+console.log('brand/i18n tests passed');
