@@ -1,4 +1,6 @@
 const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
 require('../frontend/js/hire-runway-gate.js');
 const g=globalThis.FIACOHireRunwayGate;
 const profile={economicallyReady:true,monthlyCost:900,monthlyNetImpact:300};
@@ -24,4 +26,8 @@ const weakProfile=g.evaluate({economicallyReady:false,monthlyCost:900,monthlyNet
 assert.strictEqual(weakProfile.recommendation,'DELAY_HIRE');
 assert(weakProfile.reasons.includes('PROFILE_NOT_ECONOMICALLY_READY'));
 assert(weakProfile.reasons.includes('POST_HIRE_RESULT_NEGATIVE'));
+const html=fs.readFileSync(path.join(__dirname,'../frontend/hiring-runway-lab.html'),'utf8');
+assert(html.includes('hire-runway-gate.js'));
+assert(html.includes('NO CONTRATACIÓN'));
+assert(html.includes('revisión humana'));
 console.log('hire runway gate tests passed');
