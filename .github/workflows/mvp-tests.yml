@@ -58,5 +58,6 @@ jobs:
           node tests/launch-prep.test.js
           node tests/payment-adapters.test.js
           node tests/provider-adapters-v0.test.js
+          node tests/shadow-risk-engine.test.js
           node tests/brand-i18n.test.js
           node tests/action-index-legal.test.js
