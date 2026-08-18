@@ -32,6 +32,7 @@ jobs:
           node tests/run-tests.mjs
           node tests/identity-demo.mjs
           node tests/brand-beta-tests.mjs
+          node tests/mobile-beta-polish.test.mjs
           node tests/wallet-demo-tests.mjs
           node tests/p2p-multiuser-tests.mjs
           node tests/security-sec1.test.mjs
