@@ -1,9 +1,9 @@
 # FIA&CO — B2 low-risk architecture
 
-Estado: diseño previo. B2 no está autorizado para ejecución todavía.
+Estado: `B2-R_IMPLEMENTED_IN_DEMO`. Autorizado únicamente en **shadow mode read-only**. No existe enforcement.
 
 ## Objetivo
-Reducir el riesgo del futuro motor de riesgo/escalado humano desacoplando por completo la evaluación del flujo operativo. La primera versión debe funcionar en **shadow mode**: observa, evalúa y explica, pero no puede bloquear, pausar, autorizar ni alterar una operación.
+Reducir el riesgo del motor de riesgo/escalado humano desacoplando por completo la evaluación del flujo operativo. La primera versión funciona en **shadow mode**: observa, evalúa y explica, pero no puede bloquear, pausar, autorizar ni alterar una operación.
 
 ## Principios de seguridad
 - Solo datos sintéticos/demo en esta fase.
@@ -12,41 +12,48 @@ Reducir el riesgo del futuro motor de riesgo/escalado humano desacoplando por co
 - Ninguna salida cambia el workflow automáticamente.
 - Toda decisión crítica sigue requiriendo acción explícita del usuario/humano.
 - Umbrales y reglas viven en configuración versionada, nunca hardcodeados en UI.
-- Si falta configuración, falla en modo seguro: `OBSERVE_ONLY`.
+- Si falta configuración, debe fallar en modo seguro sin ejecutar ninguna acción.
 - Si hay error, timeout o dato incompleto, no se ejecuta ninguna acción sobre la operación.
-- Sin llamadas a PSP/KYC/antifraude reales en B2 v0.
+- Sin llamadas a PSP/KYC/antifraude reales en B2-R.
 
-## Arquitectura propuesta
+## Implementación v0
 
-`Operation snapshot -> Normalizer -> Policy evaluator (pure function) -> Explanation -> Shadow recommendation -> Audit event`
+`Operation snapshot -> Normalizer -> Policy evaluator (pure function) -> Explanation -> Shadow recommendation`
+
+Archivo: `frontend/js/shadow-risk-engine.js`.
 
 ### Operation snapshot
-Copia inmutable y minimizada del estado demo. No entrega al evaluador objetos mutables ni funciones de escritura.
+Copia minimizada del estado demo. El evaluador clona/normaliza los datos y no recibe funciones de escritura.
 
 ### Normalizer
-Convierte el snapshot a campos permitidos y elimina datos no necesarios.
+Convierte el snapshot a campos permitidos y descarta propiedades no utilizadas por la política.
 
 ### Policy evaluator
-Función pura y determinista. Entrada: snapshot + policy version. Salida: recomendación + motivos + policy version. No conoce APIs, DOM, pagos ni persistencia.
-
-### Explanation
-Transforma códigos de regla a mensajes comprensibles. Nunca ejecuta acciones.
+Función determinista. Entrada: snapshot + policy version. Salida: recomendación + motivos + policy version. No conoce APIs, DOM, pagos ni persistencia.
 
 ### Shadow recommendation
-Solo se muestra en un panel de diagnóstico/demo. Estados iniciales:
+Resultados permitidos:
 - `OBSERVE_ONLY`
 - `SUGGEST_REVIEW`
 - `SUGGEST_BLOCK`
 
-### Audit event
-Registra qué política se evaluó, qué recomendó y por qué, sin modificar el expediente.
+Toda respuesta incluye `enforcement=false` y `writeCapabilities=[]`.
 
 ## Separación de permisos
-El motor de evaluación no recibe ninguna capacidad de escritura. Un futuro `enforcement-adapter` sería un módulo distinto, deshabilitado por defecto y sujeto a una autorización independiente.
+El motor de evaluación no expone métodos `block`, `pause`, `authorize` o `write`. Un futuro `enforcement-adapter` será un módulo distinto, inexistente en esta fase y sujeto a autorización independiente.
+
+## Pruebas de seguridad
+`tests/shadow-risk-engine.test.js` verifica como mínimo:
+- modo `SHADOW_READ_ONLY`;
+- conjunto cerrado de resultados permitidos;
+- ausencia de mutación del snapshot de entrada;
+- ausencia de capacidades de escritura;
+- ausencia de métodos de enforcement;
+- escenarios de observación, sugerencia de revisión y sugerencia de bloqueo.
 
 ## Gate para pasar de shadow a enforcement
 No considerar una fase de bloqueo real hasta cumplir todos estos puntos:
-1. tests unitarios de reglas y casos límite;
+1. tests unitarios ampliados y casos límite;
 2. dataset sintético de validación y revisión manual de falsos positivos;
 3. política versionada y rollback;
 4. auditoría legible y reproducible;
@@ -56,4 +63,4 @@ No considerar una fase de bloqueo real hasta cumplir todos estos puntos:
 8. autorización explícita adicional.
 
 ## Resultado
-Con esta separación, B2 v0 puede implementarse como observabilidad/recomendación sin poder interferir en el flujo. El riesgo operativo baja porque no existe ruta técnica desde el evaluador a una acción irreversible.
+B2-R queda implementado como observabilidad/recomendación sin capacidad técnica de interferir en el flujo operativo. Cualquier transición a enforcement se considera un bloque de riesgo distinto y requiere nueva autorización.
