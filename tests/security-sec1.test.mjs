@@ -1,0 +1,52 @@
+import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {createDemoServer,resetDemoState} from '../server/demo-api.mjs';
+import {createDemoStore} from '../server/demo-store.mjs';
+
+const identity=fs.readFileSync(new URL('../frontend/identity.html',import.meta.url),'utf8');
+const identityJs=fs.readFileSync(new URL('../frontend/js/identity-demo.js',import.meta.url),'utf8');
+assert.match(identity,/Content-Security-Policy/);
+assert.ok(!identity.includes('<script>'));
+assert.ok(!identityJs.includes('innerHTML'));
+assert.match(identityJs,/textContent|replaceChildren/);
+
+process.env.FIA_DEMO_SECRET_A='sec1-test-secret-a';
+process.env.FIA_DEMO_SECRET_B='sec1-test-secret-b';
+process.env.FIA_DEMO_ALLOWED_ORIGINS='https://demo.example';
+const server=await createDemoServer();
+await resetDemoState(server);
+await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+const base=`http://127.0.0.1:${server.address().port}`;
+const common={'content-type':'application/json','origin':'https://demo.example'};
+const login=async(clientId,secret)=>{
+  const r=await fetch(base+'/session',{method:'POST',headers:common,body:JSON.stringify({clientId,secret})});
+  assert.equal(r.status,201);
+  return (await r.json()).token;
+};
+const token=await login('A',process.env.FIA_DEMO_SECRET_A);
+const headers={...common,authorization:`Bearer ${token}`,'idempotency-key':'sec1-order-0001'};
+const payload=JSON.stringify({to:'B',amount:42,concept:'Prueba idempotente'});
+const first=await fetch(base+'/operations',{method:'POST',headers,body:payload});
+assert.equal(first.status,201);
+const op1=await first.json();
+const second=await fetch(base+'/operations',{method:'POST',headers,body:payload});
+assert.equal(second.status,200);
+assert.equal(second.headers.get('idempotent-replay'),'true');
+const op2=await second.json();
+assert.equal(op1.id,op2.id);
+const state=await (await fetch(base+'/state',{headers})).json();
+assert.equal(state.operations.filter(o=>o.idempotencyKey==='sec1-order-0001').length,1);
+const badKey=await fetch(base+'/operations',{method:'POST',headers:{...headers,'idempotency-key':'bad key'},body:payload});
+assert.equal(badKey.status,400);
+await new Promise(resolve=>server.close(resolve));
+
+const temp=await fsp.mkdtemp(path.join(os.tmpdir(),'fia-sec1-'));
+const stateFile=path.join(temp,'state.json');
+await fsp.writeFile(stateFile,JSON.stringify({clients:{A:{id:'A',name:'A',balance:-1},B:{id:'B',name:'B',balance:1}},operations:[],audit:[]}));
+const store=createDemoStore(stateFile);
+await assert.rejects(()=>store.load(),/BAD_STATE_FILE/);
+await fsp.rm(temp,{recursive:true,force:true});
+console.log('SEC-1 security hardening tests passed');
