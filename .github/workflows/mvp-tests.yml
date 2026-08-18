@@ -36,6 +36,7 @@ jobs:
           node tests/p2p-multiuser-tests.mjs
           node tests/security-sec1.test.mjs
           node tests/security-sec2.test.mjs
+          node tests/security-sec3.test.mjs
           node tests/pricing.test.js
           node tests/agent-security.test.js
           node tests/enterprise-flow.test.js

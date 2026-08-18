@@ -13,10 +13,13 @@ const sessions=new Map();
 const rate=new Map();
 const safe=s=>String(s??'').trim().replace(/[<>]/g,'').slice(0,120);
 const ref=()=>`FIA-P2P-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
+const auditRef=()=>`AUD-${crypto.randomBytes(12).toString('hex').toUpperCase()}`;
 const now=()=>Date.now();
 const secrets=()=>({A:process.env.FIA_DEMO_SECRET_A||'',B:process.env.FIA_DEMO_SECRET_B||''});
 const allowedOrigins=()=>new Set((process.env.FIA_DEMO_ALLOWED_ORIGINS||'').split(',').map(v=>v.trim()).filter(Boolean));
 const same=(a,b)=>{const aa=Buffer.from(String(a)),bb=Buffer.from(String(b));return aa.length===bb.length&&crypto.timingSafeEqual(aa,bb)};
+const auditPayload=e=>JSON.stringify({seq:e.seq,eventId:e.eventId,operationId:e.operationId,actor:e.actor,event:e.event,at:e.at,prevHash:e.prevHash});
+function appendAudit(state,{operationId=null,actor,event}){const previous=state.audit.at(-1);const entry={seq:state.audit.length+1,eventId:auditRef(),operationId,actor,event,at:new Date().toISOString(),prevHash:previous?.hash||'GENESIS',integrityVersion:1};entry.hash=crypto.createHash('sha256').update(auditPayload(entry)).digest('hex');state.audit.push(entry);return entry}
 function securityHeaders(res){res.setHeader('cache-control','no-store');res.setHeader('x-content-type-options','nosniff');res.setHeader('x-frame-options','DENY');res.setHeader('referrer-policy','no-referrer');res.setHeader('content-security-policy',"default-src 'none'; frame-ancestors 'none'; base-uri 'none'")}
 function corsHeaders(req,res){const origin=req.headers.origin;if(origin&&allowedOrigins().has(origin)){res.setHeader('access-control-allow-origin',origin);res.setHeader('vary','Origin');res.setHeader('access-control-allow-methods','GET, POST, OPTIONS');res.setHeader('access-control-allow-headers','Authorization, Content-Type, Idempotency-Key');res.setHeader('access-control-max-age','600')}}
 const json=(res,code,data)=>{securityHeaders(res);res.setHeader('content-type','application/json; charset=utf-8');res.statusCode=code;if(code===204)return res.end();res.end(JSON.stringify(data))};
@@ -28,13 +31,14 @@ function client(state,id){if(!state.clients[id])throw new Error('BAD_CLIENT');re
 function revokeActorSessions(id){for(const [token,s] of sessions){if(s.id===id)sessions.delete(token)}}
 function issueSession(id){sweep();revokeActorSessions(id);const token=crypto.randomBytes(32).toString('base64url');sessions.set(token,{id,expiresAt:now()+SESSION_TTL_MS,issuedAt:now()});if(sessions.size>MAX_SESSIONS)sessions.delete(sessions.keys().next().value);return {token,expiresIn:SESSION_TTL_MS/1000,rotated:true}}
 function auth(req){const raw=String(req.headers.authorization||'');if(!raw.startsWith('Bearer '))return null;const token=raw.slice(7);const s=sessions.get(token);if(!s)return null;if(s.expiresAt<=now()){sessions.delete(token);return null}return s.id}
-function snapshot(state,id){client(state,id);return {client:{...state.clients[id]},operations:state.operations.filter(o=>o.from===id||o.to===id),audit:state.audit.filter(a=>(a.operationId===null&&a.actor===id)||state.operations.some(o=>o.id===a.operationId&&(o.from===id||o.to===id)))}}
+function visibleOperation(op,actor){return op.from===actor||op.to===actor}
+function snapshot(state,id){client(state,id);const visibleIds=new Set(state.operations.filter(o=>visibleOperation(o,id)).map(o=>o.id));return {client:{...state.clients[id]},operations:state.operations.filter(o=>visibleIds.has(o.id)),audit:state.audit.filter(a=>(a.operationId===null&&a.actor===id)||visibleIds.has(a.operationId))}}
 function normalizeIdempotencyKey(req){const value=String(req.headers['idempotency-key']||'').trim();if(!value)return '';if(!/^[A-Za-z0-9._:-]{8,80}$/.test(value))throw new Error('BAD_IDEMPOTENCY_KEY');return value}
 function createOperation(state,actor,p,idempotencyKey=''){
   if(idempotencyKey){const existing=state.operations.find(o=>o.from===actor&&o.idempotencyKey===idempotencyKey);if(existing)return {op:existing,replayed:true}}
-  const to=safe(p.to);if(actor===to)throw new Error('SAME_CLIENT');client(state,to);const amount=Math.round(Number(p.amount)*100)/100;if(!Number.isFinite(amount)||amount<=0||amount>MAX_AMOUNT)throw new Error('BAD_AMOUNT');if(client(state,actor).balance<amount)throw new Error('NO_BALANCE');const concept=safe(p.concept);if(!concept)throw new Error('BAD_CONCEPT');const op={id:ref(),from:actor,to,amount,concept,status:'PENDING_RECIPIENT',createdAt:new Date().toISOString()};if(idempotencyKey)op.idempotencyKey=idempotencyKey;state.operations.unshift(op);state.audit.push({operationId:op.id,actor,event:'CREATED',at:new Date().toISOString()});return {op,replayed:false}
+  const to=safe(p.to);if(actor===to)throw new Error('SAME_CLIENT');client(state,to);const amount=Math.round(Number(p.amount)*100)/100;if(!Number.isFinite(amount)||amount<=0||amount>MAX_AMOUNT)throw new Error('BAD_AMOUNT');if(client(state,actor).balance<amount)throw new Error('NO_BALANCE');const concept=safe(p.concept);if(!concept)throw new Error('BAD_CONCEPT');const op={id:ref(),from:actor,to,amount,concept,status:'PENDING_RECIPIENT',createdAt:new Date().toISOString()};if(idempotencyKey)op.idempotencyKey=idempotencyKey;state.operations.unshift(op);appendAudit(state,{operationId:op.id,actor,event:'CREATED'});return {op,replayed:false}
 }
-function decide(state,actor,id,decision){const op=state.operations.find(o=>o.id===id);if(!op)throw new Error('NOT_FOUND');if(op.to!==actor)throw new Error('FORBIDDEN');if(op.status!=='PENDING_RECIPIENT')throw new Error('ALREADY_DECIDED');if(decision==='reject'){op.status='REJECTED';state.audit.push({operationId:id,actor,event:'REJECTED',at:new Date().toISOString()});return op}if(decision!=='accept')throw new Error('BAD_DECISION');const sender=client(state,op.from),receiver=client(state,op.to);if(sender.balance<op.amount)throw new Error('NO_BALANCE');op.status='PROCESSING_DEMO';sender.balance=Math.round((sender.balance-op.amount)*100)/100;receiver.balance=Math.round((receiver.balance+op.amount)*100)/100;op.status='CONFIRMED_DEMO';op.acceptedAt=new Date().toISOString();state.audit.push({operationId:id,actor,event:'ACCEPTED',at:new Date().toISOString()},{operationId:id,actor:'SYSTEM',event:'BALANCES_UPDATED_DEMO',at:new Date().toISOString()});return op}
+function decide(state,actor,id,decision){if(!/^FIA-P2P-[A-F0-9]{16}$/.test(id))throw new Error('BAD_OPERATION_ID');const op=state.operations.find(o=>o.id===id);if(!op)throw new Error('NOT_FOUND');if(!visibleOperation(op,actor)||op.to!==actor)throw new Error('FORBIDDEN');if(op.status!=='PENDING_RECIPIENT')throw new Error('ALREADY_DECIDED');if(decision==='reject'){op.status='REJECTED';appendAudit(state,{operationId:id,actor,event:'REJECTED'});return op}if(decision!=='accept')throw new Error('BAD_DECISION');const sender=client(state,op.from),receiver=client(state,op.to);if(sender.balance<op.amount)throw new Error('NO_BALANCE');const senderBefore=sender.balance,receiverBefore=receiver.balance;op.status='PROCESSING_DEMO';sender.balance=Math.round((sender.balance-op.amount)*100)/100;receiver.balance=Math.round((receiver.balance+op.amount)*100)/100;if(Math.round((senderBefore+receiverBefore)*100)!==Math.round((sender.balance+receiver.balance)*100))throw new Error('BALANCE_INVARIANT');op.status='CONFIRMED_DEMO';op.acceptedAt=new Date().toISOString();appendAudit(state,{operationId:id,actor,event:'ACCEPTED'});appendAudit(state,{operationId:id,actor:'SYSTEM',event:'BALANCES_UPDATED_DEMO'});return op}
 
 export async function createDemoServer({stateFile=process.env.FIA_DEMO_STATE_FILE||''}={}){
   const store=createDemoStore(stateFile);await store.load();
@@ -49,7 +53,7 @@ export async function createDemoServer({stateFile=process.env.FIA_DEMO_STATE_FIL
       const p=await body(req),id=safe(p.clientId),secret=String(p.secret||''),cfg=secrets(),state=store.snapshotAll();client(state,id);
       if(!cfg[id])return json(res,503,{error:'DEMO_SECRET_NOT_CONFIGURED'});
       if(!same(secret,cfg[id]))return json(res,401,{error:'UNAUTHORIZED'});
-      await store.transact(s=>{s.audit.push({operationId:null,actor:id,event:'SESSION_CREATED',at:new Date().toISOString()});return null});
+      await store.transact(s=>{appendAudit(s,{operationId:null,actor:id,event:'SESSION_CREATED'});return null});
       return json(res,201,issueSession(id));
     }
     const actor=auth(req);if(!actor)return json(res,401,{error:'UNAUTHORIZED'});
@@ -60,9 +64,9 @@ export async function createDemoServer({stateFile=process.env.FIA_DEMO_STATE_FIL
       if(result.replayed)res.setHeader('idempotent-replay','true');
       return json(res,result.replayed?200:201,result.op);
     }
-    const m=req.url?.match(/^\/operations\/([A-Z0-9-]+)\/decision$/);if(req.method==='POST'&&m){const p=await body(req);return json(res,200,await store.transact(s=>decide(s,actor,m[1],p.decision)))}
+    const m=req.url?.match(/^\/operations\/([^/]+)\/decision$/);if(req.method==='POST'&&m){const p=await body(req);return json(res,200,await store.transact(s=>decide(s,actor,m[1],p.decision)))}
     return json(res,404,{error:'NOT_FOUND'});
-  }catch(e){const map={BODY_TOO_LARGE:413,BAD_JSON:400,BAD_CLIENT:400,SAME_CLIENT:400,BAD_AMOUNT:400,NO_BALANCE:409,BAD_CONCEPT:400,BAD_IDEMPOTENCY_KEY:400,NOT_FOUND:404,FORBIDDEN:403,ALREADY_DECIDED:409,BAD_DECISION:400,BAD_STATE_FILE:500};return json(res,map[e.message]||400,{error:e.message||'BAD_REQUEST'})}});
+  }catch(e){const map={BODY_TOO_LARGE:413,BAD_JSON:400,BAD_CLIENT:400,SAME_CLIENT:400,BAD_AMOUNT:400,NO_BALANCE:409,BAD_CONCEPT:400,BAD_IDEMPOTENCY_KEY:400,BAD_OPERATION_ID:400,NOT_FOUND:404,FORBIDDEN:403,ALREADY_DECIDED:409,BAD_DECISION:400,BAD_STATE_FILE:500,BAD_AUDIT_CHAIN:500,AUDIT_LIMIT_REACHED:507,BALANCE_INVARIANT:500};return json(res,map[e.message]||400,{error:e.message||'BAD_REQUEST'})}});
   server.demoStore=store;return server;
 }
 export async function resetDemoState(server){sessions.clear();rate.clear();if(server?.demoStore)await server.demoStore.reset()}
