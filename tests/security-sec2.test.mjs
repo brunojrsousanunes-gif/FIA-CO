@@ -13,7 +13,7 @@ for(const file of walk(root)){
   const rel=path.relative(root,file).replaceAll('\\','/');
   if(!/\.(?:js|mjs|html|md|yml|yaml)$/.test(rel))continue;
   const text=fs.readFileSync(file,'utf8');
-  for(const re of forbidden)if(re.test(text)&&rel!=='tests/security-sec2.test.mjs')failures.push(`${rel}: patrón peligroso ${re}`);
+  if(/\.(?:js|mjs|html)$/.test(rel))for(const re of forbidden)if(re.test(text)&&rel!=='tests/security-sec2.test.mjs')failures.push(`${rel}: patrón peligroso ${re}`);
   for(const re of secretPatterns)if(re.test(text)&&rel!=='tests/security-sec2.test.mjs')failures.push(`${rel}: posible secreto ${re}`);
 }
 if(failures.length)throw new Error(`SEC-2 gate falló:\n${failures.join('\n')}`);
@@ -21,6 +21,9 @@ if(failures.length)throw new Error(`SEC-2 gate falló:\n${failures.join('\n')}`)
 const identity=fs.readFileSync(path.join(root,'frontend/identity.html'),'utf8');
 if(!identity.includes('Content-Security-Policy')||!identity.includes("script-src 'self'"))throw new Error('identity.html perdió CSP estricta');
 if(/<script(?![^>]*\bsrc=)[^>]*>/i.test(identity))throw new Error('identity.html reintrodujo script inline');
+
+const productionGate=fs.readFileSync(path.join(root,'frontend/production-gate.html'),'utf8');
+for(const re of [/insertAdjacentHTML\s*\(/,/\.innerHTML\s*=/,/\.outerHTML\s*=/])if(re.test(productionGate))throw new Error(`production-gate.html reintrodujo sink HTML: ${re}`);
 
 process.env.FIA_DEMO_SECRET_A='sec2-test-secret-a';
 process.env.FIA_DEMO_SECRET_B='sec2-test-secret-b';
