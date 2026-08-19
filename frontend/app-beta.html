@@ -11,17 +11,26 @@
 <link rel="stylesheet" href="css/transaction-hub.css">
 <link rel="stylesheet" href="css/brand-i18n.css">
 <link rel="stylesheet" href="css/action-index.css">
+<link rel="stylesheet" href="css/prepilot-v2.css">
 </head>
 <body class="app-demo-body">
 <main class="phone-shell">
 <header class="app-head">
-<img src="assets/fia-co-trust-compute.svg" alt="FIA&CO" class="app-logo">
+<a href="index.html" aria-label="Volver al inicio"><img src="assets/fia-co-trust-compute.svg" alt="FIA&CO" class="app-logo"></a>
 <a class="icon-btn" href="legal-center.html" aria-label="Derechos y obligaciones">§</a>
 </header>
 <section class="app-screen">
 <p class="muted small">BETA · SIN DINERO REAL · DATOS DEMO</p>
 <h1 class="app-title">Tu centro de operaciones</h1>
 <p class="muted">Envía, solicita, documenta o gestiona una operación desde un único flujo guiado.</p>
+
+<section class="beta-onboarding" aria-labelledby="onboardingTitle">
+<span class="eyebrow">Primera vez aquí</span>
+<h2 id="onboardingTitle">Prueba FIA&CO en menos de 2 minutos</h2>
+<p>1. Elige una operación. 2. Revisa reglas y evidencias. 3. Consulta el estado y la recomendación Premium en modo lectura.</p>
+<div class="beta-onboarding-actions"><button class="btn" data-intent="new">Empezar recorrido</button><button class="btn alt" id="dismissOnboarding">Ya conozco la beta</button></div>
+</section>
+
 <button class="balance-card balance-action" data-intent="new">
 <span>Saldo demo · Centro de operaciones</span><strong>1.250,00 €</strong><small>Iniciar una gestión ›</small>
 </button>
@@ -39,6 +48,17 @@
 <button data-direct="conciliation"><b>⚖</b><strong>Conciliación</strong><span>Incidencias y evidencias</span></button>
 <button data-intent="history"><b>◷</b><strong>Historial</strong><span>Trazabilidad</span></button>
 </div>
+
+<section class="operation-status-card" id="operationStatus" aria-labelledby="operationStatusTitle" hidden>
+<div class="operation-status-head"><div><span class="eyebrow">Borrador demo creado</span><h2 id="operationStatusTitle">Estado de la operación</h2></div><span class="status-chip">EN REVISIÓN</span></div>
+<ol class="progress-list">
+<li class="done"><strong>Reglas definidas</strong><span>Partes, importe, objeto y condiciones estructuradas.</span></li>
+<li class="done"><strong>Validaciones básicas</strong><span>Coherencia y límites demo comprobados.</span></li>
+<li><strong>Evidencias pendientes</strong><span>Adjunta o simula los documentos requeridos para continuar.</span></li>
+<li><strong>Cierre</strong><span>Solo se habilitaría tras completar requisitos; esta beta no mueve dinero real.</span></li>
+</ol>
+<div class="premium-inline"><span class="eyebrow">Premium · shadow/read-only</span><strong>Recomendación: SUGGEST_REVIEW</strong><p>El agente detecta que faltan evidencias. Explica el motivo, pero no modifica, bloquea ni ejecuta la operación.</p><a class="btn alt" href="premium-demo.html?context=operation">Ver análisis Premium</a></div>
+</section>
 
 <div class="app-legal-card">
 <span class="eyebrow">Premium · Vista previa</span><strong>Agente de Transacción</strong><p class="muted small">Analiza el expediente en shadow mode, explica riesgos y sugiere revisión sin bloquear ni ejecutar operaciones.</p><a class="btn" href="premium-demo.html">Abrir Agente Premium ★</a>
@@ -58,6 +78,13 @@
 <h2 class="app-section-title">Operaciones recientes</h2>
 <button class="transaction transaction-btn" data-operation="sale"><span><b>Acuerdo compraventa</b><small>En evidencias · Hoy</small></span><strong class="positive">500,00 € ›</strong></button>
 <div class="app-legal-card"><span class="eyebrow">Antes de operar</span><strong>Derechos, obligaciones y límites de FIA&CO</strong><p class="muted small">Consulta contratación, datos, pagos y responsabilidades.</p><a href="legal-center.html">Abrir centro jurídico →</a></div>
+
+<section class="beta-feedback" aria-labelledby="feedbackTitle">
+<span class="eyebrow">Ayúdanos a mejorar</span><h2 id="feedbackTitle">¿Te resultó claro el recorrido?</h2>
+<p class="muted small">El feedback se guarda únicamente en este dispositivo. No se envía a servidores ni a terceros.</p>
+<div class="feedback-actions"><button class="btn alt" data-feedback="clear">Sí, claro</button><button class="btn alt" data-feedback="confusing">Necesita mejorar</button></div>
+<p class="small" id="feedbackStatus" aria-live="polite"></p>
+</section>
 </section>
 
 <nav class="bottom-nav" aria-label="Navegación principal">
@@ -79,6 +106,7 @@
 </section>
 </main>
 <script src="js/app-beta.js"></script>
+<script src="js/prepilot-v2.js"></script>
 <script src="js/i18n.js"></script>
 </body>
 </html>
