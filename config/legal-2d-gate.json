@@ -1,0 +1,12 @@
+{
+  "version": "LEGAL-2D-v1",
+  "status": "PREPARED_NOT_VALIDATED",
+  "legalReadyForPilot": false,
+  "externalReviewComplete": false,
+  "pilotJurisdictionValidated": false,
+  "highRisksClosed": false,
+  "pilotTermsReviewed": false,
+  "productionCapabilitiesEnabled": false,
+  "premiumMode": "shadow-read-only",
+  "nextAction": "external-professional-review"
+}

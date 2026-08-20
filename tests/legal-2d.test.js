@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert');
+const p=JSON.parse(fs.readFileSync('config/legal-2d-gate.json','utf8'));
+const d=fs.readFileSync('docs/legal/LEGAL-2D-PREPILOT-VALIDATION.md','utf8');
+assert.equal(p.status,'PREPARED_NOT_VALIDATED');
+assert.equal(p.legalReadyForPilot,false);
+assert.equal(p.externalReviewComplete,false);
+assert.equal(p.pilotJurisdictionValidated,false);
+assert.equal(p.highRisksClosed,false);
+assert.equal(p.pilotTermsReviewed,false);
+assert.equal(p.productionCapabilitiesEnabled,false);
+assert.equal(p.premiumMode,'shadow-read-only');
+['Checklist por caso de uso','Riesgos abiertos','Bloqueantes de piloto real','Paquete para abogado externo','LEGAL_READY_FOR_PILOT','Prueba real'].forEach(x=>assert(d.includes(x),x));
+console.log('LEGAL-2D pre-pilot validation gate passed');
