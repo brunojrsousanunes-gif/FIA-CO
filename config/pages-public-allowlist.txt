@@ -22,6 +22,7 @@ css/transaction-hub.css
 css/brand-i18n.css
 css/action-index.css
 css/tx-flow.css
+css/premium-demo.css
 
 js/app-beta.js
 js/tx-flow.js
@@ -29,6 +30,9 @@ js/prepilot-v2.js
 js/pilot-telemetry.js
 js/i18n.js
 js/tx-advanced.js
+js/provider-adapters.js
+js/shadow-risk-engine.js
+js/premium-demo.js
 
 assets/fia-co-office-approved.jpg
 assets/office-fia-hero.svg
