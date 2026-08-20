@@ -1,0 +1,12 @@
+{
+  "version": "TX-FLOW-v1",
+  "priorityUseCases": ["sale", "transport", "logistics", "delivery", "receipt"],
+  "mobileFirst": true,
+  "targetStartTimeSeconds": 120,
+  "quickIncidents": ["not-delivered", "damaged", "delayed", "wrong-quantity"],
+  "businessTemplates": ["sale-with-shipping", "b2b-delivery", "recurring-goods"],
+  "realMoneyEnabled": false,
+  "realPiiEnabled": false,
+  "productionProvidersEnabled": false,
+  "premiumMode": "shadow-read-only"
+}
