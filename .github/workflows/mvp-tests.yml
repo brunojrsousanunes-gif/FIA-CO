@@ -43,6 +43,7 @@ jobs:
           node tests/security-sec3.test.mjs
           node tests/security-sec4.test.js
           node tests/legal-2a.test.js
+          node tests/legal-2bc.test.js
           node tests/pricing.test.js
           node tests/agent-security.test.js
           node tests/enterprise-flow.test.js
