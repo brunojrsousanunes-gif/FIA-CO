@@ -1,0 +1,42 @@
+{
+  "mode": "DEMO_ONLY",
+  "environments": ["dev", "beta", "pilot", "production"],
+  "authentication": {
+    "realAuthEnabled": false,
+    "preferredFutureMethod": "webauthn-passkey",
+    "mfaPrepared": true,
+    "oidcPrepared": true,
+    "tokensInLocalStorage": false
+  },
+  "secrets": {
+    "frontendAllowed": false,
+    "repositoryAllowed": false,
+    "runtimeSecretManagerRequiredForPilot": true,
+    "separateCredentialsPerEnvironment": true
+  },
+  "abuseProtection": {
+    "rateLimitRequiredForPilot": true,
+    "replayProtectionRequired": true,
+    "idempotencyRequiredForTransactionalWrites": true
+  },
+  "logging": {
+    "piiPayloadLoggingAllowed": false,
+    "correlationIdRequired": true,
+    "siemAdapterPrepared": true,
+    "externalExportEnabled": false
+  },
+  "recovery": {
+    "backupRequiredForPilot": true,
+    "restoreTestRequired": true,
+    "designRpoHours": 24,
+    "designRtoHours": 8
+  },
+  "gates": {
+    "realMoney": false,
+    "realPii": false,
+    "productionProviders": false,
+    "enforcement": false,
+    "premiumMode": "shadow-read-only",
+    "maxUnacceptedRisk": "medium"
+  }
+}
