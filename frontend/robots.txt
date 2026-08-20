@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://brunojrsousanunes-gif.github.io/FIA-CO/sitemap.xml
