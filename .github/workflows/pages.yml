@@ -22,6 +22,18 @@ jobs:
           persist-credentials: false
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Verify Pages payload
+        run: |
+          test -f frontend/approved-home-preview.html
+          test -f frontend/web-beta.html
+          test -f frontend/beta-mobile.html
+          test -f frontend/assets/fia-co-office-approved.jpg
+          grep -Fq 'Conecta.' frontend/approved-home-preview.html
+          grep -Fq 'Comprueba.' frontend/approved-home-preview.html
+          grep -Fq 'FIA&CO' frontend/approved-home-preview.html
+      - name: Stamp deployment version
+        run: |
+          printf '%s\n' "$GITHUB_SHA" > frontend/deploy-version.txt
       - name: Upload demo
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
