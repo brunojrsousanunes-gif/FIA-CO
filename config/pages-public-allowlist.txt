@@ -1,0 +1,35 @@
+# Explicit public HTML routes
+approved-home-preview.html
+web-beta.html
+beta-mobile.html
+app-beta.html
+tx-advanced.html
+pilot-dashboard.html
+premium-demo.html
+identity.html
+wallet.html
+payments.html
+legal-center.html
+tx-operator.html
+index.html
+
+# Static dependencies used by approved public routes
+css/style.css
+css/prepilot-v2.css
+css/tx-advanced.css
+css/fia-home-final.css
+css/transaction-hub.css
+css/brand-i18n.css
+css/action-index.css
+css/tx-flow.css
+
+js/app-beta.js
+js/tx-flow.js
+js/prepilot-v2.js
+js/pilot-telemetry.js
+js/i18n.js
+js/tx-advanced.js
+
+assets/fia-co-office-approved.jpg
+assets/office-fia-hero.svg
+assets/fia-co-trust-compute.svg
