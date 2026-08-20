@@ -10,7 +10,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    uses: ./.github/workflows/mvp-tests.yml
+
   build:
+    needs: validate
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -20,6 +24,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
 
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
@@ -36,16 +45,21 @@ jobs:
           grep -Fq 'Comprueba.' frontend/approved-home-preview.html
           grep -Fq 'FIA&CO' frontend/approved-home-preview.html
 
-      - name: Stamp deployment version
+      - name: Build allowlisted public artifact
         shell: bash
         run: |
           set -euo pipefail
-          printf '%s\n' "$GITHUB_SHA" > frontend/deploy-version.txt
+          node scripts/build-pages-public.mjs pages-public
+          printf '%s\n' "$GITHUB_SHA" > pages-public/deploy-version.txt
+          test ! -e pages-public/agent-lab.html
+          test ! -e pages-public/backoffice-demo.html
+          test ! -e pages-public/audit-trail-lab.html
+          test ! -e pages-public/capital-readiness-kit.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: frontend
+          path: pages-public
 
   deploy:
     needs: build
