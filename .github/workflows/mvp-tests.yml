@@ -51,6 +51,7 @@ jobs:
           node tests/tx-pilot-ops.test.js
           node tests/transport-service-role.test.js
           node tests/tx-pilot-ops2.test.js
+          node tests/full-beta.test.js
           node tests/pricing.test.js
           node tests/agent-security.test.js
           node tests/enterprise-flow.test.js
