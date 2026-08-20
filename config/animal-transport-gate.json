@@ -1,0 +1,17 @@
+{
+  "version": "ANIMAL-TRANSPORT-v1",
+  "status": "PRE_PILOT_DESIGN_ONLY",
+  "realAnimalTransportEnabled": false,
+  "speciesProfileValidated": false,
+  "jurisdictionValidated": false,
+  "externalVeterinaryOrLegalReviewCompleted": false,
+  "carrierAuthorizationRequired": true,
+  "vehicleAuthorizationRequired": true,
+  "competentPersonnelRequired": true,
+  "fitnessForTransportRequired": true,
+  "contingencyPlanRequired": true,
+  "minimumDocumentsRequired": true,
+  "longJourneyRulesValidated": false,
+  "criticalWelfareIncidentOpen": false,
+  "defaultDecision": "REVIEW_REQUIRED"
+}
