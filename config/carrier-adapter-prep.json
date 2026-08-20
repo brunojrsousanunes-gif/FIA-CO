@@ -1,0 +1,28 @@
+{
+  "version": "carrier-adapter-prep-v1",
+  "role": "EXTERNAL_CARRIER",
+  "fiaRole": "DIGITAL_COORDINATION_SUPERVISION",
+  "productionEnabled": false,
+  "realBookingEnabled": false,
+  "realTrackingEnabled": false,
+  "realPiiEnabled": false,
+  "requiredBeforeActivation": [
+    "carrier_identity_verified",
+    "service_scope_validated",
+    "licenses_or_authorizations_checked_when_applicable",
+    "insurance_checked_when_applicable",
+    "contract_and_responsibilities_approved",
+    "privacy_and_data_processing_approved",
+    "incident_and_escalation_process_approved",
+    "special_cargo_requirements_approved_when_applicable"
+  ],
+  "capabilityModel": [
+    "standard_goods",
+    "special_cargo",
+    "temperature_controlled",
+    "live_animals_subject_to_separate_gate",
+    "proof_of_delivery",
+    "status_updates"
+  ],
+  "defaultDecision": "REVIEW_REQUIRED"
+}

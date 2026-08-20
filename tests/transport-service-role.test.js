@@ -1,0 +1,16 @@
+const fs=require('fs'),assert=require('assert');
+const role=fs.readFileSync('docs/transport/SERVICE-ROLE.md','utf8');
+const legal=fs.readFileSync('docs/transport/LEGAL-CHECK.md','utf8');
+const carrier=JSON.parse(fs.readFileSync('config/carrier-adapter-prep.json','utf8'));
+assert(role.includes('no realiza materialmente el transporte'));
+assert(role.includes('transportista/porteador externo'));
+assert(role.includes('coordinación, supervisión, trazabilidad'));
+assert(legal.includes('no constituye dictamen jurídico'));
+assert.equal(carrier.role,'EXTERNAL_CARRIER');
+assert.equal(carrier.fiaRole,'DIGITAL_COORDINATION_SUPERVISION');
+assert.equal(carrier.productionEnabled,false);
+assert.equal(carrier.realBookingEnabled,false);
+assert.equal(carrier.realTrackingEnabled,false);
+assert.equal(carrier.realPiiEnabled,false);
+assert.equal(carrier.defaultDecision,'REVIEW_REQUIRED');
+console.log('Transport service role gate passed');

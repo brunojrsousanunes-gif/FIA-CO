@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('frontend/tx-operator.html','utf8');
+const js=fs.readFileSync('frontend/js/tx-operator.js','utf8');
+const role=fs.readFileSync('docs/transport/SERVICE-ROLE.md','utf8');
+const carrier=JSON.parse(fs.readFileSync('config/carrier-adapter-prep.json','utf8'));
+['Vista transportista externo','transportista/porteador externo','Separación de roles','Detalle de expedición','POD demo','Desviación de ruta'].forEach(x=>assert(html.includes(x),x));
+['EXTERNAL_CARRIER_DEMO','SERVICE_OR_ROUTE','recipientConfirmation','humanReviewRequired:true','carrierExecution:false'].forEach(x=>assert(js.includes(x),x));
+assert(role.includes('FIA&CO no realiza materialmente el transporte'));
+assert.equal(carrier.productionEnabled,false);
+assert.equal(carrier.realBookingEnabled,false);
+assert.equal(carrier.realTrackingEnabled,false);
+assert.equal(carrier.realPiiEnabled,false);
+console.log('TX-PILOT-OPS-2 external carrier boundary passed');
