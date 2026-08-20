@@ -54,17 +54,26 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
-      - name: Verify Pages payload
+      - name: Verify production homepage payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f frontend/index.html
+          test -f frontend/css/home-production.css
+          test -f frontend/assets/fia-co-office-approved.jpg
+          grep -Fq 'css/home-production.css' frontend/index.html
+          grep -Fq 'OPERA CON' frontend/index.html
+          grep -Fq 'Centro de Operaciones' frontend/index.html
+          grep -Fq 'id="acciones"' frontend/index.html
+          grep -Fq '@media(max-width:560px)' frontend/css/home-production.css
+
+      - name: Verify supporting public routes
         shell: bash
         run: |
           set -euo pipefail
           test -f frontend/approved-home-preview.html
           test -f frontend/web-beta.html
           test -f frontend/beta-mobile.html
-          test -f frontend/assets/fia-co-office-approved.jpg
-          grep -Fq 'Conecta.' frontend/approved-home-preview.html
-          grep -Fq 'Comprueba.' frontend/approved-home-preview.html
-          grep -Fq 'FIA&CO' frontend/approved-home-preview.html
 
       - name: Build allowlisted public artifact
         shell: bash
@@ -72,6 +81,10 @@ jobs:
           set -euo pipefail
           node scripts/build-pages-public.mjs pages-public
           printf '%s\n' "$GITHUB_SHA" > pages-public/deploy-version.txt
+          test -f pages-public/index.html
+          test -f pages-public/css/home-production.css
+          grep -Fq 'css/home-production.css' pages-public/index.html
+          grep -Fq 'Centro de Operaciones' pages-public/index.html
           test ! -e pages-public/agent-lab.html
           test ! -e pages-public/backoffice-demo.html
           test ! -e pages-public/audit-trail-lab.html
@@ -109,7 +122,7 @@ jobs:
       BASE_URL: ${{ needs.deploy.outputs.page_url }}
       EXPECTED_SHA: ${{ github.sha }}
     steps:
-      - name: Verify deployed commit and critical pages
+      - name: Verify deployed production homepage and commit
         shell: bash
         run: |
           set -euo pipefail
@@ -126,13 +139,18 @@ jobs:
           deployed_sha="$(fetch deploy-version.txt | tr -d '\r\n')"
           test "$deployed_sha" = "$EXPECTED_SHA"
 
-          preview="$(fetch approved-home-preview.html)"
-          grep -Fq 'FIA&CO' <<<"$preview"
-          grep -Fq 'Conecta.' <<<"$preview"
-          grep -Fq 'Comprueba.' <<<"$preview"
-          grep -Fq 'fia-co-office-approved.jpg' <<<"$preview"
+          homepage="$(fetch index.html)"
+          grep -Fq 'css/home-production.css' <<<"$homepage"
+          grep -Fq 'OPERA CON' <<<"$homepage"
+          grep -Fq 'Centro de Operaciones' <<<"$homepage"
+          grep -Fq 'id="acciones"' <<<"$homepage"
 
+          production_css="$(fetch css/home-production.css)"
+          grep -Fq '@media(max-width:560px)' <<<"$production_css"
+          grep -Fq '.hero{grid-template-columns:1fr}' <<<"$production_css"
+
+          fetch approved-home-preview.html > /dev/null
           fetch web-beta.html > /dev/null
           fetch beta-mobile.html > /dev/null
 
-          printf 'DEPLOY OK — commit %s — preview OK — web beta OK — mobile beta OK\n' "$EXPECTED_SHA"
+          printf 'DEPLOY OK — commit %s — production index OK — responsive CSS OK\n' "$EXPECTED_SHA"
