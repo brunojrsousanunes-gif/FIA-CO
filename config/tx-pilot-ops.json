@@ -1,0 +1,17 @@
+{
+  "version":"TX-PILOT-OPS-v1",
+  "status":"DEMO_LOCAL_ONLY",
+  "storage":"browser-local",
+  "maxDemoOperations":25,
+  "realMoney":false,
+  "realPii":false,
+  "providerExecution":false,
+  "realGps":false,
+  "realSensors":false,
+  "realTransportAuthorized":false,
+  "animalTransportRealUse":false,
+  "incidentDecision":"HUMAN_REVIEW_REQUIRED",
+  "supportedDemoMilestones":["DRAFT_DEMO","PICKED_UP_DEMO","IN_TRANSIT_DEMO","DELIVERED_DEMO","REVIEW_REQUIRED"],
+  "supportedEvidence":["POD_DEMO"],
+  "pilotMetrics":["operations_total","active","completed","with_incident","checkpoints","evidence_count"]
+}
