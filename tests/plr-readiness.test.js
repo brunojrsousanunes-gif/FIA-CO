@@ -1,0 +1,11 @@
+const fs=require('fs'),assert=require('assert');
+const p=JSON.parse(fs.readFileSync('config/plr-gate.json','utf8'));
+assert.equal(p.status,'PILOT_CANDIDATE_PREPARATION');
+assert.equal(p.pilotReady,false);
+assert.equal(p.realPilotAuthorized,false);
+assert.equal(p.legalReady,false);
+assert.equal(p.restoreValidated,false);
+assert.equal(p.productionCapabilitiesEnabled,false);
+assert.equal(p.premiumMode,'shadow-read-only');
+['docs/pilot/PLR-OPERATIONS.md','docs/pilot/PLR-CONTINUITY-SUPPORT.md','docs/pilot/PLR-PREMIUM-COMMERCIAL.md'].forEach(f=>assert(fs.existsSync(f),f));
+console.log('PLR readiness gate passed');
