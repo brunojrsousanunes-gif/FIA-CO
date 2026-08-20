@@ -1,0 +1,14 @@
+const fs=require('fs'),assert=require('assert');
+const gate=JSON.parse(fs.readFileSync('config/tx-pilot-ops.json','utf8'));
+const op=fs.readFileSync('frontend/tx-operator.html','utf8');
+const js=fs.readFileSync('frontend/js/tx-operator.js','utf8');
+const advanced=fs.readFileSync('frontend/js/tx-advanced.js','utf8');
+assert.equal(gate.status,'DEMO_LOCAL_ONLY');
+['realMoney','realPii','providerExecution','realGps','realSensors','realTransportAuthorized','animalTransportRealUse'].forEach(k=>assert.equal(gate[k],false,k));
+assert.equal(gate.incidentDecision,'HUMAN_REVIEW_REQUIRED');
+['PICKED_UP_DEMO','IN_TRANSIT_DEMO','DELIVERED_DEMO','REVIEW_REQUIRED'].forEach(x=>assert(gate.supportedDemoMilestones.includes(x),x));
+['Operador / conductor','SIN GPS REAL','Prueba entrega','Incidencia'].forEach(x=>assert(op.includes(x),x));
+['POD_DEMO','humanReviewRequired:true','fia_tx_pilot_ops_v1'].forEach(x=>assert(js.includes(x),x));
+assert(advanced.includes('[name="txMode"]:checked'),'checked mode must drive operation type');
+assert(advanced.includes('realTransportAuthorized:false'),'real transport must stay disabled');
+console.log('TX-PILOT-OPS safe demo gate passed');
