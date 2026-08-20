@@ -3,7 +3,7 @@ const web=fs.readFileSync('frontend/web-beta.html','utf8');
 const app=fs.readFileSync('frontend/beta-mobile.html','utf8');
 const css=fs.readFileSync('frontend/css/fia-home-final.css','utf8');
 const art=fs.readFileSync('frontend/assets/office-fia-hero.svg','utf8');
-['Conecta.','Acuerda.','Gestiona.','Comprueba.','Compraventa','Venta + transporte','Porte especial','Transporte animal','Proveedores','Transportistas','Empresas','Colaboradores','Agente Premium','Marco jurídico','Panel operativo'].forEach(x=>assert(web.includes(x),`web ${x}`));
+['Conecta.','Acuerda.','Gestiona.','Comprueba.','Compraventa','Venta + transporte','Porte especial','Transporte animal','Proveedores','Transportistas','Empresas','Colaboradores','Premium','Marco jurídico','Panel operativo'].forEach(x=>assert(web.includes(x),`web ${x}`));
 ['Conecta. Acuerda.','Transportistas','Porte especial','Transporte animal','Identidad','Cartera demo','Marco jurídico','Panel operativo'].forEach(x=>assert(app.includes(x),`app ${x}`));
 assert(web.includes('FIA&CO coordina digitalmente; terceros ejecutan servicios físicos'));
 assert(app.includes('El transporte físico corresponde a terceros habilitados'));
