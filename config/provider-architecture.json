@@ -1,0 +1,52 @@
+{
+  "mode": "SANDBOX_ONLY",
+  "productionEnabled": false,
+  "networkCallsEnabled": false,
+  "categories": {
+    "identity": {
+      "contract": "IdentityVerificationAdapter",
+      "capabilities": ["check_requirements", "validate_shape", "status", "explain"],
+      "slots": ["mock", "future-primary", "future-secondary"]
+    },
+    "payments": {
+      "contract": "PaymentProviderAdapter",
+      "capabilities": ["quote", "validate", "prepare", "status"],
+      "custodyDefault": "non-custodial",
+      "slots": ["mock", "future-primary", "future-secondary"]
+    },
+    "fraud": {
+      "contract": "FraudSignalsAdapter",
+      "capabilities": ["observe", "score", "explain"],
+      "directEnforcementAllowed": false,
+      "slots": ["mock", "future-primary", "future-secondary"]
+    },
+    "securityTelemetry": {
+      "contract": "SecurityTelemetryAdapter",
+      "capabilities": ["normalize", "preview_export"],
+      "fortinetPrepared": true,
+      "externalExportEnabled": false,
+      "slots": ["mock", "future-primary", "future-secondary"]
+    },
+    "premiumAgent": {
+      "contract": "TransactionAgentAdapter",
+      "allowedMode": "shadow-read-only",
+      "futureModes": ["recommend", "authorized-action"],
+      "executionEnabled": false,
+      "slots": ["mock", "future-primary", "future-secondary"]
+    }
+  },
+  "sandbox": {
+    "scenarios": ["success", "timeout", "latency", "transient_error", "permanent_error", "invalid_response", "circuit_open"],
+    "idempotencyRequiredForFutureWrites": true,
+    "retryPolicy": "bounded",
+    "circuitBreakerRequired": true
+  },
+  "activationGate": {
+    "securityReview": true,
+    "legal2Required": true,
+    "rollbackRequired": true,
+    "observabilityRequired": true,
+    "runbookRequired": true,
+    "explicitAuthorizationRequired": true
+  }
+}
