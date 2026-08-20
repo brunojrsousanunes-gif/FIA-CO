@@ -1,0 +1,13 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const cfg=JSON.parse(fs.readFileSync('config/provider-architecture.json','utf8'));
+assert.equal(cfg.mode,'SANDBOX_ONLY');assert.equal(cfg.productionEnabled,false);assert.equal(cfg.networkCallsEnabled,false);
+['identity','payments','fraud','securityTelemetry','premiumAgent'].forEach(k=>assert(cfg.categories[k],k));
+assert.equal(cfg.categories.fraud.directEnforcementAllowed,false);assert.equal(cfg.categories.securityTelemetry.externalExportEnabled,false);assert.equal(cfg.categories.premiumAgent.allowedMode,'shadow-read-only');assert.equal(cfg.categories.premiumAgent.executionEnabled,false);
+assert(cfg.activationGate.legal2Required);assert(cfg.activationGate.explicitAuthorizationRequired);assert.equal(cfg.categories.identity.slots.length,3);assert.equal(cfg.categories.payments.slots.length,3);
+const sandbox={window:{}};vm.createContext(sandbox);vm.runInContext(fs.readFileSync('frontend/js/provider-adapters.js','utf8'),sandbox);vm.runInContext(fs.readFileSync('frontend/js/provider-sandbox.js','utf8'),sandbox);
+const api=sandbox.window.FIAProviderAdapters,sim=sandbox.window.FIAProviderSandbox;
+assert.equal(api.DEMO_ONLY,true);assert.equal(api.productionEnabled,false);assert.equal(api.networkCallsEnabled,false);
+assert.equal(api.get('securityTelemetry').meta.fortinetPrepared,true);assert.equal(api.get('premiumAgent').meta.executionEnabled,false);assert.equal(api.get('payments').meta.custodyDefault,'non-custodial');
+assert.equal(sim.networkCallsEnabled,false);for(const scenario of cfg.sandbox.scenarios){const r=sim.simulate('mock',scenario,{demo:1});assert.equal(r.demo,true);assert.equal(r.network,false);}assert.equal(sim.simulate('mock','timeout').status,'TIMEOUT');assert.equal(sim.simulate('mock','circuit_open').status,'CIRCUIT_OPEN');
+const doc=fs.readFileSync('docs/architecture/PROVIDERS-R.md','utf8');['KYC/KYB','PSP / pagos','Antifraude','Fortinet','Agente Premium','Sandbox de proveedores','Gate de proveedor','Portabilidad','LEGAL-2'].forEach(x=>assert(doc.includes(x),x));
+console.log('provider architecture R gate passed');
