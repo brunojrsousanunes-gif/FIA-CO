@@ -1,0 +1,39 @@
+{
+  "version": "LEGAL-2C-v1",
+  "status": "DESIGN_ONLY",
+  "jurisdictionProfile": "ES-EU-RESEARCH",
+  "jurisdictionValidated": false,
+  "externalLegalReviewCompleted": false,
+  "legalReadyForPilot": false,
+  "ruleKinds": ["norm", "case_law", "internal_policy", "recommendation"],
+  "precedence": {
+    "caseLawMayAutoEnforce": false,
+    "recommendationMayOverrideNorm": false,
+    "internalPolicyMayOverrideNorm": false
+  },
+  "traceability": {
+    "ruleIdRequired": true,
+    "ruleVersionRequired": true,
+    "sourceIdRequiredForNormOrCaseLaw": true,
+    "decisionCorrelationIdRequired": true,
+    "historicalVersionImmutable": true
+  },
+  "humanInLoop": {
+    "requiredForSensitiveOutcome": true,
+    "requiredForBindingLegalEffect": true,
+    "requiredForPremiumEnforcement": true
+  },
+  "rollback": {
+    "supported": true,
+    "reasonRequired": true,
+    "auditEventRequired": true,
+    "previousVersionsRetained": true
+  },
+  "enforcement": {
+    "automatedLegalEnforcementEnabled": false,
+    "caseLawDirectEnforcementEnabled": false,
+    "premiumAgentMode": "shadow-read-only",
+    "realMoney": false,
+    "realPii": false
+  }
+}
