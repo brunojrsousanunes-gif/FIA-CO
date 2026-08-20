@@ -35,6 +35,7 @@ jobs:
           node tests/mobile-beta-polish.test.mjs
           node tests/homepage-v2.test.mjs
           node tests/prepilot-v2.test.mjs
+          node tests/pilot-experience-q.test.js
           node tests/wallet-demo-tests.mjs
           node tests/p2p-multiuser-tests.mjs
           node tests/security-sec1.test.mjs
