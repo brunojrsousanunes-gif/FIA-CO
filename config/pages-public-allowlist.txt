@@ -29,6 +29,7 @@ css/tx-flow.css
 css/premium-demo.css
 css/wallet.css
 css/home-v2.css
+css/home-reference-final.css
 
 js/app-beta.js
 js/tx-flow.js
