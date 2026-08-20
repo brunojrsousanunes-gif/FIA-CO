@@ -47,6 +47,7 @@ jobs:
           node tests/tx-flow.test.js
           node tests/special-transport.test.js
           node tests/animal-transport.test.js
+          node tests/tx-advanced.test.js
           node tests/pricing.test.js
           node tests/agent-security.test.js
           node tests/enterprise-flow.test.js
