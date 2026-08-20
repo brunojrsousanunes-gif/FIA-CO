@@ -1,0 +1,13 @@
+{
+  "version": "PLR-v1",
+  "status": "PILOT_CANDIDATE_PREPARATION",
+  "pilotReady": false,
+  "realPilotAuthorized": false,
+  "legalReady": false,
+  "restoreValidated": false,
+  "supportReady": false,
+  "metricsReady": false,
+  "criticalOrHighSecurityRiskOpen": true,
+  "productionCapabilitiesEnabled": false,
+  "premiumMode": "shadow-read-only"
+}
