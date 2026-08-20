@@ -16,6 +16,8 @@ products.html
 product.html
 cart.html
 checkout.html
+robots.txt
+sitemap.xml
 
 # Static dependencies used by approved public routes
 css/style.css
