@@ -1,0 +1,31 @@
+{
+  "version": "ANIMAL-PROFILES-PREP-v1",
+  "status": "PREPARED_NOT_VALIDATED",
+  "realUseEnabled": false,
+  "jurisdiction": "ES_EU_RESEARCH_PROFILE",
+  "profileModel": {
+    "requiredKeys": [
+      "speciesGroup",
+      "journeyType",
+      "fitnessChecklist",
+      "carrierRequirements",
+      "vehicleRequirements",
+      "personnelRequirements",
+      "documents",
+      "welfareControls",
+      "contingencyControls",
+      "sourceVersion",
+      "professionalValidationStatus"
+    ],
+    "thresholdPolicy": "NO_UNIVERSAL_THRESHOLDS_UNTIL_VALIDATED",
+    "defaultDecision": "REVIEW_REQUIRED"
+  },
+  "profiles": [
+    {"speciesGroup":"bovine","journeyType":"placeholder","professionalValidationStatus":"PENDING"},
+    {"speciesGroup":"ovine_caprine","journeyType":"placeholder","professionalValidationStatus":"PENDING"},
+    {"speciesGroup":"porcine","journeyType":"placeholder","professionalValidationStatus":"PENDING"},
+    {"speciesGroup":"equidae","journeyType":"placeholder","professionalValidationStatus":"PENDING"},
+    {"speciesGroup":"poultry","journeyType":"placeholder","professionalValidationStatus":"PENDING"},
+    {"speciesGroup":"other","journeyType":"placeholder","professionalValidationStatus":"PENDING"}
+  ]
+}
