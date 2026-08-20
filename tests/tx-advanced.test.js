@@ -1,0 +1,17 @@
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('frontend/tx-advanced.html','utf8');
+const js=fs.readFileSync('frontend/js/tx-advanced.js','utf8');
+const dashboard=fs.readFileSync('frontend/pilot-dashboard.html','utf8');
+const profiles=JSON.parse(fs.readFileSync('config/animal-transport-profiles.json','utf8'));
+const pack=fs.readFileSync('docs/pilot/PILOT-PACK-TRANSPORT.md','utf8');
+['Compraventa','Venta + transporte','Transporte / logística','Porte especial','Transporte animal','SIN DINERO REAL','SIN PII REAL'].forEach(x=>assert(html.includes(x),x));
+assert(js.includes('realMoney:false'));
+assert(js.includes('realPii:false'));
+assert(js.includes('providerExecution:false'));
+assert(dashboard.includes('tx-advanced.html'));
+assert.equal(profiles.status,'PREPARED_NOT_VALIDATED');
+assert.equal(profiles.realUseEnabled,false);
+assert.equal(profiles.profileModel.defaultDecision,'REVIEW_REQUIRED');
+assert.equal(profiles.profileModel.thresholdPolicy,'NO_UNIVERSAL_THRESHOLDS_UNTIL_VALIDATED');
+['tiempo para crear operación','facilidad de uso móvil','primer inversor o entidad colaboradora'].forEach(x=>assert(pack.includes(x),x));
+console.log('TX advanced + animal profiles + pilot pack gate passed');
