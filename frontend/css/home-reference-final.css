@@ -3,7 +3,7 @@
 .home-v2 .hero-copy{padding:42px 36px 34px}
 .home-v2 .hero-copy h1{font-family:Georgia,'Times New Roman',serif;font-weight:900;font-size:clamp(2.65rem,4.25vw,4.9rem);line-height:.94;letter-spacing:-.035em}
 .home-v2 .hero-copy h1 em{font-family:inherit}
-.home-v2 .hero-scene{background-image:linear-gradient(90deg,rgba(255,255,255,.02),rgba(45,22,69,.02)),url('../assets/office-fia-hero.svg');background-color:#f7f8fb;background-size:cover;background-position:center;min-height:520px}
+.home-v2 .hero-scene{background-image:linear-gradient(90deg,rgba(255,255,255,.02),rgba(45,22,69,.02)),url('../assets/fia-co-office-approved.jpg');background-color:#f7f8fb;background-size:cover;background-position:center;min-height:520px}
 .home-v2 .scene-monitor{left:22%;top:26%;width:48%;min-width:360px;border-width:8px;border-color:#1b1c22;background:#fff;box-shadow:0 20px 45px rgba(26,20,36,.28)}
 .home-v2 .trust-row-compact{grid-template-columns:repeat(4,minmax(0,1fr));padding:10px 28px 14px}
 .home-v2 .reference-dashboard{grid-template-columns:.72fr 2.08fr;padding:14px 28px 10px}
