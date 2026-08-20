@@ -1,0 +1,17 @@
+const fs=require('fs'),assert=require('assert');
+const p=JSON.parse(fs.readFileSync('config/tx-flow.json','utf8'));
+const app=fs.readFileSync('frontend/app-beta.html','utf8');
+const dash=fs.readFileSync('frontend/pilot-dashboard.html','utf8');
+const js=fs.readFileSync('frontend/js/tx-flow.js','utf8');
+assert.deepEqual(p.priorityUseCases.slice(0,2),['sale','transport']);
+assert.equal(p.mobileFirst,true);
+assert.equal(p.targetStartTimeSeconds,120);
+assert.equal(p.realMoneyEnabled,false);
+assert.equal(p.realPiiEnabled,false);
+assert.equal(p.productionProvidersEnabled,false);
+assert.equal(p.premiumMode,'shadow-read-only');
+['Compraventa rápida','Transporte / logística','Venta con envío','Entrega B2B','No entregado','Dañado','Retrasado','Cantidad incorrecta','menos de 2 minutos'].forEach(x=>assert(app.includes(x),x));
+['Operaciones de empresa','Siguiente paso: prueba de entrega','Nueva compraventa','Nuevo transporte'].forEach(x=>assert(dash.includes(x),x));
+assert(js.includes("data-tx-start"));
+assert(!/innerHTML\s*=/.test(js),'TX-FLOW must avoid innerHTML');
+console.log('TX-FLOW usability and safety gate passed');
