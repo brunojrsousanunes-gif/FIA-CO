@@ -44,6 +44,8 @@ jobs:
           node tests/legal-2bc.test.js
           node tests/legal-2d.test.js
           node tests/plr-readiness.test.js
+          node tests/tx-flow.test.js
+          node tests/special-transport.test.js
           node tests/pricing.test.js
           node tests/agent-security.test.js
           node tests/enterprise-flow.test.js

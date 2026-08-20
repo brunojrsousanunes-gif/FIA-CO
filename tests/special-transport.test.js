@@ -1,0 +1,14 @@
+const fs=require('fs'),assert=require('assert');
+const p=JSON.parse(fs.readFileSync('config/special-transport.json','utf8'));
+const js=fs.readFileSync('frontend/js/tx-flow.js','utf8');
+const doc=fs.readFileSync('docs/pilot/SPECIAL-TRANSPORT-SUPERVISION.md','utf8');
+assert.equal(p.mode,'DEMO_ONLY');
+assert.equal(p.realGpsEnabled,false);
+assert.equal(p.productionSensorsEnabled,false);
+assert.equal(p.realPiiEnabled,false);
+assert.equal(p.autonomousEnforcement,false);
+assert.equal(p.humanReviewOnException,true);
+['pickup','custody','transit','handover','delivery'].forEach(x=>assert(p.checkpoints.includes(x),x));
+['Porte especial supervisado','cadena de custodia','checkpoints'].forEach(x=>assert(js.toLowerCase().includes(x.toLowerCase()),x));
+['GPS','temperatura','humedad','golpes','apertura','R7','SEC-4'].forEach(x=>assert(doc.includes(x),x));
+console.log('Special transport supervision gate passed');

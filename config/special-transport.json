@@ -1,0 +1,12 @@
+{
+  "mode": "DEMO_ONLY",
+  "service": "special-transport-supervision",
+  "realGpsEnabled": false,
+  "productionSensorsEnabled": false,
+  "realPiiEnabled": false,
+  "autonomousEnforcement": false,
+  "humanReviewOnException": true,
+  "checkpoints": ["pickup", "custody", "transit", "handover", "delivery"],
+  "evidence": ["seal", "packaging", "condition", "checkpoint", "proof_of_delivery"],
+  "exceptionTypes": ["delay", "route-deviation", "seal-broken", "condition-alert", "handover-mismatch", "delivery-rejected"]
+}
