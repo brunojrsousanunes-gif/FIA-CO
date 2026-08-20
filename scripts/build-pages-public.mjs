@@ -12,7 +12,9 @@ const forbiddenName=/(^|\/)(?:\.env(?:\.|$)|.*secret.*|.*credential.*|.*token.*|
 
 function normalizeRelative(value){
   const clean=String(value||'').split('#')[0].split('?')[0].trim();
-  if(!clean||clean.startsWith('#')||/^(?:https?:|mailto:|tel:|data:|javascript:)/i.test(clean))return null;
+  if(!clean||clean.startsWith('#'))return null;
+  if(/^(?:https?:|mailto:|tel:|data:)/i.test(clean))return null;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(clean))throw new Error(`UNSAFE_PUBLIC_REFERENCE:${value}`);
   const normalized=path.posix.normalize(clean.replace(/^\.\//,''));
   if(normalized.startsWith('../')||path.posix.isAbsolute(normalized))throw new Error(`UNSAFE_PUBLIC_REFERENCE:${value}`);
   return normalized;
