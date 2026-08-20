@@ -1,0 +1,17 @@
+const fs=require('fs'),assert=require('assert');
+const p=JSON.parse(fs.readFileSync('config/legal-use-case-matrix.json','utf8'));
+const d=fs.readFileSync('docs/legal/LEGAL-2A-USE-CASE-MATRIX.md','utf8');
+assert.equal(p.status,'PRE_PILOT_DESIGN_ONLY');
+assert.equal(p.legalReadyForPilot,false);
+assert.equal(p.jurisdictionValidated,false);
+assert.equal(p.externalLegalReviewCompleted,false);
+assert.equal(p.defaults.custodyModel,'non-custodial');
+assert.equal(p.defaults.premiumAgentMode,'shadow-read-only');
+assert.equal(p.defaults.realMoney,false);
+assert.equal(p.defaults.realPii,false);
+assert.equal(p.defaults.bindingAutomatedLegalDecision,false);
+assert.equal(p.defaults.productionProvider,false);
+assert.equal(p.useCases.length,8);
+['universalEvidenceAdmissibility','realFundsExecutionOrCustody','realBiometricOrPiiCapture','bindingDisputeResolution','premiumEnforcement'].forEach(k=>assert.equal(p.classification[k],'BLOCKED',k));
+['L2A-1','L2A-2','L2A-3','L2A-4','L2A-5','L2A-6','L2A-7','L2A-8','L2A-9','no constituye asesoramiento jurídico','No implica `LEGAL_READY_FOR_PILOT`'].forEach(x=>assert(d.includes(x),x));
+console.log('LEGAL-2A use-case matrix gate passed');

@@ -1,0 +1,29 @@
+{
+  "version": "LEGAL-2A-v1",
+  "status": "PRE_PILOT_DESIGN_ONLY",
+  "legalReadyForPilot": false,
+  "jurisdictionValidated": false,
+  "externalLegalReviewCompleted": false,
+  "useCases": ["sale", "transport", "marketplace", "custody_boundary", "evidence", "conciliation", "identity", "premium_agent"],
+  "defaults": {
+    "custodyModel": "non-custodial",
+    "premiumAgentMode": "shadow-read-only",
+    "realMoney": false,
+    "realPii": false,
+    "bindingAutomatedLegalDecision": false,
+    "productionProvider": false
+  },
+  "classification": {
+    "structureConditions": "AUTOMATABLE",
+    "auditTrail": "DESIGN_REQUIREMENT",
+    "detectMissingEvidence": "AUTOMATABLE",
+    "suggestHumanReview": "AUTOMATABLE",
+    "finalLegalLiability": "PROFESSIONAL_REVIEW",
+    "universalEvidenceAdmissibility": "BLOCKED",
+    "realFundsExecutionOrCustody": "BLOCKED",
+    "realBiometricOrPiiCapture": "BLOCKED",
+    "bindingDisputeResolution": "BLOCKED",
+    "premiumEnforcement": "BLOCKED"
+  },
+  "nextGates": ["LEGAL-2B", "LEGAL-2C", "LEGAL-2D", "SEC-4", "R7"]
+}
