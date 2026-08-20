@@ -1,8 +1,14 @@
 const fs=require('fs'),assert=require('assert');
 const web=fs.readFileSync('frontend/web-beta.html','utf8');
 const app=fs.readFileSync('frontend/beta-mobile.html','utf8');
-['Compraventa','Venta + transporte','Porte especial','Transporte animal','Agente Premium','Marco jurídico','Panel de operaciones'].forEach(x=>assert(web.includes(x),`web ${x}`));
-['Todo FIA&CO en una sola beta','Transportista externo','Porte especial','Transporte animal preparado','Identidad avanzada','Cartera demo','Página web completa'].forEach(x=>assert(app.includes(x),`app ${x}`));
-assert(web.includes('no realiza transporte físico'));
+const css=fs.readFileSync('frontend/css/fia-home-final.css','utf8');
+const art=fs.readFileSync('frontend/assets/office-fia-hero.svg','utf8');
+['Conecta.','Acuerda.','Gestiona.','Comprueba.','Compraventa','Venta + transporte','Porte especial','Transporte animal','Proveedores','Transportistas','Empresas','Colaboradores','Agente Premium','Marco jurídico','Panel operativo'].forEach(x=>assert(web.includes(x),`web ${x}`));
+['Conecta. Acuerda.','Transportistas','Porte especial','Transporte animal','Identidad','Cartera demo','Marco jurídico','Panel operativo'].forEach(x=>assert(app.includes(x),`app ${x}`));
+assert(web.includes('FIA&CO coordina digitalmente; terceros ejecutan servicios físicos'));
 assert(app.includes('El transporte físico corresponde a terceros habilitados'));
-console.log('Full web/mobile beta gate passed');
+assert(css.includes('@media(prefers-reduced-motion:reduce)'));
+assert(css.includes('fiaAmp'));
+assert(art.includes('FIA&amp;CO') || art.includes('FIA'));
+assert(!web.includes('+5.000') && !web.includes('+1.200') && !web.includes('+850'));
+console.log('Full web/mobile beta visual gate passed');
