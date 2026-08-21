@@ -56,3 +56,4 @@ node tests/brand-i18n.test.js
 node tests/action-index-legal.test.js
 node tests/integration-ecosystem.test.js
 node tests/integration-readiness.test.js
+node tests/provider-evaluation.test.js

@@ -1,0 +1,50 @@
+{
+  "mode": "DEMO_ONLY",
+  "decisionAuthority": "FOUNDER",
+  "automaticSelectionAllowed": false,
+  "realCredentialsAllowed": false,
+  "realContractsAllowed": false,
+  "criteria": [
+    {"id":"regulatory_fit","label":"Encaje regulatorio","weight":20},
+    {"id":"sandbox_quality","label":"Sandbox / entorno de pruebas","weight":15},
+    {"id":"adapter_fit","label":"Encaje con adapters FIA&CO","weight":15},
+    {"id":"security","label":"Seguridad y controles","weight":15},
+    {"id":"data_terms","label":"Datos, privacidad y residencia","weight":10},
+    {"id":"reversibility","label":"Reversibilidad / lock-in","weight":10},
+    {"id":"commercial","label":"Coste y condiciones comerciales","weight":10},
+    {"id":"observability","label":"Observabilidad / soporte","weight":5}
+  ],
+  "gates": {
+    "minimumEvidenceBeforeScoring": ["official_docs","sandbox_or_test_channel","security_terms","data_terms"],
+    "founderActionRequiredBeforeShortlist": ["commercial_terms","budget_fit","relationship_preference"],
+    "explicitAuthorizationRequiredBeforeIntegration": true
+  },
+  "capabilities": [
+    {
+      "id":"payments",
+      "contract":"PaymentProviderAdapter",
+      "candidates":[
+        {"name":"Cecabank","status":"EVIDENCE_PENDING","score":null,"founderAction":"REQUEST_INFORMATION"},
+        {"name":"Sipay/Uinku","status":"EVIDENCE_PENDING","score":null,"founderAction":"REQUEST_INFORMATION"},
+        {"name":"Bizum","status":"EVIDENCE_PENDING","score":null,"founderAction":"CHECK_ACCESS_MODEL"}
+      ]
+    },
+    {
+      "id":"identity",
+      "contract":"IdentityVerificationAdapter",
+      "candidates":[]
+    },
+    {
+      "id":"security",
+      "contract":"SecurityTelemetryAdapter",
+      "candidates":[]
+    },
+    {
+      "id":"banking",
+      "contract":"BankingConnectivityAdapter",
+      "candidates":[
+        {"name":"Banca española a evaluar","status":"EVIDENCE_PENDING","score":null,"founderAction":"SELECT_TARGETS"}
+      ]
+    }
+  ]
+}
