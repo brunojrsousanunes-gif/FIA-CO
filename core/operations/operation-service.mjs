@@ -25,8 +25,9 @@ export function createOperationService(repository, dependencies = {}) {
     return operation;
   }
 
-  async function mutate(id, mutator) {
+  async function mutate(id, mutator, guard = () => {}) {
     const operation = await load(id);
+    guard(operation);
     const expectedVersion = operation.version;
     mutator(operation);
     return repo.save(operation, { expectedVersion });
@@ -36,6 +37,7 @@ export function createOperationService(repository, dependencies = {}) {
     create,
     getById: load,
     list: filters => repo.list(filters),
+    mutate,
     move: (id, nextState, actor, meta = {}) => mutate(id, op => moveOperation(op, nextState, actor, meta, options)),
     setCondition: (id, name, value, actor) => mutate(id, op => setOperationCondition(op, name, value, actor, options)),
     dispute: (id, actor, reason = '') => mutate(id, op => disputeOperation(op, actor, reason, options)),

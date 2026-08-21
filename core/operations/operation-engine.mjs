@@ -63,9 +63,11 @@ export function createOperation(input = {}, options = {}) {
   const deps = dependencies(options);
   const amount = Number(input.amount || 0);
   if (!Number.isFinite(amount) || amount <= 0) throw new Error('INVALID_AMOUNT');
+  const organizationId = cleanText(input.organizationId || '', 80) || null;
 
   return {
     id: deps.idFactory('op'),
+    organizationId,
     kind: cleanText(input.kind || 'generic', 40),
     amount: Math.round(amount * 100) / 100,
     currency: cleanText(input.currency || 'EUR', 6),
