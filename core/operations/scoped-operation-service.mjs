@@ -19,7 +19,7 @@ export function createScopedOperationService(repository, context, dependencies =
     return operation;
   }
 
-  function guardedMutate(id, permission, mutator) {
+  async function guardedMutate(id, permission, mutator) {
     assertPermission(access, permission);
     return service.mutate(
       id,
