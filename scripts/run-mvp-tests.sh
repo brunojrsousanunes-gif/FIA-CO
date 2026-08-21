@@ -62,3 +62,4 @@ node tests/v1-consolidation-scan.test.js
 node tests/core-operation-contract.test.mjs
 node tests/preprod-repository-contract.test.mjs
 node tests/preprod-org-access-boundary.test.mjs
+node tests/preprod-audit-evidence-contract.test.mjs
