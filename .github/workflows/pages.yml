@@ -54,18 +54,22 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
-      - name: Verify production homepage payload
+      - name: Verify approved production homepage payload
         shell: bash
         run: |
           set -euo pipefail
           test -f frontend/index.html
-          test -f frontend/css/home-production.css
           test -f frontend/assets/fia-co-office-approved.jpg
-          grep -Fq 'css/home-production.css' frontend/index.html
-          grep -Fq 'OPERA CON' frontend/index.html
-          grep -Fq 'Centro de Operaciones' frontend/index.html
-          grep -Fq 'id="acciones"' frontend/index.html
-          grep -Fq '@media(max-width:560px)' frontend/css/home-production.css
+          grep -Fq 'Conecta.' frontend/index.html
+          grep -Fq 'Acuerda.' frontend/index.html
+          grep -Fq 'Gestiona.' frontend/index.html
+          grep -Fq 'Comprueba.' frontend/index.html
+          grep -Fq 'assets/fia-co-office-approved.jpg' frontend/index.html
+          grep -Fq 'id="servicios"' frontend/index.html
+          grep -Fq 'id="participantes"' frontend/index.html
+          grep -Fq 'id="confianza"' frontend/index.html
+          grep -Fq '@media(max-width:560px)' frontend/index.html
+          ! grep -Fq 'PREVIEW VISUAL · no sustituye aún la portada actual' frontend/index.html
 
       - name: Verify supporting public routes
         shell: bash
@@ -82,9 +86,12 @@ jobs:
           node scripts/build-pages-public.mjs pages-public
           printf '%s\n' "$GITHUB_SHA" > pages-public/deploy-version.txt
           test -f pages-public/index.html
-          test -f pages-public/css/home-production.css
-          grep -Fq 'css/home-production.css' pages-public/index.html
-          grep -Fq 'Centro de Operaciones' pages-public/index.html
+          grep -Fq 'Conecta.' pages-public/index.html
+          grep -Fq 'Comprueba.' pages-public/index.html
+          grep -Fq 'assets/fia-co-office-approved.jpg' pages-public/index.html
+          grep -Fq 'id="servicios"' pages-public/index.html
+          grep -Fq 'id="participantes"' pages-public/index.html
+          grep -Fq 'id="confianza"' pages-public/index.html
           test ! -e pages-public/agent-lab.html
           test ! -e pages-public/backoffice-demo.html
           test ! -e pages-public/audit-trail-lab.html
@@ -122,7 +129,7 @@ jobs:
       BASE_URL: ${{ needs.deploy.outputs.page_url }}
       EXPECTED_SHA: ${{ github.sha }}
     steps:
-      - name: Verify deployed production homepage and commit
+      - name: Verify deployed approved homepage and commit
         shell: bash
         run: |
           set -euo pipefail
@@ -140,17 +147,18 @@ jobs:
           test "$deployed_sha" = "$EXPECTED_SHA"
 
           homepage="$(fetch index.html)"
-          grep -Fq 'css/home-production.css' <<<"$homepage"
-          grep -Fq 'OPERA CON' <<<"$homepage"
-          grep -Fq 'Centro de Operaciones' <<<"$homepage"
-          grep -Fq 'id="acciones"' <<<"$homepage"
-
-          production_css="$(fetch css/home-production.css)"
-          grep -Fq '@media(max-width:560px)' <<<"$production_css"
-          grep -Fq '.hero{grid-template-columns:1fr}' <<<"$production_css"
+          grep -Fq 'Conecta.' <<<"$homepage"
+          grep -Fq 'Acuerda.' <<<"$homepage"
+          grep -Fq 'Gestiona.' <<<"$homepage"
+          grep -Fq 'Comprueba.' <<<"$homepage"
+          grep -Fq 'assets/fia-co-office-approved.jpg' <<<"$homepage"
+          grep -Fq 'id="servicios"' <<<"$homepage"
+          grep -Fq 'id="participantes"' <<<"$homepage"
+          grep -Fq 'id="confianza"' <<<"$homepage"
+          ! grep -Fq 'PREVIEW VISUAL · no sustituye aún la portada actual' <<<"$homepage"
 
           fetch approved-home-preview.html > /dev/null
           fetch web-beta.html > /dev/null
           fetch beta-mobile.html > /dev/null
 
-          printf 'DEPLOY OK — commit %s — production index OK — responsive CSS OK\n' "$EXPECTED_SHA"
+          printf 'DEPLOY OK — commit %s — approved homepage OK — responsive layout OK\n' "$EXPECTED_SHA"
