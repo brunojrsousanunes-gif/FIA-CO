@@ -1,1 +1,0 @@
-Temporary functional test trigger for GitHub Actions.
