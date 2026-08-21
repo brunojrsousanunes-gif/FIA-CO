@@ -54,3 +54,4 @@ node tests/provider-architecture-r.test.js
 node tests/shadow-risk-engine.test.js
 node tests/brand-i18n.test.js
 node tests/action-index-legal.test.js
+node tests/integration-ecosystem.test.js
