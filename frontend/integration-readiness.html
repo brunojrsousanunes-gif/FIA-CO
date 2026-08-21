@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Estado operativo de preparación de integraciones FIA&CO V1 por capacidad y gate.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<title>FIA&CO — Integration Readiness</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+body{padding:16px;background:#faf8fc}.lab{max-width:980px;margin:auto}.card{padding:16px;margin:14px 0;border:1px solid #e3dbea;border-radius:16px;background:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.item{padding:14px;border:1px solid #e3dbea;border-radius:14px}.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.status{display:inline-block;padding:5px 8px;border-radius:999px;background:#f1edf5;font-size:.72rem;font-weight:800}.slot{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;color:#5b18b4}.req{margin:10px 0 0;padding-left:18px}.req li{margin:4px 0}.limits{display:flex;gap:8px;flex-wrap:wrap}.limit{padding:6px 9px;border:1px solid #e3dbea;border-radius:999px;font-size:.75rem}.actions{display:flex;gap:10px;flex-wrap:wrap}@media(max-width:700px){.grid{grid-template-columns:1fr}.top{display:block}.status{margin-top:8px}}
+</style>
+</head>
+<body>
+<main class="lab">
+<p class="muted small">V1 · DEMO_ONLY · READINESS OPERATIVO · SIN CREDENCIALES REALES</p>
+<h1>Integration Readiness</h1>
+<p>Panel interno para decidir qué capacidades están listas para evaluar con proveedores y cuáles siguen bloqueadas por arquitectura o Production Gate. Este panel no activa integraciones.</p>
+<div class="card limits"><span class="limit">production=false</span><span class="limit">realFunds=false</span><span class="limit">realPII=false</span><span class="limit">realCredentials=false</span><span class="limit">autoActivation=false</span></div>
+<div class="grid">
+  <section class="item"><div class="top"><div><strong>Pagos y liquidación</strong><div class="slot">PaymentProviderAdapter · slot: mock</div></div><span class="status">READY_TO_EVALUATE</span></div><ul class="req"><li>Sandbox</li><li>Proveedor autorizado</li><li>Revisión legal y de seguridad</li><li>Rollback, observabilidad y runbook</li><li>Autorización explícita</li></ul></section>
+  <section class="item"><div class="top"><div><strong>Identidad / KYB / KYC</strong><div class="slot">IdentityVerificationAdapter · slot: mock</div></div><span class="status">READY_TO_EVALUATE</span></div><ul class="req"><li>Sandbox</li><li>Condiciones de datos UE</li><li>Privacidad y seguridad</li><li>Rollback y observabilidad</li><li>Autorización explícita</li></ul></section>
+  <section class="item"><div class="top"><div><strong>Riesgo y antifraude</strong><div class="slot">FraudSignalsAdapter · slot: mock</div></div><span class="status">SHADOW_ONLY</span></div><ul class="req"><li>Validación sintética</li><li>Revisión de falsos positivos</li><li>Política versionada</li><li>Override humano</li><li>Nueva autorización para enforcement</li></ul></section>
+  <section class="item"><div class="top"><div><strong>Ciberseguridad y telemetría</strong><div class="slot">SecurityTelemetryAdapter · slot: mock</div></div><span class="status">READY_TO_EVALUATE</span></div><ul class="req"><li>Mapa de exportación</li><li>Retención</li><li>Runbook de incidentes</li><li>Revisión de seguridad</li><li>Autorización explícita</li></ul></section>
+  <section class="item"><div class="top"><div><strong>Cloud y continuidad</strong><div class="slot">InfrastructureBoundary · slot: future-primary</div></div><span class="status">BLOCKED_BY_PRODUCTION_GATE</span></div><ul class="req"><li>Backend de secretos</li><li>Backup y restauración</li><li>Monitorización</li><li>Retención y borrado</li><li>Incident response</li></ul></section>
+  <section class="item"><div class="top"><div><strong>Banca y red empresarial</strong><div class="slot">BankingConnectivityAdapter · slot: future-primary</div></div><span class="status">READY_TO_EVALUATE</span></div><ul class="req"><li>Sandbox o canal de pruebas</li><li>Revisión legal y comercial</li><li>Revisión de seguridad</li><li>Rollback</li><li>Autorización explícita</li></ul></section>
+</div>
+<div class="card"><strong>Regla de avance</strong><p class="small">READY_TO_EVALUATE permite estudiar documentación, sandbox y encaje técnico. No implica contrato, credenciales, datos reales ni activación productiva.</p></div>
+<div class="actions"><a class="btn" href="integrations.html">Mapa público de integraciones</a><a class="btn" href="app-beta.html">Centro de Operaciones</a><a class="btn" href="legal-center.html">Límites y cumplimiento</a></div>
+</main>
+</body>
+</html>
