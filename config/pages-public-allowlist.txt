@@ -11,6 +11,7 @@ wallet.html
 payments.html
 legal-center.html
 integrations.html
+integration-readiness.html
 tx-operator.html
 index.html
 products.html

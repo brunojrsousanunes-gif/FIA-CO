@@ -1,0 +1,57 @@
+{
+  "mode": "DEMO_ONLY",
+  "productionActivationAllowed": false,
+  "realCredentialsAllowed": false,
+  "realPiiAllowed": false,
+  "realFundsAllowed": false,
+  "capabilities": [
+    {
+      "id": "payments",
+      "label": "Pagos y liquidación",
+      "contract": "PaymentProviderAdapter",
+      "slot": "mock",
+      "status": "READY_TO_EVALUATE",
+      "requirements": ["sandbox", "licensed_provider", "security_review", "legal_review", "rollback", "observability", "runbook", "explicit_authorization"]
+    },
+    {
+      "id": "identity",
+      "label": "Identidad / KYB / KYC",
+      "contract": "IdentityVerificationAdapter",
+      "slot": "mock",
+      "status": "READY_TO_EVALUATE",
+      "requirements": ["sandbox", "eu_data_terms", "privacy_review", "security_review", "rollback", "observability", "explicit_authorization"]
+    },
+    {
+      "id": "fraud",
+      "label": "Riesgo y antifraude",
+      "contract": "FraudSignalsAdapter",
+      "slot": "mock",
+      "status": "SHADOW_ONLY",
+      "requirements": ["synthetic_validation", "false_positive_review", "policy_versioning", "human_override", "legal_review", "explicit_authorization_for_enforcement"]
+    },
+    {
+      "id": "security",
+      "label": "Ciberseguridad y telemetría",
+      "contract": "SecurityTelemetryAdapter",
+      "slot": "mock",
+      "status": "READY_TO_EVALUATE",
+      "requirements": ["export_mapping", "retention_policy", "incident_runbook", "security_review", "rollback", "explicit_authorization"]
+    },
+    {
+      "id": "cloud",
+      "label": "Cloud y continuidad",
+      "contract": "InfrastructureBoundary",
+      "slot": "future-primary",
+      "status": "BLOCKED_BY_PRODUCTION_GATE",
+      "requirements": ["secrets_backend", "backup_restore", "monitoring", "data_retention", "incident_response", "security_review", "explicit_authorization"]
+    },
+    {
+      "id": "banking",
+      "label": "Banca y red empresarial",
+      "contract": "BankingConnectivityAdapter",
+      "slot": "future-primary",
+      "status": "READY_TO_EVALUATE",
+      "requirements": ["sandbox_or_test_channel", "legal_review", "commercial_review", "security_review", "rollback", "explicit_authorization"]
+    }
+  ]
+}
