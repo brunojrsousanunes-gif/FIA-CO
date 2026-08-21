@@ -4,6 +4,8 @@ export const PREPROD_CHECKS = Object.freeze([
   'organizationIsolation',
   'auditIntegrity',
   'recoveryProcedureDefined',
+  'recoveryRoundTripVerified',
+  'observabilitySafe',
   'productionExecutionDisabled'
 ]);
 
