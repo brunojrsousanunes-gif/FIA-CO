@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "authorizedAt": "2026-08-21",
+  "scope": "V1_TECHNICAL_TRANSITION",
+  "block6": "AUTHORIZED_FOR_V1_TECHNICAL_CLOSEOUT",
+  "productionMode": "DEMO_ONLY",
+  "productionExecutionEnabled": false,
+  "realFundsEnabled": false,
+  "realPiiEnabled": false,
+  "customerAuthenticationEnabled": false,
+  "billingEnabled": false,
+  "autonomousFinancialAuthority": false,
+  "licensedPaymentPartnerRequired": true,
+  "externalSecurityReviewRequired": true,
+  "legalReviewRequired": true,
+  "explicitAuthorizationRequiredForRealProduction": true,
+  "notes": "La autorización permite cerrar el Bloque 6 y continuar a V1 técnica. No autoriza actividad productiva real, fondos reales, PII real, secretos productivos ni compromisos vinculantes."
+}
