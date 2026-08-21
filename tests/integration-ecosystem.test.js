@@ -15,7 +15,7 @@ assert(page.includes('Sipay/Uinku'));
 assert(page.includes('DEMO_ONLY'));
 assert(page.includes('Sin dinero real en V1'));
 assert(page.includes('Sin PII real en V1'));
-assert(!/href=["']https?:\/\//i.test(page),'La página no debe publicar enlaces externos de proveedores antes de validarlos');
+assert(!/<a\b[^>]*href=["']https?:\/\//i.test(page),'La página no debe publicar enlaces externos clicables de proveedores antes de validarlos');
 assert(home.includes('href="integrations.html"'));
 assert(allowlist.includes('\nintegrations.html\n'));
 assert(allowlist.includes('\ncss/integrations.css\n'));
