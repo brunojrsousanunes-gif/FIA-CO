@@ -57,3 +57,4 @@ node tests/action-index-legal.test.js
 node tests/integration-ecosystem.test.js
 node tests/integration-readiness.test.js
 node tests/provider-evaluation.test.js
+node tests/dual-security-strategy.test.js
