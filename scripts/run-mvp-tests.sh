@@ -60,3 +60,4 @@ node tests/provider-evaluation.test.js
 node tests/dual-security-strategy.test.js
 node tests/v1-consolidation-scan.test.js
 node tests/core-operation-contract.test.mjs
+node tests/preprod-repository-contract.test.mjs
