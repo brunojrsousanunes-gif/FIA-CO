@@ -30,11 +30,14 @@ assert.equal(listed[0].id, created.id);
 
 const concurrentA = await repository.getById(created.id);
 const concurrentB = await repository.getById(created.id);
+const versionBeforeConcurrentSave = concurrentA.version;
 concurrentA.kind = 'a';
-await repository.save(concurrentA, { expectedVersion: concurrentA.version });
+concurrentA.version += 1;
+await repository.save(concurrentA, { expectedVersion: versionBeforeConcurrentSave });
 concurrentB.kind = 'b';
+concurrentB.version += 1;
 await assert.rejects(
-  () => repository.save(concurrentB, { expectedVersion: concurrentB.version }),
+  () => repository.save(concurrentB, { expectedVersion: versionBeforeConcurrentSave }),
   error => error instanceof RepositoryConflictError
 );
 
