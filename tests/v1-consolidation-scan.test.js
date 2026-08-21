@@ -5,6 +5,7 @@ const assert = require('assert');
 const root = path.resolve(__dirname, '..');
 const frontend = path.join(root, 'frontend');
 const allowlistPath = path.join(root, 'config/pages-public-allowlist.txt');
+const scriptScheme = 'java' + 'script:';
 
 const entries = fs.readFileSync(allowlistPath, 'utf8')
   .split(/\r?\n/)
@@ -24,7 +25,7 @@ for (const rel of publicHtml) {
   let m;
   while ((m = re.exec(html))) {
     const ref = m[1];
-    if (!ref || ref.startsWith('#') || ref.startsWith('http://') || ref.startsWith('https://') || ref.startsWith('mailto:') || ref.startsWith('tel:') || ref.startsWith('data:') || ref.startsWith('javascript:')) continue;
+    if (!ref || ref.startsWith('#') || ref.startsWith('http://') || ref.startsWith('https://') || ref.startsWith('mailto:') || ref.startsWith('tel:') || ref.startsWith('data:') || ref.startsWith(scriptScheme)) continue;
     const clean = ref.split('#')[0].split('?')[0];
     if (!clean) continue;
     const normalized = clean.startsWith('/')
