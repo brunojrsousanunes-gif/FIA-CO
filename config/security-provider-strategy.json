@@ -1,0 +1,50 @@
+{
+  "mode": "DEMO_ONLY",
+  "architecture": "DUAL_VENDOR_DEFENSE_IN_DEPTH",
+  "singleVendorDependencyAllowed": false,
+  "automaticEnforcementAllowed": false,
+  "realCredentialsAllowed": false,
+  "decisionAuthority": "FOUNDER",
+  "primaryCandidate": {
+    "name": "Fortinet",
+    "status": "EVIDENCE_REVIEWED_TECHNICAL",
+    "strongFits": [
+      "SIEM_AND_EVENT_CORRELATION",
+      "SOAR_AND_INCIDENT_ORCHESTRATION",
+      "ENDPOINT_EDR",
+      "NETWORK_SECURITY",
+      "THREAT_INTELLIGENCE",
+      "MULTIVENDOR_CONNECTORS"
+    ],
+    "preferredInitialRole": "SECURITY_TELEMETRY_AND_DETECTION",
+    "defer": ["AUTONOMOUS_FINANCIAL_BLOCKING", "FULL_STACK_LOCK_IN"]
+  },
+  "secondarySlot": {
+    "name": null,
+    "status": "CANDIDATE_REQUIRED_LATER",
+    "mustBeIndependent": true,
+    "preferredRoles": [
+      "INDEPENDENT_DETECTION_VALIDATION",
+      "SECONDARY_LOG_PATH",
+      "ENDPOINT_OR_CLOUD_CROSS_CHECK",
+      "INCIDENT_ESCALATION_BACKUP"
+    ]
+  },
+  "sharedSecurityLayer": {
+    "contract": "SecurityTelemetryAdapter",
+    "normalizedEventSchema": true,
+    "vendorNeutralEvidenceStore": true,
+    "dualDeliveryCapable": true,
+    "correlationMode": "SHADOW_ONLY",
+    "responseMode": "HUMAN_APPROVAL_REQUIRED"
+  },
+  "activationGates": [
+    "DATA_PROCESSING_TERMS_REVIEWED",
+    "LOG_RESIDENCY_REVIEWED",
+    "RETENTION_POLICY_APPROVED",
+    "INCIDENT_RUNBOOK_APPROVED",
+    "ROLLBACK_TESTED",
+    "SECONDARY_VENDOR_EVALUATED",
+    "FOUNDER_EXPLICIT_AUTHORIZATION"
+  ]
+}
