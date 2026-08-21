@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Mapa de compatibilidad de FIA&CO con infraestructura de pagos, identidad, riesgo, seguridad, cloud y banca mediante adapters desacoplados.">
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<link rel="canonical" href="https://brunojrsousanunes-gif.github.io/FIA-CO/integrations.html">
+<title>FIA&CO — Infraestructura e integraciones</title>
+<link rel="stylesheet" href="css/home-production.css">
+<link rel="stylesheet" href="css/integrations.css">
+</head>
+<body>
+<div class="site">
+<header class="topbar">
+  <a class="brand" href="index.html" aria-label="FIA&CO, inicio"><img src="assets/fia-co-trust-compute.svg" alt="FIA&CO"></a>
+  <p class="slogan">INFRAESTRUCTURA MODULAR. PROVEEDORES SUSTITUIBLES.</p>
+  <a class="contact-btn" href="legal-center.html">◌ HABLAR CON NOSOTROS</a>
+</header>
+<nav class="nav" aria-label="Navegación principal"><div class="nav-inner">
+  <a href="index.html">Inicio</a>
+  <a class="active" href="integrations.html">Integraciones</a>
+  <a href="payments.html">Pagos</a>
+  <a href="identity.html">Identidad</a>
+  <a href="premium-demo.html">Agente Premium</a>
+  <a href="legal-center.html">Cumplimiento</a>
+</div></nav>
+<main>
+<section class="integration-hero"><div class="wrap integration-hero-grid">
+  <div><span class="eyebrow">V1 · Ecosistema compatible</span><h1>FIA&CO mantiene la lógica. Los proveedores aportan capacidades especializadas.</h1><p>La arquitectura separa producto, reglas y trazabilidad de las capacidades externas. Cada integración se conecta mediante un contrato estable y puede ocupar un slot <strong>mock</strong>, <strong>future-primary</strong> o <strong>future-secondary</strong>.</p><div class="hero-actions"><a class="btn" href="#mapa">VER MAPA DE COMPATIBILIDAD →</a><a class="btn secondary" href="legal-center.html">VER LÍMITES V1</a></div></div>
+  <aside class="architecture-card" aria-label="Principios de integración"><strong>Principios activos</strong><ul><li>Sandbox primero</li><li>Sin dinero real en V1</li><li>Sin PII real en V1</li><li>Non-custodial por defecto</li><li>Riesgo en shadow/read-only</li><li>Rollback y observabilidad antes de activar</li></ul></aside>
+</div></section>
+<section class="integration-section" id="mapa"><div class="wrap">
+  <span class="eyebrow">Mapa funcional</span><h2>Una interfaz por capacidad, no una dependencia por proveedor.</h2>
+  <div class="integration-grid">
+    <article class="integration-card"><span class="integration-icon">€</span><h3>Pagos &amp; liquidación</h3><p>Preparación, validación, cotización y estado mediante <code>PaymentProviderAdapter</code>. Custodia desactivada por defecto.</p><div class="slot-row"><span>mock</span><span>future-primary</span><span>future-secondary</span></div><div class="card-links"><a href="payments.html">Arquitectura de pagos</a><a href="wallet.html">Cartera demo</a></div></article>
+    <article class="integration-card"><span class="integration-icon">▧</span><h3>Identidad / KYB / KYC</h3><p>Comprobación de requisitos, validación de forma, estado y explicación mediante <code>IdentityVerificationAdapter</code>.</p><div class="slot-row"><span>mock</span><span>future-primary</span><span>future-secondary</span></div><div class="card-links"><a href="identity.html">Identidad empresarial</a><a href="legal-center.html">Política de datos</a></div></article>
+    <article class="integration-card"><span class="integration-icon">◎</span><h3>Riesgo &amp; antifraude</h3><p>Señales de observación, score y explicación. En V1 no existe enforcement directo y cualquier decisión crítica sigue siendo humana.</p><div class="slot-row"><span>observe</span><span>score</span><span>explain</span></div><div class="card-links"><a href="premium-demo.html">Agente Premium</a><a href="app-beta.html">Centro de Operaciones</a></div></article>
+    <article class="integration-card"><span class="integration-icon">⌬</span><h3>Ciberseguridad &amp; telemetría</h3><p>Normalización y preparación de exportación de eventos. La exportación externa permanece apagada hasta revisión y autorización.</p><div class="slot-row"><span>normalize</span><span>preview-export</span><span>external-off</span></div><div class="card-links"><a href="pilot-dashboard.html">Panel operativo</a><a href="legal-center.html">Controles y límites</a></div></article>
+    <article class="integration-card"><span class="integration-icon">☁</span><h3>Cloud &amp; continuidad</h3><p>Backend, secretos, backup, observabilidad y recuperación se mantienen como capacidades separadas para poder cambiar infraestructura sin rehacer el producto.</p><div class="slot-row"><span>secrets</span><span>backup</span><span>observability</span></div><div class="card-links"><a href="legal-center.html">Requisitos de producción</a><a href="pilot-dashboard.html">Preparación operativa</a></div></article>
+    <article class="integration-card"><span class="integration-icon">↔</span><h3>Banca &amp; red empresarial</h3><p>Conectividad futura para cuentas, transferencias, servicios B2B y distribución, manteniendo FIA&CO como capa de reglas y orquestación.</p><div class="slot-row"><span>banking</span><span>b2b</span><span>distribution</span></div><div class="card-links"><a href="tx-advanced.html">Operación avanzada</a><a href="app-beta.html?action=sale">Flujo B2B</a></div></article>
+  </div>
+</div></section>
+<section class="integration-section soft"><div class="wrap">
+  <span class="eyebrow">Infraestructura española a evaluar</span><h2>Candidatos de compatibilidad, no socios anunciados.</h2><p class="section-lead">La arquitectura permite estudiar infraestructuras como Bizum, Cecabank, Sipay/Uinku, bancos españoles y firmas especializadas de seguridad o regulación sin acoplar FIA&CO a una sola de ellas. La inclusión aquí expresa <strong>compatibilidad potencial a evaluar</strong>, no relación comercial, certificación ni integración activa.</p>
+  <div class="candidate-grid"><div><strong>Pagos / banca</strong><span>Bizum · Cecabank · Sipay/Uinku · banca española</span></div><div><strong>Seguridad / regulación</strong><span>Firmas especializadas y consultoría independiente</span></div><div><strong>Identidad / riesgo</strong><span>RegTech/KYB/KYC con APIs y sandbox europeo</span></div></div>
+</div></section>
+<section class="integration-section"><div class="wrap">
+  <span class="eyebrow">Gate de activación</span><h2>Conectar no significa activar.</h2><div class="gate-grid"><article><b>1</b><strong>Compatibilidad</strong><p>Se valida contrato, sandbox, límites y tratamiento de errores.</p></article><article><b>2</b><strong>Revisión</strong><p>Seguridad, legal, observabilidad, rollback y runbook.</p></article><article><b>3</b><strong>Autorización</strong><p>La activación productiva requiere autorización explícita y no ocurre desde la web.</p></article></div>
+  <div class="detail-actions"><a class="btn" href="app-beta.html">ABRIR CENTRO DE OPERACIONES →</a><a class="btn secondary" href="index.html">VOLVER A PORTADA</a></div>
+</div></section>
+</main>
+<footer class="footer"><div class="wrap"><strong>FIA&amp;CO · V1 técnica / DEMO_ONLY.</strong> Las referencias a proveedores son ejemplos de infraestructura compatible a evaluar y no implican alianza, autorización o servicio activo.</div></footer>
+</div>
+</body>
+</html>
