@@ -1,129 +1,107 @@
 # Proyecto SM Port Automation
 
-## Objetivo
+## Idea simple
 
-Crear, sobre el núcleo de FIA&CO, una automatización B2B para transformar las notas utilizadas en la documentación de portes en información estructurada, verificable y gestionable por excepciones.
+**SM sigue trabajando como ahora.**
 
-Este proyecto **no sustituye la app móvil, la web, la VPN ni el sistema logístico de SM**. Se diseña como capa complementaria mediante adapter.
+Los repartidores continúan escribiendo sus notas de portes en su sistema actual. FIA&CO trabaja por detrás y convierte esas notas en información clara para la oficina.
 
-## Información de partida
+No queremos añadir otra app, otro login ni otro procedimiento al trabajador durante el piloto.
 
-Hipótesis facilitadas por conocimiento operativo del cliente potencial:
-- SM dispone de web y aplicación móvil para trabajadores.
-- La app opera con acceso protegido/VPN.
-- La documentación de entregas/verificaciones todavía utiliza notas.
-- La oficina concentra parte de la gestión en 2–3 personas.
-- Existen asalariados y autónomos.
-- No se pretende automatizar decisiones laborales ni puntuar personas.
+## Flujo
 
-Toda hipótesis deberá validarse con SM antes de una integración real.
+`Nota del repartidor`
+→ `FIA&CO la interpreta`
+→ `La oficina recibe solo el resultado`
 
-## Problema
+La oficina ve únicamente tres estados:
 
-Las notas de portes contienen contexto útil pero son poco estructuradas. Esto puede obligar a oficina a leer, interpretar, clasificar, buscar documentación o detectar manualmente excepciones.
-
-## Propuesta
-
-Pipeline:
-
-`SM App / exportación autorizada`
-→ `SM Adapter`
-→ `Document Intake`
-→ `Extraction & Normalization`
-→ `Rules`
-→ `Evidence`
-→ `Exception Queue`
-→ `Office Review`
-
-La nota original se conserva como evidencia. FIA&CO genera una representación estructurada.
+- 🟢 **CORRECTO** — no hay que hacer nada.
+- 🟡 **REVISAR** — falta información o documentación.
+- 🔴 **INCIDENCIA** — requiere intervención.
 
 ## Ejemplo
 
-Entrada:
+Nota actual:
 
 `Entregado 4 bultos, recoge almacén, falta firma.`
 
-Salida estructurada:
+FIA&CO muestra:
 
-- estado: `DELIVERED_WITH_EXCEPTION`
-- bultos: `4`
-- receptor: `WAREHOUSE`
-- firma: `PENDING`
-- requiere_revision: `true`
-- motivo: `SIGNATURE_MISSING`
+**Porte:** SM-28472  
+**Estado:** 🟡 REVISAR  
+**Bultos:** 4  
+**Receptor:** almacén  
+**Pendiente:** firma  
+**Acción sugerida:** verificar documentación
 
-## Estados iniciales
+La nota original se conserva como evidencia.
 
-- `NORMAL`
-- `DOCUMENT_PENDING`
-- `RECIPIENT_ABSENT`
-- `REJECTED`
-- `DAMAGED`
-- `ADDRESS_ISSUE`
-- `QUANTITY_MISMATCH`
-- `DELAY`
-- `OTHER_EXCEPTION`
+## Qué gana SM
 
-## Regla humana
+- menos tiempo leyendo notas una por una;
+- menos búsquedas manuales;
+- incidencias separadas de portes normales;
+- información más fácil de consultar;
+- histórico estructurado de portes;
+- posibilidad futura de reducir notas libres si SM lo considera útil;
+- sin cambiar inicialmente la app, web, VPN o sistema logístico.
 
-FIA&CO puede clasificar, estructurar y recomendar. No toma decisiones sensibles sobre empleados o autónomos.
+## Qué NO hace FIA&CO
 
-La puntuación, si se utiliza, se aplica a la **completitud/confianza documental del porte**, nunca a la persona.
+- no puntúa trabajadores;
+- no toma decisiones laborales;
+- no modifica rutas;
+- no sustituye el sistema logístico;
+- no accede a cuentas bancarias en este piloto;
+- no cierra automáticamente una incidencia dudosa.
 
-## MVP / Piloto
+## Piloto más fácil posible
 
-Primera fase recomendada:
-- 100–500 notas históricas;
-- datos minimizados y autorizados;
-- ejecución fuera de producción;
-- sin modificar la app SM;
-- sin acceso a cuentas bancarias;
-- sin decisiones automáticas de negocio.
+1. SM entrega una muestra autorizada de **100 notas históricas**.
+2. FIA&CO las procesa fuera de producción.
+3. Comparamos el resultado con la revisión manual de SM.
+4. Solo si demuestra ahorro y precisión se propone una integración.
 
-## KPIs
+No se toca la operativa real durante esta fase.
 
-- % de notas estructuradas correctamente;
-- precisión por campo;
-- % de portes que podrían cerrarse sin revisión;
-- % de portes correctamente enviados a excepción;
-- falsos positivos;
-- falsos negativos críticos;
-- minutos de oficina por 100 portes antes/después;
-- tiempo medio de resolución de excepciones.
+## Qué medimos
 
-## Gates
+Solo cinco métricas:
 
-No avanzar a producción si:
-- la precisión no es suficiente;
-- existe riesgo de ocultar incidencias;
-- el ahorro administrativo es irrelevante;
-- la integración interfiere con la operativa de SM;
-- no existe autorización contractual/técnica para los datos.
+1. notas interpretadas correctamente;
+2. portes normales que no necesitan revisión;
+3. excepciones detectadas correctamente;
+4. errores críticos;
+5. minutos de oficina ahorrados por cada 100 portes.
 
-## Arquitectura
+## Gate de continuación
 
-El proyecto reutiliza principios FIA&CO:
-- adapters sustituibles;
-- fail-safe;
-- evidencias trazables;
-- auditoría;
-- configuración versionada;
-- humano en decisiones críticas;
-- sin lock-in artificial;
-- exportabilidad del dato.
+El proyecto solo avanza si:
 
-## Evolución posible
+- SM considera útil el resultado;
+- no se ocultan incidencias;
+- el ahorro de oficina es medible;
+- la precisión es suficiente;
+- la integración no complica el trabajo de repartidores u oficina.
 
-Solo si el piloto demuestra ROI:
-1. ingestión automática desde la app/sistema SM;
-2. campos estructurados en origen;
-3. nota libre solo para excepciones;
-4. panel de excepciones de oficina;
-5. expedientes de portes;
-6. integración opcional con facturación/conciliación en una fase separada.
+## Fase 2, solo si funciona
+
+Si el piloto tiene ROI:
+
+`Sistema SM`
+→ `Adapter FIA&CO`
+→ `CORRECTO / REVISAR / INCIDENCIA`
+→ `Panel simple de oficina`
+
+Más adelante, y únicamente si SM lo desea, las notas repetitivas podrían sustituirse progresivamente por campos estructurados. La nota libre quedaría para casos excepcionales.
+
+## Principio de diseño
+
+**Automatizar sin obligar a SM a cambiar su forma de trabajar antes de demostrar valor.**
 
 ## Estado
 
 `DESIGN_ONLY / PILOT_CANDIDATE`
 
-No existe integración productiva con SM ni autorización para tratar sus datos reales.
+No existe integración productiva con SM ni autorización para tratar datos reales.
