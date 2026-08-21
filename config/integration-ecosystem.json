@@ -1,0 +1,46 @@
+{
+  "version": "v1-demo",
+  "mode": "DEMO_ONLY",
+  "externalLinksPublished": false,
+  "partnershipClaimsAllowed": false,
+  "slots": {
+    "payments": {
+      "adapter": "PaymentProviderAdapter",
+      "modes": ["mock", "future-primary", "future-secondary"],
+      "candidateExamples": ["Bizum", "Cecabank", "Sipay/Uinku", "Spanish banking infrastructure"],
+      "realFundsEnabled": false
+    },
+    "identity": {
+      "adapter": "IdentityVerificationAdapter",
+      "modes": ["mock", "future-primary", "future-secondary"],
+      "candidateProfile": "EU KYC/KYB RegTech with sandbox and API",
+      "realPiiEnabled": false
+    },
+    "risk": {
+      "adapter": "FraudSignalsAdapter",
+      "mode": "shadow-read-only",
+      "directEnforcementAllowed": false
+    },
+    "securityTelemetry": {
+      "adapter": "SecurityTelemetryAdapter",
+      "externalExportEnabled": false,
+      "candidateProfile": "independent cybersecurity and regulated-sector telemetry"
+    },
+    "cloudContinuity": {
+      "capabilities": ["secrets", "backup_restore", "observability", "incident_response"],
+      "productionEnabled": false
+    },
+    "bankingNetwork": {
+      "capabilities": ["banking_connectivity", "b2b_services", "distribution"],
+      "productionEnabled": false
+    }
+  },
+  "activationRequirements": [
+    "security_review",
+    "legal_review",
+    "rollback",
+    "observability",
+    "runbook",
+    "explicit_authorization"
+  ]
+}
