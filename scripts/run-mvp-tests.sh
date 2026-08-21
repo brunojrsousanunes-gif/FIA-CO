@@ -64,3 +64,4 @@ node tests/preprod-repository-contract.test.mjs
 node tests/preprod-org-access-boundary.test.mjs
 node tests/preprod-audit-evidence-contract.test.mjs
 node tests/preprod-technical-gate.test.mjs
+node tests/preprod-observability-recovery.test.mjs

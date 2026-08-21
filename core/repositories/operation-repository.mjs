@@ -52,12 +52,13 @@ export function createMemoryOperationRepository(initialOperations = []) {
     return snapshotOperation(snapshot);
   }
 
-  async function list({ limit = 100, state, organizationId } = {}) {
+  async function list({ limit = 100, offset = 0, state, organizationId } = {}) {
     const normalizedLimit = Math.max(1, Math.min(Number(limit) || 100, 500));
+    const normalizedOffset = Math.max(0, Number(offset) || 0);
     const values = [...records.values()]
       .filter(operation => !state || operation.state === state)
       .filter(operation => organizationId === undefined || operation.organizationId === organizationId)
-      .slice(0, normalizedLimit)
+      .slice(normalizedOffset, normalizedOffset + normalizedLimit)
       .map(snapshotOperation);
     return values;
   }
