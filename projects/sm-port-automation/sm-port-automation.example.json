@@ -1,0 +1,46 @@
+{
+  "project": "SM_PORT_AUTOMATION",
+  "mode": "PILOT_ONLY",
+  "productionEnabled": false,
+  "realCredentialsAllowed": false,
+  "realPiiAllowed": false,
+  "source": {
+    "type": "HISTORICAL_EXPORT",
+    "allowedFormats": ["CSV", "JSON"],
+    "directAppIntegration": false
+  },
+  "processing": {
+    "preserveOriginalNote": true,
+    "humanReviewRequiredForExceptions": true,
+    "automaticEmploymentDecisionsAllowed": false,
+    "workerScoringAllowed": false,
+    "operationDocumentationScoringAllowed": true
+  },
+  "categories": [
+    "NORMAL",
+    "DOCUMENT_PENDING",
+    "RECIPIENT_ABSENT",
+    "REJECTED",
+    "DAMAGED",
+    "ADDRESS_ISSUE",
+    "QUANTITY_MISMATCH",
+    "DELAY",
+    "OTHER_EXCEPTION"
+  ],
+  "pilot": {
+    "minHistoricalNotes": 100,
+    "maxHistoricalNotes": 500,
+    "requiresDataAuthorization": true,
+    "requiresDataMinimization": true,
+    "requiresBaselineMeasurement": true,
+    "goLiveAllowed": false
+  },
+  "gates": {
+    "precisionThreshold": null,
+    "criticalFalseNegativeTolerance": 0,
+    "minimumMeasuredAdministrativeBenefit": null,
+    "securityReviewRequired": true,
+    "legalReviewRequiredBeforeRealData": true,
+    "founderApprovalRequiredForProduction": true
+  }
+}
