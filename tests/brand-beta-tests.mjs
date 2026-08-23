@@ -5,7 +5,7 @@ const app=fs.readFileSync(new URL('../frontend/app-beta.html',import.meta.url),'
 const identity=fs.readFileSync(new URL('../frontend/identity.html',import.meta.url),'utf8');
 const identityLower=identity.toLowerCase();
 const logo=fs.readFileSync(new URL('../frontend/assets/fia-co-trust-compute.svg',import.meta.url),'utf8');
-ok(index.includes('app-beta.html'),'la portada debe enlazar la app beta');
+ok(index.includes('beta-mobile.html'),'la portada debe enlazar la app beta unificada');
 ok(index.includes('fia-co-trust-compute.svg'),'la portada debe usar la identidad Trust Infrastructure de FIA&CO');
 ok(app.includes('name="viewport"'),'la app beta debe ser móvil');
 ok(app.includes('SIN DINERO REAL'),'la app beta debe declarar el modo demo');
