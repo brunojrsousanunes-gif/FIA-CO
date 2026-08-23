@@ -79,6 +79,8 @@ jobs:
           test -f frontend/approved-home-preview.html
           test -f frontend/web-beta.html
           test -f frontend/beta-mobile.html
+          test -f frontend/tx-advanced.html
+          test -f frontend/tx-operator.html
 
       - name: Build allowlisted public artifact
         shell: bash
@@ -88,6 +90,9 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > pages-public/deploy-version.txt
           test -f pages-public/index.html
           test -f pages-public/css/home-production.css
+          test -f pages-public/beta-mobile.html
+          test -f pages-public/tx-advanced.html
+          test -f pages-public/tx-operator.html
           grep -Fq 'css/home-production.css' pages-public/index.html
           grep -Fq 'OPERA CON' pages-public/index.html
           grep -Fq 'CRECE CON' pages-public/index.html
@@ -162,5 +167,7 @@ jobs:
           fetch approved-home-preview.html > /dev/null
           fetch web-beta.html > /dev/null
           fetch beta-mobile.html > /dev/null
+          fetch tx-advanced.html > /dev/null
+          fetch tx-operator.html > /dev/null
 
-          printf 'DEPLOY OK — commit %s — corporate index OK — responsive CSS OK\n' "$EXPECTED_SHA"
+          printf 'DEPLOY OK — commit %s — corporate index OK — beta-mobile OK — tx-advanced OK — tx-operator OK — responsive CSS OK\n' "$EXPECTED_SHA"
