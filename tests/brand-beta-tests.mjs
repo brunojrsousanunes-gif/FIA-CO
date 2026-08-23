@@ -5,14 +5,14 @@ const app=fs.readFileSync(new URL('../frontend/app-beta.html',import.meta.url),'
 const identity=fs.readFileSync(new URL('../frontend/identity.html',import.meta.url),'utf8');
 const identityLower=identity.toLowerCase();
 const logo=fs.readFileSync(new URL('../frontend/assets/fia-co-trust-compute.svg',import.meta.url),'utf8');
-ok(index.includes('beta-mobile.html'),'la portada aprobada debe enlazar la experiencia móvil');
-ok(index.includes('class="brand"')&&index.includes('FIA<b>&</b>CO'),'la portada aprobada debe conservar la marca tipográfica FIA&CO');
+ok(index.includes('app-beta.html'),'la portada debe enlazar la app beta');
+ok(index.includes('fia-co-trust-compute.svg'),'la portada debe usar la identidad Trust Infrastructure de FIA&CO');
 ok(app.includes('name="viewport"'),'la app beta debe ser móvil');
 ok(app.includes('SIN DINERO REAL'),'la app beta debe declarar el modo demo');
 ok(app.includes('identity.html')&&app.includes('Biometría simulada'),'la app beta debe enlazar y describir la identidad avanzada simulada');
 ok(identityLower.includes('huella dactilar')&&identityLower.includes('reconocimiento facial')&&identityLower.includes('biometría de voz'),'la pantalla de identidad debe conservar las modalidades biométricas simuladas');
 ok(!app.includes('two-clients.html'),'la pantalla principal no debe exponer la demo técnica multiusuario');
 ok(!/card-number|cvv|private-key|seed-phrase|iban-input/i.test(app),'la app beta no debe pedir secretos financieros');
-ok(logo.includes('FIA')&&logo.includes('CO')&&logo.includes('&amp;'),'el logo de infraestructura debe contener FIA, ampersand y CO');
-ok(logo.includes('INFRAESTRUCTURA')&&logo.includes('CONFIANZA')&&logo.includes('VALOR'),'el logo de infraestructura debe conservar el posicionamiento visual aprobado');
+ok(logo.includes('FIA')&&logo.includes('CO')&&logo.includes('&amp;'),'el logo debe contener FIA, ampersand y CO');
+ok(logo.includes('INFRAESTRUCTURA')&&logo.includes('CONFIANZA')&&logo.includes('VALOR'),'el logo debe conservar el posicionamiento visual aprobado');
 console.log('PASS branding y beta móvil: 10 comprobaciones');
