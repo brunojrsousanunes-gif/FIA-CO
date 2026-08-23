@@ -8,7 +8,7 @@ expected.forEach(code=>assert(i18n.includes(`['${code}'`)||i18n.includes(`,'${co
 assert(i18n.includes("localStorage.setItem('fiaco.language'"));
 assert(i18n.includes("code==='ar'?'rtl':'ltr'"));
 assert(web.includes('fia-co-trust-compute.svg')&&app.includes('fia-co-trust-compute.svg'));
-assert(app.includes('js/i18n.js'),'la app debe conservar i18n dinámico');
+assert(web.includes('js/i18n.js')&&app.includes('js/i18n.js'));
 assert(logo.includes('INFRAESTRUCTURA · CONFIANZA · VALOR'));
-assert(web.includes('sin fondos reales')||web.includes('no custodia ni mueve fondos reales')||web.includes('no procesa ni custodia fondos reales'),'la portada debe dejar claro que no opera con fondos reales');
+assert(web.includes('no custodia ni mueve fondos reales')||web.includes('no procesa ni custodia fondos reales')||web.includes('no procesa ni custodia fondos reales'.toUpperCase()),'la portada debe dejar claro que FIA&CO no custodia/mueve fondos reales');
 console.log('brand/i18n tests passed');
