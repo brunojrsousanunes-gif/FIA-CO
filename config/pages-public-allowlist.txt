@@ -36,6 +36,7 @@ css/home-v2.css
 css/home-reference-final.css
 css/home-production.css
 css/integrations.css
+css/unified-app.css
 
 js/app-beta.js
 js/tx-flow.js
@@ -53,6 +54,7 @@ js/products.js
 js/cart.js
 js/product.js
 js/api.js
+js/unified-app.js
 
 assets/fia-co-office-approved.jpg
 assets/office-fia-hero.svg
