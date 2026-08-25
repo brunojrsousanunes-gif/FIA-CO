@@ -1,62 +1,21 @@
-# Explicit public HTML routes
-approved-home-preview.html
-web-beta.html
+# Current public routes
+index.html
 beta-mobile.html
 app-beta.html
-tx-advanced.html
-pilot-dashboard.html
-premium-demo.html
-identity.html
-wallet.html
-payments.html
 legal-center.html
-integrations.html
-integration-readiness.html
-tx-operator.html
-index.html
-products.html
-product.html
-cart.html
-checkout.html
 robots.txt
 sitemap.xml
 
-# Static dependencies used by approved public routes
+# Current public styles
 css/style.css
-css/prepilot-v2.css
-css/tx-advanced.css
-css/fia-home-final.css
-css/transaction-hub.css
+css/home-production.css
+css/unified-app.css
 css/brand-i18n.css
 css/action-index.css
-css/tx-flow.css
-css/premium-demo.css
-css/wallet.css
-css/home-v2.css
-css/home-reference-final.css
-css/home-production.css
-css/integrations.css
-css/unified-app.css
 
-js/app-beta.js
-js/tx-flow.js
-js/prepilot-v2.js
-js/pilot-telemetry.js
+# Current public scripts
 js/i18n.js
-js/tx-advanced.js
-js/provider-adapters.js
-js/shadow-risk-engine.js
-js/premium-demo.js
-js/identity-demo.js
-js/wallet-demo.js
-js/tx-operator.js
-js/products.js
-js/cart.js
-js/product.js
-js/api.js
 js/unified-app.js
 
-assets/fia-co-office-approved.jpg
-assets/office-fia-hero.svg
+# Current public assets
 assets/fia-co-trust-compute.svg
-assets/fia-co-balance.svg
