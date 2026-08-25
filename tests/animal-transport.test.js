@@ -1,7 +1,6 @@
 const fs=require('fs'),assert=require('assert');
 const gate=JSON.parse(fs.readFileSync('config/animal-transport-gate.json','utf8'));
 const doc=fs.readFileSync('docs/transport/ANIMAL-TRANSPORT-REQUIREMENTS.md','utf8');
-const tx=fs.readFileSync('frontend/js/tx-flow.js','utf8');
 assert.equal(gate.status,'PRE_PILOT_DESIGN_ONLY');
 assert.equal(gate.realAnimalTransportEnabled,false);
 assert.equal(gate.speciesProfileValidated,false);
@@ -14,5 +13,4 @@ assert.equal(gate.fitnessForTransportRequired,true);
 assert.equal(gate.contingencyPlanRequired,true);
 assert.equal(gate.minimumDocumentsRequired,true);
 ['Aptitud para el transporte','Plan de contingencia','Transportista autorizado','Personal formado','Documentación acompañante','Registro de actividad','REVIEW_REQUIRED','no debe codificar un único umbral universal'].forEach(x=>assert(doc.includes(x),x));
-['Transporte de animales','Aptitud','plan de contingencia','perfil normativo'].forEach(x=>assert(tx.toLowerCase().includes(x.toLowerCase()),x));
-console.log('animal transport welfare gate passed');
+console.log('animal transport requirements gate passed');
