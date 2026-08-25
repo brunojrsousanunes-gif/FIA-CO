@@ -16,10 +16,15 @@ assert.ok(html.includes('css/unified-app.css'),'unified stylesheet not reference
 assert.ok(html.includes('js/unified-app.js'),'unified script not referenced');
 assert.ok(allowlist.includes('css/unified-app.css'),'unified stylesheet not allowlisted');
 assert.ok(allowlist.includes('js/unified-app.js'),'unified script not allowlisted');
-assert.ok(js.includes("fia_unified_beta_v1"),'shared local state missing');
-assert.ok(js.includes("localStorage"),'local-only persistence missing');
+assert.ok(js.includes("fia_unified_beta_v2"),'clean shared local state missing');
+assert.ok(js.includes("fia_unified_beta_v1"),'legacy storage migration missing');
+assert.ok(js.includes('localStorage.removeItem'),'legacy storage purge missing');
+assert.ok(js.includes('operations:[]')&&js.includes('evidence:[]')&&js.includes('participants:[]'),'empty initial state missing');
+for(const stale of ['ROC-4587','LOG-1932','Compradora Demo S.L.','Proveedor Demo S.A.','Transportes Demo Norte','DOC-7731']){
+  assert.equal(js.includes(stale),false,`stale seeded fixture remains: ${stale}`);
+}
 assert.ok(js.includes("SUGGEST_REVIEW"),'Premium recommendation contract missing');
 assert.equal(/\bfetch\s*\(/.test(js),false,'unified demo must not call network APIs');
 assert.equal(/XMLHttpRequest|WebSocket|EventSource/.test(js),false,'unified demo must not open remote transports');
 assert.ok(css.includes('@media(max-width:760px)'),'mobile navigation breakpoint missing');
-console.log('unified app contract OK');
+console.log('unified app clean-state contract OK');

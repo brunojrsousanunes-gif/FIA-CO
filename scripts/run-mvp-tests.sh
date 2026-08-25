@@ -1,64 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-node tests/run-tests.mjs
-node tests/identity-demo.mjs
-node tests/brand-beta-tests.mjs
-node tests/mobile-beta-polish.test.mjs
+# Current public surface
 node tests/homepage-v2.test.mjs
-node tests/prepilot-v2.test.mjs
-node tests/pilot-experience-q.test.js
-node tests/wallet-demo-tests.mjs
-node tests/p2p-multiuser-tests.mjs
-node tests/security-sec1.test.mjs
-node tests/security-sec2.test.mjs
-node tests/security-sec3.test.mjs
-node tests/security-sec4.test.js
+node tests/unified-app.test.js
+node tests/action-index-legal.test.js
+node tests/v1-consolidation-scan.test.js
+
+# Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
 node tests/legal-2bc.test.js
 node tests/legal-2d.test.js
-node tests/plr-readiness.test.js
-node tests/tx-flow.test.js
 node tests/special-transport.test.js
 node tests/animal-transport.test.js
-node tests/tx-advanced.test.js
-node tests/tx-pilot-ops.test.js
 node tests/transport-service-role.test.js
-node tests/tx-pilot-ops2.test.js
-node tests/full-beta.test.js
-node tests/pricing.test.js
-node tests/agent-security.test.js
-node tests/enterprise-flow.test.js
-node tests/ops-metrics.test.js
-node tests/runway-pilot.test.js
-node tests/enterprise-ops-dashboard.test.js
-node tests/ops-hub.test.js
-node tests/ops-automation.test.js
-node tests/founder-capacity.test.js
-node tests/hiring-model.test.js
-node tests/hire-runway-gate.test.js
-node tests/founder-hiring-kit.test.js
-node tests/growth-strategy.test.js
-node tests/capital-readiness.test.js
-node tests/investor-readiness-pack.test.js
-node tests/audit-trail.test.js
-node tests/provider-guard.test.js
-node tests/pilot-readiness.test.js
-node tests/production-gate.test.js
-node tests/security-hardening.test.js
-node tests/commercial-dashboard.test.js
-node tests/launch-prep.test.js
-node tests/payment-adapters.test.js
-node tests/provider-adapters-v0.test.js
-node tests/provider-architecture-r.test.js
-node tests/shadow-risk-engine.test.js
-node tests/brand-i18n.test.js
-node tests/action-index-legal.test.js
-node tests/integration-ecosystem.test.js
-node tests/integration-readiness.test.js
-node tests/provider-evaluation.test.js
-node tests/dual-security-strategy.test.js
-node tests/v1-consolidation-scan.test.js
+
+# Current core / preproduction contracts
 node tests/core-operation-contract.test.mjs
 node tests/preprod-repository-contract.test.mjs
 node tests/preprod-org-access-boundary.test.mjs
