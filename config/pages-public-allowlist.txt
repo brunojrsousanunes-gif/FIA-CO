@@ -2,6 +2,8 @@
 index.html
 beta-mobile.html
 app-beta.html
+integrations.html
+tx-advanced.html
 legal-center.html
 robots.txt
 sitemap.xml
