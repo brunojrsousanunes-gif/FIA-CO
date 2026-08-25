@@ -2,7 +2,6 @@
 'use strict';
 
 const STORAGE_KEY='fia_unified_beta_v2';
-const LEGACY_KEYS=['fia_unified_beta_v1','fia_cart_v1'];
 const now=()=>new Date().toISOString();
 const uid=(prefix)=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
 const safeNumber=(value)=>Number.isFinite(Number(value))?Number(value):0;
@@ -15,12 +14,7 @@ function emptyState(){
   return {version:2,selectedOperationId:null,operations:[],evidence:[],participants:[],ledger:[],activity:[]};
 }
 
-function purgeLegacyStorage(){
-  try{for(const key of LEGACY_KEYS)localStorage.removeItem(key);}catch(_e){}
-}
-
 function load(){
-  purgeLegacyStorage();
   try{
     const raw=localStorage.getItem(STORAGE_KEY);
     if(!raw)return emptyState();
