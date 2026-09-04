@@ -44,6 +44,14 @@ function assertOwner(transaction, context) {
   return access;
 }
 
+function providerStatus(boundary = {}) {
+  const provider = boundary.provider;
+  if (!provider) return 'NOT_CONFIGURED';
+  if (provider.allowedForProduction === true) return 'VERIFIED_FOR_PRODUCTION';
+  if (provider.reason === 'NO_PROVIDER_SELECTED') return 'NOT_CONFIGURED';
+  return 'NOT_READY';
+}
+
 export function createTrustSecurityReceipt(input = {}, options = {}) {
   const { operation, transaction, context } = input;
   if (!operation || !transaction) throw new Error('SECURITY_RECEIPT_INPUT_REQUIRED');
@@ -97,7 +105,7 @@ export function createTrustSecurityReceipt(input = {}, options = {}) {
       fiaReceivesFunds: false,
       fiaCustodiesFunds: false,
       fiaMovesFunds: false,
-      paymentProviderStatus: transaction.financialBoundary?.paymentProvider?.status || 'NOT_CONFIGURED'
+      paymentProviderStatus: providerStatus(transaction.financialBoundary)
     },
     issuedBy: {
       actorId: access.actorId,
