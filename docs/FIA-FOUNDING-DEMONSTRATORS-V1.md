@@ -16,8 +16,9 @@ La prioridad es obtener evidencia creíble, no fabricar testimonios ni maximizar
 4. Un descuento promocional nunca compra ni condiciona una valoración positiva.
 5. Separar siempre `CONFIRMED`, `ASSISTED` y `ESTIMATED`.
 6. No publicar PII ni datos comerciales sensibles innecesarios.
-7. El cliente puede aprobar un caso identificado, anonimizado o privado.
-8. Toda cifra promocional debe poder rastrearse a una fuente o método de cálculo documentado.
+7. Toda cifra promocional debe poder rastrearse a una fuente o método de cálculo documentado.
+8. **Los resultados detallados no se publican en abierto.** Se muestran únicamente a prospectos identificados/autorizados y a clientes FIA autenticados, tanto en web privada como en app.
+9. La web pública puede mostrar mensajes generales, sectores cubiertos o rangos agregados no sensibles, pero no Proof Packs completos ni cifras identificables de clientes.
 
 ## 2. Perfiles objetivo de los 3 primeros demostradores
 
@@ -66,33 +67,63 @@ FIA puede ofrecer condiciones de lanzamiento especiales a cambio de:
 - acceso razonable a datos operativos necesarios para medir el piloto;
 - tiempo de discovery y revisión;
 - feedback estructurado;
-- autorización independiente para reutilizar métricas/caso, si el cliente acepta.
+- autorización independiente para reutilizar métricas/caso dentro del entorno comercial restringido, si el cliente acepta.
 
 No exigir testimonio positivo.
 
-### Niveles de publicación
+### Niveles de visibilidad
 
-**IDENTIFIED**
-- nombre comercial;
-- logo;
-- sector/ubicación;
-- métricas aprobadas;
-- testimonio opcional.
+**GATED_IDENTIFIED**
+- visible solo a prospectos autorizados y clientes FIA autenticados;
+- puede incluir nombre comercial, logo, sector/ubicación, métricas aprobadas y testimonio opcional;
+- requiere autorización expresa.
 
-**ANONYMIZED**
-- sector;
-- tamaño/rango aproximado;
-- zona amplia;
-- métricas;
+**GATED_ANONYMIZED**
+- visible solo a prospectos autorizados y clientes FIA autenticados;
+- sector, tamaño/rango aproximado, zona amplia y métricas;
 - sin nombre ni elementos identificables.
+
+**CLIENT_ONLY**
+- visible únicamente para clientes FIA autenticados y equipo FIA autorizado.
 
 **PRIVATE**
 - uso exclusivo interno para validar producto/economics;
 - no se utiliza comercialmente.
 
-El nivel debe quedar registrado antes de publicar nada.
+No existe un nivel de Proof Pack público abierto por defecto.
 
-## 5. Evidencia mínima antes/después
+## 5. Canales de acceso a resultados
+
+### Web pública
+Puede mostrar:
+- propuesta de valor;
+- sectores;
+- metodología;
+- ejemplos sintéticos;
+- indicadores agregados no sensibles aprobados.
+
+No puede mostrar:
+- Proof Packs completos;
+- cifras identificables de un cliente;
+- capturas internas;
+- datos comerciales sensibles.
+
+### Web privada / portal comercial
+Puede mostrar Proof Packs a:
+- prospectos registrados/autorizados;
+- usuarios con rol comercial válido;
+- clientes autenticados.
+
+Debe registrar al menos:
+- quién accedió;
+- qué caso visualizó;
+- fecha/hora;
+- nivel de permiso.
+
+### App FIA
+Los clientes autenticados pueden acceder a una biblioteca de casos según permisos, sector y visibilidad concedida. Un cliente nunca obtiene acceso a datos privados de otro cliente fuera del Proof Pack autorizado.
+
+## 6. Evidencia mínima antes/después
 
 ### Baseline
 - oportunidades o presupuestos/30 días;
@@ -124,7 +155,7 @@ El nivel debe quedar registrado antes de publicar nada.
 - ratio valor/coste;
 - intención de continuar pagando.
 
-## 6. Definiciones de atribución
+## 7. Definiciones de atribución
 
 ### CONFIRMED
 Resultado confirmado por el cliente y razonablemente atribuible al flujo FIA.
@@ -143,7 +174,7 @@ Ejemplo: horas administrativas evitadas multiplicadas por un coste/hora acordado
 
 Nunca mezclar las tres categorías en una única cifra sin desglose.
 
-## 7. Criterios para considerar el demostrador comercialmente útil
+## 8. Criterios para considerar el demostrador comercialmente útil
 
 Un caso puede generar FIA Proof Pack si cumple al menos 4:
 - baseline suficiente;
@@ -152,24 +183,25 @@ Un caso puede generar FIA Proof Pack si cumple al menos 4:
 - cliente percibe valor;
 - coste operativo sostenible;
 - una métrica económica clara;
-- autorización `IDENTIFIED` o `ANONYMIZED`;
+- autorización `GATED_IDENTIFIED`, `GATED_ANONYMIZED` o `CLIENT_ONLY`;
 - narrativa comprensible en menos de 60 segundos.
 
-## 8. Cierre del piloto
+## 9. Cierre del piloto
 
 Reunión final obligatoria:
 1. revisar cifras con el cliente;
 2. separar CONFIRMED / ASSISTED / ESTIMATED;
 3. corregir cualquier dato discutible;
 4. registrar intención de seguir pagando;
-5. elegir nivel de publicación;
+5. elegir nivel de visibilidad;
 6. solicitar testimonio solo después de revisar resultados, sin presión;
-7. generar Proof Pack si procede.
+7. generar Proof Pack si procede;
+8. registrar permisos de acceso y fecha de expiración/revisión cuando aplique.
 
-## 9. Regla estratégica
+## 10. Regla estratégica
 
 Los primeros 3 proyectos deben optimizar tres activos simultáneos:
 
-`INGRESO INICIAL + APRENDIZAJE DE PRODUCTO + PRUEBA COMERCIAL`
+`INGRESO INICIAL + APRENDIZAJE DE PRODUCTO + PRUEBA COMERCIAL RESTRINGIDA`
 
 Un piloto que factura pero no deja aprendizaje ni evidencia tiene menos valor estratégico que un demostrador bien medido.
