@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<title>FIA&CO — Recover Founding Demonstrator</title>
+<link rel="stylesheet" href="css/recover-demo.css">
+</head>
+<body>
+<header class="topbar">
+  <div><b>FIA&CO</b><span>Recover · Founding Demonstrator</span></div>
+  <div class="safe-badge">PILOT_SAFE · DATOS SINTÉTICOS · SIN ENVÍOS REALES</div>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Quote Recovery</p>
+      <h1>Demostrar valor antes de automatizar de verdad.</h1>
+      <p>Esta superficie simula cómo FIA vigilaría presupuestos, prepararía seguimientos y mediría resultados. No conecta correo, CRM, WhatsApp, SMS, pagos ni datos reales.</p>
+    </div>
+    <aside class="guardrail">
+      <strong>Regla del piloto</strong>
+      <p>IA propone y clasifica. La política limita. Una persona autoriza contactos y resultados comerciales.</p>
+    </aside>
+  </section>
+
+  <section class="metrics" aria-label="Métricas del demostrador">
+    <article><small>Presupuestos vigilados</small><strong data-metric="tracked">0</strong></article>
+    <article><small>Seguimientos registrados</small><strong data-metric="attempts">0</strong></article>
+    <article><small>Respuestas</small><strong data-metric="responses">0</strong></article>
+    <article><small>Valor confirmado</small><strong data-metric="confirmed">0 €</strong></article>
+    <article><small>Coste variable</small><strong data-metric="cost">0 €</strong></article>
+    <article><small>Margen mensual</small><strong data-metric="margin">—</strong></article>
+  </section>
+
+  <section class="grid two">
+    <article class="panel">
+      <div class="panel-head"><div><p class="eyebrow">Antes de FIA</p><h2>Baseline del cliente</h2></div><span class="tag">30 días</span></div>
+      <form data-baseline-form class="form-grid">
+        <label>Presupuestos enviados<input name="quotesSent" type="number" min="0" value="40"></label>
+        <label>Con seguimiento<input name="quotesFollowed" type="number" min="0" value="12"></label>
+        <label>Valor presupuestado (€)<input name="quoteValue" type="number" min="0" step="0.01" value="80000"></label>
+        <label>Horas dedicadas<input name="hours" type="number" min="0" step="0.1" value="10"></label>
+        <label>Primer seguimiento medio (h)<input name="delay" type="number" min="0" step="0.1" value="72"></label>
+        <label>Coste/hora estimado (€)<input name="hourly" type="number" min="0" step="0.01" value="18"></label>
+        <button type="submit">Actualizar baseline</button>
+      </form>
+      <div class="baseline-summary" data-baseline-summary></div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head"><div><p class="eyebrow">Economía FIA</p><h2>Coste y sostenibilidad</h2></div><span class="tag">HIPÓTESIS</span></div>
+      <form data-economics-form class="form-grid">
+        <label>Cuota mensual (€)<input name="monthly" type="number" min="0" step="0.01" value="129"></label>
+        <label>Implantación (€)<input name="implementation" type="number" min="0" step="0.01" value="199"></label>
+        <label>Coste tecnología (€)<input name="tech" type="number" min="0" step="0.01" value="8"></label>
+        <label>Minutos humanos FIA<input name="humanMinutes" type="number" min="0" step="1" value="45"></label>
+        <label>Coste interno/hora (€)<input name="humanHourly" type="number" min="0" step="0.01" value="20"></label>
+        <button type="submit">Recalcular economics</button>
+      </form>
+      <div class="baseline-summary" data-economics-summary></div>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><p class="eyebrow">Operación simulada</p><h2>Cola de presupuestos</h2></div>
+      <button type="button" class="secondary" data-reset>Restablecer demo</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Referencia</th><th>Importe</th><th>Estado</th><th>Intentos</th><th>Respuesta</th><th>Acciones humanas</th></tr></thead>
+        <tbody data-case-table></tbody>
+      </table>
+    </div>
+    <p class="fineprint">Todos los botones registran eventos locales de demostración. Ningún botón envía comunicaciones externas.</p>
+  </section>
+
+  <section class="grid two">
+    <article class="panel">
+      <div class="panel-head"><div><p class="eyebrow">Resultado demostrable</p><h2>Vista previa del FIA Proof Pack</h2></div><span class="tag restricted">RESTRINGIDO EN PRODUCCIÓN</span></div>
+      <div data-proof-preview class="proof-preview"></div>
+      <p class="fineprint">En producción, los Proof Packs reales no serán públicos. Se aplicará la política de acceso autenticado y autorización del cliente origen.</p>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head"><div><p class="eyebrow">Gate del primer cliente</p><h2>Checklist antes de usar datos reales</h2></div></div>
+      <ul class="checklist">
+        <li>Baseline acordado y medible.</li>
+        <li>Alcance, precio y duración del piloto aceptados.</li>
+        <li>Tratamiento de datos y proveedores revisados.</li>
+        <li>Plantillas y horarios aprobados por el cliente.</li>
+        <li>Primer envío siempre con aprobación humana.</li>
+        <li>Kill switch / desactivación inmediata disponible.</li>
+        <li>Resultados separados en CONFIRMED, ASSISTED y ESTIMATED.</li>
+        <li>Permiso separado para reutilizar el caso comercialmente.</li>
+      </ul>
+    </article>
+  </section>
+</main>
+<script src="js/recover-demo.js" defer></script>
+</body>
+</html>

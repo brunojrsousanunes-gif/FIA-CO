@@ -8,6 +8,16 @@
     "targetTotalVariableCostRatioMax": 0.35,
     "requirePositiveContributionMarginBeforePaidAcquisition": true
   },
+  "externalActionControls": {
+    "killSwitchRequired": true,
+    "organizationAuthorizationRequired": true,
+    "dataUseAuthorizationRequired": true,
+    "contactPermissionRequired": true,
+    "allowedHoursRequired": true,
+    "approvedTemplateRequired": true,
+    "auditDecisionRequired": true,
+    "preapprovedSequenceAllowedAfterFirstHumanApproval": true
+  },
   "quoteRecovery": {
     "defaultMaxAttempts": 3,
     "suggestedDelayDays": [2, 5, 10],
