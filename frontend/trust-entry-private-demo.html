@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
+<title>FIA&CO — Trust Entry Demo privada</title>
+<link rel="stylesheet" href="css/trust-entry-private-demo.css">
+</head>
+<body>
+<main class="shell">
+  <header class="hero">
+    <div>
+      <span class="eyebrow">FIA TRUST ENTRY · PRIMERA REUNIÓN</span>
+      <h1>No nos des las llaves de tu empresa.</h1>
+      <p class="lead">Danos una sola operación y te demostramos qué aporta FIA, qué información utiliza y quién puede verla.</p>
+    </div>
+    <div class="zero-card"><strong>0</strong><span>datos reales necesarios para esta demo</span></div>
+  </header>
+
+  <section class="trust-strip" aria-label="Principios de entrada">
+    <div><b>Sin credenciales</b><span>No pedimos contraseñas ni acceso general.</span></div>
+    <div><b>Sin fondos</b><span>FIA no recibe, custodia ni mueve dinero.</span></div>
+    <div><b>Sin salto de nivel</b><span>Más acceso exige más controles verificados.</span></div>
+  </section>
+
+  <nav class="tabs" aria-label="Flujo de demostración">
+    <button type="button" class="active" data-tab="value">Qué demuestra</button>
+    <button type="button" data-tab="levels">Niveles</button>
+    <button type="button" data-tab="operation">Operación</button>
+    <button type="button" data-tab="next">Siguiente paso</button>
+  </nav>
+
+  <section class="panel active" data-panel="value">
+    <div class="grid two">
+      <article class="card"><span class="num">01</span><h2>Trazabilidad</h2><p>Cada cambio importante deja un evento identificable y auditable.</p></article>
+      <article class="card"><span class="num">02</span><h2>Control de acceso</h2><p>La empresa ve quién puede acceder a cada dato y qué queda fuera.</p></article>
+      <article class="card"><span class="num">03</span><h2>Seguridad visible</h2><p>No pedimos confianza ciega: mostramos los límites que FIA aplica.</p></article>
+      <article class="card"><span class="num">04</span><h2>Utilidad medible</h2><p>Al terminar, comparamos tiempos, incidencias, seguimiento y resultado.</p></article>
+    </div>
+    <aside class="pitch"><strong>Objetivo de la primera reunión</strong><p>Entender una operación real, enseñar la demo sintética y decidir si merece la pena probar una única operación aislada. Nada más.</p></aside>
+  </section>
+
+  <section class="panel" data-panel="levels" hidden>
+    <header class="level-header"><div><small>NIVEL ACTUAL DEMO</small><strong>L0_DEMO</strong></div><p>La demo no contiene datos reales ni conexiones externas.</p></header>
+    <ol class="levels">
+      <li class="current"><span>L0</span><div><b>Demo</b><p>Datos sintéticos. Cero accesos reales.</p></div></li>
+      <li><span>L1</span><div><b>Operación aislada</b><p>Una operación real, introducida de forma controlada.</p></div></li>
+      <li><span>L2</span><div><b>Empresa verificada</b><p>OAuth aprobado y automatización interna segura.</p></div></li>
+      <li><span>L3</span><div><b>Operación compartida</b><p>Dos organizaciones, permisos temporales y finalidad exacta.</p></div></li>
+      <li><span>L4</span><div><b>Avanzado</b><p>Flujos personales solo tras controles y revisión específica.</p></div></li>
+    </ol>
+    <p class="note">Los datos críticos no se comparten entre organizaciones en ningún nivel. FIA mantiene frontera financiera NON_CUSTODIAL.</p>
+  </section>
+
+  <section class="panel" data-panel="operation" hidden>
+    <div class="operation-head"><div><small>OPERACIÓN SINTÉTICA</small><h2>Venta de maquinaria · FIA-DEMO-01</h2></div><span class="status">IN_PROGRESS</span></div>
+    <div class="metrics">
+      <article><small>Importe informado</small><strong>72.400 €</strong></article>
+      <article><small>Participantes</small><strong>2</strong></article>
+      <article><small>Campos compartidos</small><strong>2</strong></article>
+      <article><small>Datos críticos compartidos</small><strong>0</strong></article>
+    </div>
+    <div class="timeline">
+      <div><time>09:42</time><p><b>Operación creada</b><span>Actor identificado · evento auditable</span></p></div>
+      <div><time>10:12</time><p><b>Permiso propuesto</b><span>Solo referencia + ventana de entrega</span></p></div>
+      <div><time>10:13</time><p><b>Aprobación humana</b><span>Finalidad y caducidad registradas</span></p></div>
+      <div><time>11:34</time><p><b>Evidencia recibida</b><span>Preparación iniciada</span></p></div>
+    </div>
+    <aside class="finance"><strong>Frontera financiera</strong><p>FIA no recibe, custodia ni mueve fondos. Cualquier pago real se ejecutaría mediante una entidad financiera o proveedor de servicios de pago legalmente habilitado.</p></aside>
+  </section>
+
+  <section class="panel" data-panel="next" hidden>
+    <div class="next-step">
+      <small>SI LA DEMO TIENE SENTIDO</small>
+      <h2>Pasamos a L1 con una sola operación.</h2>
+      <p>No conectamos Gmail, ERP ni CRM. No compartimos con otra empresa. No ejecutamos pagos ni acciones externas.</p>
+    </div>
+    <div class="checklist">
+      <label><input type="checkbox" data-check> Gerente/patrocinador confirma interés</label>
+      <label><input type="checkbox" data-check> Elegimos una única operación</label>
+      <label><input type="checkbox" data-check> Definimos qué mediremos</label>
+      <label><input type="checkbox" data-check> Revisamos exactamente qué datos hacen falta</label>
+      <label><input type="checkbox" data-check> Definimos retención, contacto de incidentes y revocación</label>
+    </div>
+    <button type="button" class="primary" data-evaluate>Simular evaluación de entrada</button>
+    <p class="result" data-result aria-live="polite">Demo: todavía no se ha solicitado ningún acceso real.</p>
+  </section>
+
+  <footer>
+    <p>Superficie privada y sintética para reuniones. No usar datos reales aquí. La futura app autenticada consumirá snapshots filtrados por policy antes de llegar al dispositivo.</p>
+  </footer>
+</main>
+<script src="js/trust-entry-private-demo.js"></script>
+</body>
+</html>
