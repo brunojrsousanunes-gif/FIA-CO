@@ -26,6 +26,12 @@ export const ACTION_CLASSES = Object.freeze({
   PROHIBITED: 'PROHIBITED'
 });
 
+export const ATTRIBUTION_LEVELS = Object.freeze({
+  CONFIRMED: 'CONFIRMED',
+  ASSISTED: 'ASSISTED',
+  ESTIMATED: 'ESTIMATED'
+});
+
 const terminal = new Set(['WON', 'LOST', 'EXPIRED', 'CANCELLED']);
 
 const transitions = Object.freeze({
@@ -97,6 +103,9 @@ export function createRecoveryCase(input = {}, options = {}) {
     throw new Error('INVALID_MAX_ATTEMPTS');
   }
 
+  const expiresAt = cleanText(input.expiresAt || '', 40) || null;
+  if (expiresAt && Number.isNaN(Date.parse(expiresAt))) throw new Error('INVALID_EXPIRY');
+
   const caseId = deps.idFactory('rec');
   return {
     id: caseId,
@@ -110,7 +119,7 @@ export function createRecoveryCase(input = {}, options = {}) {
     attempts: 0,
     maxAttempts,
     nextActionAt: null,
-    expiresAt: cleanText(input.expiresAt || '', 40) || null,
+    expiresAt,
     lastResponseClass: null,
     outcome: null,
     outcomeValue: null,
@@ -129,10 +138,13 @@ export function activateRecovery(recovery, actor = 'system', options = {}) {
 export function scheduleFollowUp(recovery, at, actor = 'system', options = {}) {
   ensureOpen(recovery);
   if (!['WAITING', 'HUMAN_REVIEW'].includes(recovery.state)) throw new Error('SCHEDULE_NOT_ALLOWED');
-  const when = cleanText(at, 40);
-  if (!when || Number.isNaN(Date.parse(when))) throw new Error('INVALID_SCHEDULE');
   const deps = dependencies(options);
-  recovery.nextActionAt = new Date(when).toISOString();
+  const when = cleanText(at, 40);
+  const scheduleMs = Date.parse(when);
+  const nowMs = Date.parse(deps.clock());
+  if (!when || Number.isNaN(scheduleMs) || Number.isNaN(nowMs)) throw new Error('INVALID_SCHEDULE');
+  if (scheduleMs < nowMs) throw new Error('SCHEDULE_IN_PAST');
+  recovery.nextActionAt = new Date(scheduleMs).toISOString();
   recovery.version += 1;
   recovery.evidence.push(makeEvidence('FOLLOW_UP_SCHEDULED', actor, {
     at: recovery.nextActionAt,
@@ -212,12 +224,17 @@ export function resolveRecovery(recovery, input = {}, options = {}) {
     throw new Error('INVALID_OUTCOME_VALUE');
   }
 
+  const attribution = cleanText(input.attribution || 'ASSISTED', 20).toUpperCase();
+  if (outcome === 'WON' && !Object.values(ATTRIBUTION_LEVELS).includes(attribution)) {
+    throw new Error('INVALID_ATTRIBUTION');
+  }
+
   const deps = dependencies(options);
   recovery.outcome = outcome;
   recovery.outcomeValue = outcomeValue == null ? null : Math.round(outcomeValue * 100) / 100;
   return move(recovery, outcome, input.actor || 'human', {
     outcomeValue: recovery.outcomeValue,
-    attribution: cleanText(input.attribution || 'ASSISTED', 20).toUpperCase(),
+    attribution: outcome === 'WON' ? attribution : null,
     actionClass: ACTION_CLASSES.HUMAN_APPROVAL
   }, deps);
 }
