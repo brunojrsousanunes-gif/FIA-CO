@@ -1,0 +1,44 @@
+{
+  "policyVersion": "proof-pack-visibility.v1",
+  "defaultVisibility": "PRIVATE",
+  "publicWeb": {
+    "allowFullProofPacks": false,
+    "allowIdentifiableMetrics": false,
+    "allowSyntheticExamples": true,
+    "allowApprovedAggregates": true
+  },
+  "allowedVisibilityLevels": [
+    "GATED_IDENTIFIED",
+    "GATED_ANONYMIZED",
+    "CLIENT_ONLY",
+    "PRIVATE"
+  ],
+  "channels": {
+    "PRIVATE_WEB": {
+      "allowedRoles": ["PROSPECT_AUTHORIZED", "CLIENT", "FIA_STAFF"]
+    },
+    "APP": {
+      "allowedRoles": ["CLIENT", "FIA_STAFF", "PROSPECT_AUTHORIZED"]
+    },
+    "PUBLIC_WEB": {
+      "allowedRoles": ["PUBLIC"],
+      "fullProofPackAccess": false
+    }
+  },
+  "requirements": {
+    "GATED_IDENTIFIED": ["explicitCustomerAuthorization", "authenticatedViewer", "accessLogging"],
+    "GATED_ANONYMIZED": ["customerReuseAuthorization", "authenticatedViewer", "accessLogging"],
+    "CLIENT_ONLY": ["authenticatedClientOrStaff", "accessLogging"],
+    "PRIVATE": ["fiaStaffAuthorization"]
+  },
+  "accessLogging": {
+    "enabled": true,
+    "fields": ["viewerId", "viewerRole", "organizationId", "proofPackId", "timestamp", "accessDecision", "policyVersion"],
+    "minimizeData": true
+  },
+  "notes": [
+    "Prospect access must be granted through a controlled commercial flow, not anonymous public browsing.",
+    "A client must never gain access to another client's raw operational data outside an explicitly approved Proof Pack.",
+    "Customer authorization governs identifiable publication; FIA policy cannot override it."
+  ]
+}
