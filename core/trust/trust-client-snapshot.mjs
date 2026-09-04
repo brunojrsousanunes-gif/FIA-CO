@@ -40,11 +40,29 @@ function ownerSecuritySummary(transaction, context, options = {}) {
       organizationId: item.organizationId,
       relationship: item.relationship,
       fieldKeys: [...item.fieldKeys],
-      expiresAt: item.expiresAt || null
+      expiresAt: item.expiresAt || null,
+      requiredCapabilities: [...(item.requiredCapabilities || [])]
     })),
     defaultCrossOrganizationAccess: 'DENY',
-    personalDataSharingV1: false,
-    criticalDataSharingV1: false
+    personalDataSharingRequiresAdvancedLevel: true,
+    criticalDataSharing: false
+  });
+}
+
+function securityProgress(profile) {
+  if (!profile) {
+    return Object.freeze({
+      level: 'NOT_ASSESSED',
+      policyVersion: null,
+      capabilities: Object.freeze([]),
+      missingForNextLevel: Object.freeze([])
+    });
+  }
+  return Object.freeze({
+    level: clean(profile.level, 40),
+    policyVersion: clean(profile.policyVersion, 80) || null,
+    capabilities: Object.freeze([...(profile.capabilities || [])]),
+    missingForNextLevel: Object.freeze([...(profile.missingForNextLevel || [])])
   });
 }
 
@@ -80,6 +98,7 @@ export function buildTrustClientSnapshot(input = {}, options = {}) {
     }),
     transaction: clone(trustView),
     security: Object.freeze({
+      progress: securityProgress(options.viewerSecurityProfile),
       whoSeesWhat: ownerSecuritySummary(transaction, access, options),
       auditTimelineVisible: isOwnerOrganization,
       auditIntegrityStatus: input.auditIntegrityVerified === true ? 'VERIFIED' : 'NOT_VERIFIED',
