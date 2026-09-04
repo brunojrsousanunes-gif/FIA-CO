@@ -1,0 +1,72 @@
+{
+  "policyVersion": "recover-v1",
+  "mode": "PILOT_SAFE",
+  "externalActionsEnabled": false,
+  "defaultCurrency": "EUR",
+  "economics": {
+    "targetTechnologyVariableCostRatioMax": 0.15,
+    "targetTotalVariableCostRatioMax": 0.35,
+    "requirePositiveContributionMarginBeforePaidAcquisition": true
+  },
+  "quoteRecovery": {
+    "defaultMaxAttempts": 3,
+    "suggestedDelayDays": [2, 5, 10],
+    "autoCloseWon": false,
+    "autoCloseLostFromAIClassification": false,
+    "humanApprovalRequiredForOutcome": true,
+    "humanApprovalRequiredForFirstExternalSend": true
+  },
+  "leadRecovery": {
+    "humanApprovalRequiredForFirstExternalSend": true,
+    "autoQualifyForPriorityOnly": true,
+    "autoRejectLead": false
+  },
+  "paymentRecovery": {
+    "enabledInPilot": false,
+    "legalThreatsAllowed": false,
+    "automaticDiscountsAllowed": false,
+    "automaticDebtSettlementAllowed": false,
+    "humanEscalationOnDispute": true
+  },
+  "documentRecovery": {
+    "enabledInPilot": false,
+    "aiMayClassify": true,
+    "aiMayExtract": true,
+    "aiMayFlagInconsistency": true,
+    "aiMayCertifyAuthenticity": false
+  },
+  "actionClasses": {
+    "AUTO_SAFE": [
+      "READ_INTERNAL_DATA",
+      "CLASSIFY",
+      "SUMMARIZE",
+      "SCHEDULE_INTERNAL_TASK",
+      "CALCULATE_METRIC"
+    ],
+    "AUTO_WITH_POLICY": [
+      "SEND_PREAPPROVED_FOLLOWUP",
+      "SEND_PREAPPROVED_REMINDER"
+    ],
+    "HUMAN_APPROVAL": [
+      "FIRST_EXTERNAL_SEND",
+      "PRICE_CHANGE",
+      "DISCOUNT",
+      "CONTRACTUAL_COMMITMENT",
+      "FINAL_OUTCOME",
+      "SENSITIVE_MESSAGE",
+      "EXCEPTION_OVERRIDE"
+    ],
+    "PROHIBITED": [
+      "CUSTODY_FUNDS",
+      "MOVE_FUNDS",
+      "LEGAL_THREAT_AUTOMATION",
+      "UNVALIDATED_REGULATED_DECISION"
+    ]
+  },
+  "failSafe": {
+    "onMissingPolicy": "NO_EXTERNAL_ACTION",
+    "onTimeout": "NO_EXTERNAL_ACTION",
+    "onLowConfidence": "HUMAN_REVIEW",
+    "onAmbiguousConsent": "HUMAN_REVIEW"
+  }
+}
