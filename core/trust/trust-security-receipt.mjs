@@ -59,6 +59,7 @@ export function createTrustSecurityReceipt(input = {}, options = {}) {
   if (operation.organizationId !== transaction.ownerOrganizationId) throw new Error('TRUST_OWNER_MISMATCH');
   const access = assertOwner(transaction, context);
   const generatedAt = clean(options.now || new Date().toISOString(), 40);
+  const securityProfile = input.securityProfile || null;
 
   const auditEvents = (input.auditEvents || []).filter(event => !event.operationId || event.operationId === operation.id);
   const grants = transaction.grants || [];
@@ -92,9 +93,13 @@ export function createTrustSecurityReceipt(input = {}, options = {}) {
       latestAuditHash: auditEvents.at(-1)?.hash || null
     },
     dataControl: {
+      securityLevel: clean(securityProfile?.level || 'NOT_ASSESSED', 40),
+      securityPolicyVersion: clean(securityProfile?.policyVersion || '', 80) || null,
+      unlockedCapabilities: Array.isArray(securityProfile?.capabilities) ? [...securityProfile.capabilities].sort() : [],
       defaultCrossOrganizationAccess: 'DENY',
-      personalDataSharingV1: false,
-      criticalDataSharingV1: false,
+      minimumCrossOrganizationLevel: 'L3_SHARED',
+      personalDataSharingMinimumLevel: 'L4_ADVANCED',
+      criticalDataSharing: false,
       activeSharedOrganizations: [...new Set(activeGrants.map(grant => grant.organizationId))].sort(),
       activeSharedFieldCount: new Set(activeGrants.flatMap(grant => grant.fieldKeys || [])).size,
       revocationSupported: true,
