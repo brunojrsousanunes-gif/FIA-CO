@@ -27,6 +27,7 @@ node tests/preprod-observability-recovery.test.mjs
 node tests/recover-engine.test.mjs
 node tests/recover-outcomes.test.mjs
 node tests/recover-action-gate.test.mjs
+node tests/recover-pilot-readiness.test.mjs
 node tests/recover-demo.test.mjs
 node tests/proof-pack-access.test.mjs
 node tests/proof-pack-viewer-context.test.mjs
