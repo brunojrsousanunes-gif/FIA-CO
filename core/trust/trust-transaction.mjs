@@ -1,6 +1,11 @@
 import crypto from 'node:crypto';
 import { AccessDeniedError, normalizeAccessContext } from '../identity/access-control.mjs';
 import { buildFinancialBoundaryView } from '../finance/financial-boundary.mjs';
+import {
+  TRUST_CAPABILITIES,
+  assertTrustCapability,
+  hasTrustCapability
+} from './trust-security-levels.mjs';
 
 export const DATA_CLASSES = Object.freeze({
   PUBLIC: 'PUBLIC',
@@ -10,7 +15,7 @@ export const DATA_CLASSES = Object.freeze({
   CRITICAL: 'CRITICAL'
 });
 
-const SHAREABLE_V1 = new Set([
+const BASIC_SHAREABLE = new Set([
   DATA_CLASSES.PUBLIC,
   DATA_CLASSES.INTERNAL,
   DATA_CLASSES.COMMERCIAL_CONFIDENTIAL
@@ -74,6 +79,43 @@ function activeGrant(grant, now) {
   return Number.isFinite(current) && Number.isFinite(expiry) && current < expiry;
 }
 
+function assertCrossOrganizationSecurity(options = {}) {
+  const ownerProfile = options.ownerSecurityProfile;
+  const targetProfile = options.targetSecurityProfile;
+  assertTrustCapability(ownerProfile, TRUST_CAPABILITIES.CROSS_ORG_SHARE);
+  assertTrustCapability(targetProfile, TRUST_CAPABILITIES.CROSS_ORG_SHARE);
+  return { ownerProfile, targetProfile };
+}
+
+function requiredCapabilityForFields(transaction, fieldKeys, input, securityProfiles) {
+  let requiredCapability = TRUST_CAPABILITIES.CROSS_ORG_SHARE;
+
+  for (const key of fieldKeys) {
+    const field = transaction.fields[key];
+    if (!field) throw new Error(`UNKNOWN_TRUST_FIELD:${key}`);
+    if (field.classification === DATA_CLASSES.CRITICAL) {
+      throw new Error('FIELD_CLASS_NEVER_SHAREABLE:CRITICAL');
+    }
+    if (BASIC_SHAREABLE.has(field.classification)) continue;
+    if (field.classification === DATA_CLASSES.PERSONAL) {
+      assertTrustCapability(securityProfiles.ownerProfile, TRUST_CAPABILITIES.PERSONAL_DATA_WORKFLOW);
+      assertTrustCapability(securityProfiles.targetProfile, TRUST_CAPABILITIES.PERSONAL_DATA_WORKFLOW);
+      if (input.personalDataReviewed !== true) throw new Error('PERSONAL_DATA_REVIEW_REQUIRED');
+      if (!clean(input.legalReviewRef, 120)) throw new Error('LEGAL_REVIEW_REFERENCE_REQUIRED');
+      requiredCapability = TRUST_CAPABILITIES.PERSONAL_DATA_WORKFLOW;
+      continue;
+    }
+    throw new Error(`FIELD_CLASS_NOT_SHAREABLE:${field.classification}`);
+  }
+
+  return requiredCapability;
+}
+
+function grantEligibleForViewer(grant, profile) {
+  const capability = grant.requiredCapability || TRUST_CAPABILITIES.CROSS_ORG_SHARE;
+  return hasTrustCapability(profile, capability);
+}
+
 export function createTrustTransaction(input = {}, options = {}) {
   const d = deps(options);
   const ownerOrganizationId = clean(input.ownerOrganizationId, 80);
@@ -111,16 +153,10 @@ export function grantOrganizationAccess(transaction, context, input = {}, option
     throw new Error('INVALID_TARGET_ORGANIZATION');
   }
 
+  const securityProfiles = assertCrossOrganizationSecurity(options);
   const fieldKeys = [...new Set((input.fieldKeys || []).map(value => clean(value, 80)).filter(Boolean))];
   if (!fieldKeys.length) throw new Error('NO_FIELDS_SELECTED');
-
-  for (const key of fieldKeys) {
-    const field = transaction.fields[key];
-    if (!field) throw new Error(`UNKNOWN_TRUST_FIELD:${key}`);
-    if (!SHAREABLE_V1.has(field.classification)) {
-      throw new Error(`FIELD_CLASS_NOT_SHAREABLE_V1:${field.classification}`);
-    }
-  }
+  const requiredCapability = requiredCapabilityForFields(transaction, fieldKeys, input, securityProfiles);
 
   const purpose = clean(input.purpose, 180);
   if (!purpose) throw new Error('PURPOSE_REQUIRED');
@@ -139,6 +175,11 @@ export function grantOrganizationAccess(transaction, context, input = {}, option
     createdAt: d.clock(),
     createdBy: access.actorId,
     approvedByHuman: true,
+    requiredCapability,
+    ownerSecurityLevelAtGrant: securityProfiles.ownerProfile.level,
+    targetSecurityLevelAtGrant: securityProfiles.targetProfile.level,
+    legalReviewRef: clean(input.legalReviewRef, 120) || null,
+    personalDataReviewed: input.personalDataReviewed === true,
     revokedAt: null,
     revokedBy: null
   };
@@ -169,7 +210,12 @@ export function getTrustTransactionView(transaction, context, options = {}) {
   if (owner) {
     permittedKeys = Object.keys(transaction.fields);
   } else {
-    const grants = transaction.grants.filter(grant => grant.organizationId === access.organizationId && activeGrant(grant, now));
+    assertTrustCapability(options.viewerSecurityProfile, TRUST_CAPABILITIES.CROSS_ORG_SHARE);
+    const grants = transaction.grants.filter(grant =>
+      grant.organizationId === access.organizationId
+      && activeGrant(grant, now)
+      && grantEligibleForViewer(grant, options.viewerSecurityProfile)
+    );
     if (!grants.length) throw new AccessDeniedError();
     permittedKeys = [...new Set(grants.flatMap(grant => grant.fieldKeys))];
   }
@@ -189,14 +235,16 @@ export function getTrustTransactionView(transaction, context, options = {}) {
     ownerOrganizationId: owner ? transaction.ownerOrganizationId : null,
     viewerOrganizationId: access.organizationId,
     viewerRole: access.role,
+    viewerSecurityLevel: options.viewerSecurityProfile?.level || (owner ? 'OWNER_INTERNAL' : null),
     fields: visibleFields,
     visibleFieldKeys: Object.keys(visibleFields),
     financialBoundary: clone(transaction.financialBoundary),
     security: Object.freeze({
       ownerView: owner,
       crossOrganizationDataDefault: 'DENY',
-      personalDataSharingV1: false,
-      criticalDataSharingV1: false
+      securityLevelGatedAccess: true,
+      personalDataSharingRequiresAdvancedLevel: true,
+      criticalDataSharing: false
     })
   });
 }
@@ -210,16 +258,19 @@ export function buildWhoSeesWhat(transaction, context, options = {}) {
     organizationId: transaction.ownerOrganizationId,
     relationship: 'OWNER',
     fieldKeys: Object.keys(transaction.fields),
-    expiresAt: null
+    expiresAt: null,
+    requiredCapabilities: []
   });
   for (const grant of active) {
     const current = organizations.get(grant.organizationId) || {
       organizationId: grant.organizationId,
       relationship: 'GRANTEE',
       fieldKeys: [],
-      expiresAt: grant.expiresAt
+      expiresAt: grant.expiresAt,
+      requiredCapabilities: []
     };
     current.fieldKeys = [...new Set([...current.fieldKeys, ...grant.fieldKeys])];
+    current.requiredCapabilities = [...new Set([...current.requiredCapabilities, grant.requiredCapability || TRUST_CAPABILITIES.CROSS_ORG_SHARE])];
     if (!current.expiresAt || Date.parse(grant.expiresAt) < Date.parse(current.expiresAt)) current.expiresAt = grant.expiresAt;
     organizations.set(grant.organizationId, current);
   }
