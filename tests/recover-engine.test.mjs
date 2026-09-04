@@ -39,6 +39,7 @@ assert.equal(rec.state, 'WAITING');
 scheduleFollowUp(rec, '2026-09-05T09:00:00.000Z', 'system', deps);
 assert.equal(rec.nextActionAt, '2026-09-05T09:00:00.000Z');
 assert.equal(rec.evidence.at(-1).meta.actionClass, ACTION_CLASSES.AUTO_SAFE);
+assert.throws(() => scheduleFollowUp(rec, '2026-09-03T09:00:00.000Z', 'system', deps), /SCHEDULE_IN_PAST/);
 
 assert.throws(() => recordContactAttempt(rec, {
   actor: 'system',
@@ -68,6 +69,12 @@ assert.throws(() => resolveRecovery(rec, {
   approvedByHuman: false,
   outcome: 'WON'
 }, deps), /HUMAN_APPROVAL_REQUIRED/);
+assert.throws(() => resolveRecovery(rec, {
+  actor: 'founder',
+  approvedByHuman: true,
+  outcome: 'WON',
+  attribution: 'MADE_UP'
+}, deps), /INVALID_ATTRIBUTION/);
 
 resolveRecovery(rec, {
   actor: 'founder',
@@ -78,6 +85,7 @@ resolveRecovery(rec, {
 }, deps);
 assert.equal(rec.state, 'WON');
 assert.equal(rec.outcomeValue, 10000);
+assert.equal(rec.evidence.at(-1).meta.attribution, 'ASSISTED');
 assert.throws(() => cancelRecovery(rec, 'system', 'late', deps), /TERMINAL_RECOVERY/);
 
 const continuing = createRecoveryCase({ amount: 500, maxAttempts: 2 }, deps);
@@ -114,6 +122,7 @@ assert.equal(continuing.state, 'WAITING');
 
 assert.throws(() => createRecoveryCase({ amount: -1 }, deps), /INVALID_AMOUNT/);
 assert.throws(() => createRecoveryCase({ maxAttempts: 21 }, deps), /INVALID_MAX_ATTEMPTS/);
+assert.throws(() => createRecoveryCase({ expiresAt: 'not-a-date' }, deps), /INVALID_EXPIRY/);
 assert.throws(() => scheduleFollowUp(continuing, 'not-a-date', 'system', deps), /INVALID_SCHEDULE/);
 
 console.log('FIA Recover engine contract OK');
