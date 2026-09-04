@@ -26,5 +26,6 @@ node tests/preprod-observability-recovery.test.mjs
 # FIA Recover / Founding Demonstrator contracts
 node tests/recover-engine.test.mjs
 node tests/recover-outcomes.test.mjs
+node tests/recover-demo.test.mjs
 node tests/proof-pack-access.test.mjs
 node tests/proof-pack-viewer-context.test.mjs
