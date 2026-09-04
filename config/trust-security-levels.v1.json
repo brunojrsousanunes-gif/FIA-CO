@@ -1,0 +1,48 @@
+{
+  "policyVersion": "trust-security-levels.v1",
+  "principle": "MORE_ACCESS_REQUIRES_MORE_VERIFIED_CONTROLS",
+  "levels": [
+    {
+      "id": "L0_DEMO",
+      "label": "Demo",
+      "realData": false,
+      "crossOrganization": false,
+      "description": "Datos sintéticos, sin integraciones ni acciones externas reales."
+    },
+    {
+      "id": "L1_ISOLATED",
+      "label": "Operación aislada",
+      "realData": true,
+      "crossOrganization": false,
+      "description": "Una organización puede usar datos reales limitados en un expediente aislado, con tenant y auditoría preparados."
+    },
+    {
+      "id": "L2_VERIFIED",
+      "label": "Empresa verificada",
+      "realData": true,
+      "crossOrganization": false,
+      "description": "Identidad y autenticación reforzadas, secretos, minimización, retención y pruebas de seguridad permiten integraciones OAuth aprobadas y automatización interna segura."
+    },
+    {
+      "id": "L3_SHARED",
+      "label": "Operación compartida",
+      "realData": true,
+      "crossOrganization": true,
+      "description": "Permite compartir campos no personales entre organizaciones verificadas mediante finalidad, caducidad, revocación y aislamiento interempresa probado."
+    },
+    {
+      "id": "L4_ADVANCED",
+      "label": "Flujo avanzado",
+      "realData": true,
+      "crossOrganization": true,
+      "description": "Puede habilitar flujos con datos personales cuando exista revisión jurídica y de seguridad específica. Los datos críticos siguen fuera del intercambio interempresa."
+    }
+  ],
+  "permanentBoundaries": {
+    "criticalDataCrossOrganization": false,
+    "credentialsOrSecretsInAiPrompts": false,
+    "fiaCustodiesFunds": false,
+    "fiaMovesFunds": false,
+    "clientSideHidingAsSecurityControl": false
+  }
+}

@@ -18,6 +18,8 @@
 
 <section class="notice financial"><strong>Frontera financiera FIA</strong><p>FIA no recibe, custodia ni mueve fondos. Los pagos reales se ejecutan mediante un proveedor de servicios de pago o entidad financiera legalmente habilitada.</p></section>
 
+<section class="notice trust-level"><strong>Nivel de seguridad demostrado: L3_SHARED</strong><p>En FIA, más acceso requiere más controles verificados. Este ejemplo representa una operación compartida con finalidad, caducidad, revocación e aislamiento interempresa.</p></section>
+
 <nav class="tabs" aria-label="Vistas de la operación">
   <button type="button" class="active" data-tab="operation">Operación</button>
   <button type="button" data-tab="access">Quién ve qué</button>
@@ -28,21 +30,21 @@
 <section class="panel active" data-panel="operation">
   <div class="metrics">
     <article><small>Estado</small><strong>IN_PROGRESS</strong></article>
-    <article><small>Importe informado</small><strong>72.400 €</strong></article>
+    <article><small>Nivel seguridad</small><strong>L3_SHARED</strong></article>
     <article><small>Participantes</small><strong>2</strong></article>
     <article><small>Campos compartidos</small><strong>2</strong></article>
   </div>
   <div class="grid">
-    <article><h2>Objeto</h2><dl><div><dt>Referencia</dt><dd>TR-8472</dd></div><div><dt>Tipo</dt><dd>Maquinaria agrícola</dd></div><div><dt>Ventana entrega</dt><dd>15–18 sep 2026</dd></div></dl></article>
+    <article><h2>Objeto</h2><dl><div><dt>Referencia</dt><dd>TR-8472</dd></div><div><dt>Tipo</dt><dd>Maquinaria agrícola</dd></div><div><dt>Importe informado</dt><dd>72.400 €</dd></div><div><dt>Ventana entrega</dt><dd>15–18 sep 2026</dd></div></dl></article>
     <article><h2>Siguiente control</h2><p>Esperando confirmación de preparación por empresa colaboradora.</p><span class="pill human">APROBACIÓN HUMANA EN ACCIONES CRÍTICAS</span></article>
   </div>
 </section>
 
 <section class="panel" data-panel="access" hidden>
   <h2>Quién puede ver cada dato</h2>
-  <div class="access-card owner"><strong>Empresa ancla</strong><p>Acceso a su expediente completo.</p><ul><li>Referencia operación</li><li>Importe</li><li>Cliente</li><li>Documentación interna</li><li>Historial y evidencias</li></ul></div>
-  <div class="access-card partner"><strong>Empresa colaboradora</strong><p>Permiso temporal: preparación y entrega.</p><ul><li>Referencia máquina: TR-8472</li><li>Ventana de entrega: 15–18 sep</li></ul><p class="denied">NO VE: cliente, precio, margen, emails ni otros documentos.</p></div>
-  <p class="note">El acceso entre organizaciones es DENY por defecto. Los permisos tienen finalidad, caducidad y revocación.</p>
+  <div class="access-card owner"><strong>Empresa ancla · L3_SHARED</strong><p>Acceso a su expediente completo.</p><ul><li>Referencia operación</li><li>Importe</li><li>Cliente</li><li>Documentación interna</li><li>Historial y evidencias</li></ul></div>
+  <div class="access-card partner"><strong>Empresa colaboradora · L3_SHARED</strong><p>Permiso temporal: preparación y entrega.</p><ul><li>Referencia máquina: TR-8472</li><li>Ventana de entrega: 15–18 sep</li></ul><p class="denied">NO VE: cliente, precio, margen, emails ni otros documentos.</p></div>
+  <p class="note">El acceso entre organizaciones es DENY por defecto. L3_SHARED es el nivel mínimo para compartir campos no personales y los permisos tienen finalidad, caducidad y revocación.</p>
 </section>
 
 <section class="panel" data-panel="trace" hidden>
@@ -50,24 +52,37 @@
   <ol class="timeline">
     <li><time>09:42</time><span><b>Operación creada</b><small>Empresa ancla · actor identificado</small></span></li>
     <li><time>09:47</time><span><b>Referencia registrada</b><small>TR-8472 · dato interno</small></span></li>
-    <li><time>10:12</time><span><b>Permiso compartido aprobado</b><small>2 campos · finalidad: preparación y entrega</small></span></li>
-    <li><time>10:13</time><span><b>Acceso concedido</b><small>Empresa colaboradora · caduca 10/09/2026</small></span></li>
+    <li><time>10:12</time><span><b>Nivel L3 verificado</b><small>Controles de intercambio interempresa superados</small></span></li>
+    <li><time>10:13</time><span><b>Permiso compartido aprobado</b><small>2 campos · finalidad: preparación y entrega</small></span></li>
+    <li><time>10:14</time><span><b>Acceso concedido</b><small>Empresa colaboradora · caduca 10/09/2026</small></span></li>
     <li><time>11:34</time><span><b>Evidencia añadida</b><small>Preparación iniciada · evento auditable</small></span></li>
   </ol>
   <p class="note">La implementación productiva reutiliza el registro de auditoría encadenado de FIA; esta pantalla solo contiene datos sintéticos.</p>
 </section>
 
 <section class="panel" data-panel="security" hidden>
-  <h2>Controles visibles</h2>
+  <h2>Seguridad por niveles</h2>
+  <div class="level-grid" aria-label="Escala FIA Trust">
+    <article class="level done"><small>L0</small><strong>DEMO</strong><span>Sintético</span></article>
+    <article class="level done"><small>L1</small><strong>ISOLATED</strong><span>Operación real aislada</span></article>
+    <article class="level done"><small>L2</small><strong>VERIFIED</strong><span>Empresa e integraciones verificadas</span></article>
+    <article class="level current"><small>L3</small><strong>SHARED</strong><span>Interempresa controlado</span></article>
+    <article class="level locked"><small>L4</small><strong>ADVANCED</strong><span>Datos personales bajo revisión específica</span></article>
+  </div>
+
   <div class="security-list">
     <div><span>Tenant isolation</span><strong>ACTIVO</strong></div>
     <div><span>Cross-organization default</span><strong>DENY</strong></div>
-    <div><span>Datos personales compartidos v1</span><strong>NO</strong></div>
-    <div><span>Datos críticos compartidos v1</span><strong>NO</strong></div>
+    <div><span>Finalidad + caducidad + revocación</span><strong>REQUERIDO</strong></div>
+    <div><span>Datos personales interempresa en L3</span><strong>NO</strong></div>
+    <div><span>Datos críticos interempresa</span><strong>NUNCA</strong></div>
     <div><span>Acciones críticas</span><strong>HUMANO</strong></div>
     <div><span>Custodia/movimiento de fondos FIA</span><strong>NO</strong></div>
     <div><span>Conexiones externas demo</span><strong>DESACTIVADAS</strong></div>
   </div>
+
+  <div class="next-level"><strong>Para L4_ADVANCED</strong><p>Se exigirían revisión jurídica del flujo, condiciones de tratamiento aplicables, subencargados documentados, revisión reforzada de seguridad y validación específica del uso de datos personales.</p></div>
+
   <button type="button" class="danger" data-revoke>Simular revocación de permiso</button>
   <p class="result" data-result aria-live="polite"></p>
 </section>

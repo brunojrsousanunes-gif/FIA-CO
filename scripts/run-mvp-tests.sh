@@ -35,5 +35,7 @@ node tests/proof-pack-viewer-context.test.mjs
 # FIA Trust Transaction / permanent financial boundary
 node tests/financial-boundary.test.mjs
 node tests/financial-copy-boundary.test.mjs
+node tests/trust-security-levels.test.mjs
 node tests/trust-transaction.test.mjs
+node tests/trust-client-view.test.mjs
 node tests/trust-transaction-private-demo.test.mjs
