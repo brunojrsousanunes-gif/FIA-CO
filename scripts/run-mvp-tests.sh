@@ -31,3 +31,9 @@ node tests/recover-pilot-readiness.test.mjs
 node tests/recover-demo.test.mjs
 node tests/proof-pack-access.test.mjs
 node tests/proof-pack-viewer-context.test.mjs
+
+# FIA Trust Transaction / permanent financial boundary
+node tests/financial-boundary.test.mjs
+node tests/financial-copy-boundary.test.mjs
+node tests/trust-transaction.test.mjs
+node tests/trust-transaction-private-demo.test.mjs

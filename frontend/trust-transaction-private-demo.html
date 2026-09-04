@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
+<title>FIA&CO — Trust Transaction Demo privada</title>
+<link rel="stylesheet" href="css/trust-transaction-private-demo.css">
+</head>
+<body>
+<main class="trust-shell">
+<header class="hero">
+  <div><span class="eyebrow">FIA TRUST TRANSACTION · DEMO PRIVADA</span><h1>Operación FIA-0001</h1><p>Una operación aislada para demostrar trazabilidad, permisos y control sin conectar sistemas reales.</p></div>
+  <span class="status">DATOS SINTÉTICOS</span>
+</header>
+
+<section class="notice financial"><strong>Frontera financiera FIA</strong><p>FIA no recibe, custodia ni mueve fondos. Los pagos reales se ejecutan mediante un proveedor de servicios de pago o entidad financiera legalmente habilitada.</p></section>
+
+<nav class="tabs" aria-label="Vistas de la operación">
+  <button type="button" class="active" data-tab="operation">Operación</button>
+  <button type="button" data-tab="access">Quién ve qué</button>
+  <button type="button" data-tab="trace">Trazabilidad</button>
+  <button type="button" data-tab="security">Seguridad</button>
+</nav>
+
+<section class="panel active" data-panel="operation">
+  <div class="metrics">
+    <article><small>Estado</small><strong>IN_PROGRESS</strong></article>
+    <article><small>Importe informado</small><strong>72.400 €</strong></article>
+    <article><small>Participantes</small><strong>2</strong></article>
+    <article><small>Campos compartidos</small><strong>2</strong></article>
+  </div>
+  <div class="grid">
+    <article><h2>Objeto</h2><dl><div><dt>Referencia</dt><dd>TR-8472</dd></div><div><dt>Tipo</dt><dd>Maquinaria agrícola</dd></div><div><dt>Ventana entrega</dt><dd>15–18 sep 2026</dd></div></dl></article>
+    <article><h2>Siguiente control</h2><p>Esperando confirmación de preparación por empresa colaboradora.</p><span class="pill human">APROBACIÓN HUMANA EN ACCIONES CRÍTICAS</span></article>
+  </div>
+</section>
+
+<section class="panel" data-panel="access" hidden>
+  <h2>Quién puede ver cada dato</h2>
+  <div class="access-card owner"><strong>Empresa ancla</strong><p>Acceso a su expediente completo.</p><ul><li>Referencia operación</li><li>Importe</li><li>Cliente</li><li>Documentación interna</li><li>Historial y evidencias</li></ul></div>
+  <div class="access-card partner"><strong>Empresa colaboradora</strong><p>Permiso temporal: preparación y entrega.</p><ul><li>Referencia máquina: TR-8472</li><li>Ventana de entrega: 15–18 sep</li></ul><p class="denied">NO VE: cliente, precio, margen, emails ni otros documentos.</p></div>
+  <p class="note">El acceso entre organizaciones es DENY por defecto. Los permisos tienen finalidad, caducidad y revocación.</p>
+</section>
+
+<section class="panel" data-panel="trace" hidden>
+  <h2>Trazabilidad de la operación</h2>
+  <ol class="timeline">
+    <li><time>09:42</time><span><b>Operación creada</b><small>Empresa ancla · actor identificado</small></span></li>
+    <li><time>09:47</time><span><b>Referencia registrada</b><small>TR-8472 · dato interno</small></span></li>
+    <li><time>10:12</time><span><b>Permiso compartido aprobado</b><small>2 campos · finalidad: preparación y entrega</small></span></li>
+    <li><time>10:13</time><span><b>Acceso concedido</b><small>Empresa colaboradora · caduca 10/09/2026</small></span></li>
+    <li><time>11:34</time><span><b>Evidencia añadida</b><small>Preparación iniciada · evento auditable</small></span></li>
+  </ol>
+  <p class="note">La implementación productiva reutiliza el registro de auditoría encadenado de FIA; esta pantalla solo contiene datos sintéticos.</p>
+</section>
+
+<section class="panel" data-panel="security" hidden>
+  <h2>Controles visibles</h2>
+  <div class="security-list">
+    <div><span>Tenant isolation</span><strong>ACTIVO</strong></div>
+    <div><span>Cross-organization default</span><strong>DENY</strong></div>
+    <div><span>Datos personales compartidos v1</span><strong>NO</strong></div>
+    <div><span>Datos críticos compartidos v1</span><strong>NO</strong></div>
+    <div><span>Acciones críticas</span><strong>HUMANO</strong></div>
+    <div><span>Custodia/movimiento de fondos FIA</span><strong>NO</strong></div>
+    <div><span>Conexiones externas demo</span><strong>DESACTIVADAS</strong></div>
+  </div>
+  <button type="button" class="danger" data-revoke>Simular revocación de permiso</button>
+  <p class="result" data-result aria-live="polite"></p>
+</section>
+
+<footer><p>Vista responsive para demostrar la futura experiencia web/app privada. No usar datos reales en esta demo.</p></footer>
+</main>
+<script src="js/trust-transaction-private-demo.js"></script>
+</body>
+</html>

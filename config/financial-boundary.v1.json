@@ -1,0 +1,46 @@
+{
+  "policyVersion": "financial-boundary.v1",
+  "mode": "NON_CUSTODIAL",
+  "fia": {
+    "receivesClientFunds": false,
+    "custodiesClientFunds": false,
+    "movesClientFunds": false,
+    "holdsClientBalances": false,
+    "issuesPaymentAccounts": false,
+    "guaranteesSettlement": false
+  },
+  "paymentExecution": {
+    "mode": "REGULATED_PROVIDER_ONLY",
+    "allowedProviderTypes": [
+      "CREDIT_INSTITUTION",
+      "PAYMENT_INSTITUTION",
+      "E_MONEY_INSTITUTION",
+      "OTHER_LEGALLY_AUTHORIZED_PSP"
+    ],
+    "providerMustBeVerifiedBeforeProduction": true,
+    "verificationEvidenceRequired": true,
+    "preferredEvidence": [
+      "OFFICIAL_REGISTER_REFERENCE",
+      "AUTHORIZATION_OR_REGISTRATION_REFERENCE",
+      "PROVIDER_LEGAL_TERMS"
+    ]
+  },
+  "customerDisclosure": {
+    "short": "FIA no recibe, custodia ni mueve fondos. Los pagos reales se ejecutan mediante un proveedor de servicios de pago o entidad financiera legalmente habilitada.",
+    "extended": "FIA coordina estados, autorizaciones, evidencias y trazabilidad de la operación, pero no actúa como banco, entidad de pago ni custodio de fondos. Cuando una operación requiera un pago real, la ejecución y, cuando corresponda, la protección de los fondos corresponden al proveedor financiero o de pagos legalmente habilitado seleccionado para la operación.",
+    "mustAppearOnRealPaymentSurfaces": true,
+    "mustAppearInCommercialMaterialWhenPaymentsAreMentioned": true
+  },
+  "prohibitedClaims": [
+    "FIA custodia tu dinero",
+    "FIA guarda los fondos",
+    "FIA garantiza los fondos",
+    "los fondos están en el Banco de España",
+    "el dinero está depositado en el Banco de España"
+  ],
+  "legalNotes": [
+    "No afirmar que el Banco de España mantiene los fondos del cliente.",
+    "La supervisión, autorización o registro del proveedor depende de su tipo y del marco aplicable.",
+    "La salvaguarda de fondos, cuando resulte aplicable a una entidad de pago, corresponde a dicha entidad según la normativa de servicios de pago, no a FIA."
+  ]
+}
