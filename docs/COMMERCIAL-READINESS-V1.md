@@ -17,12 +17,20 @@ FIA&CO organiza el proceso de una operación entre partes para que cada paso, ev
 - evita instrucciones duplicadas en el motor demo;
 - ofrece una experiencia compartida para las partes.
 
-### Qué no debe prometer todavía
-- custodia de dinero;
-- ejecución o intermediación regulada de pagos;
-- garantías financieras;
+### Qué FIA no debe prometer
+- custodia de dinero por FIA;
+- ejecución o intermediación regulada de pagos por FIA;
+- garantías financieras por FIA;
 - verificación legal definitiva de identidad, titularidad o documentación;
 - operación con datos reales hasta completar los controles de producción.
+
+**Frontera permanente:** FIA mantiene un modelo `NON_CUSTODIAL`. Cuando una operación requiera un pago real, la ejecución corresponde a una entidad financiera o proveedor de servicios de pago legalmente habilitado y validado para producción. FIA no debe afirmar que los fondos del cliente están depositados en el Banco de España.
+
+Texto corto aprobado cuando una pantalla o promoción mencione pagos o seguridad económica:
+
+> **FIA no recibe, custodia ni mueve fondos. Los pagos reales se ejecutan mediante un proveedor de servicios de pago o entidad financiera legalmente habilitada.**
+
+La política fuente de verdad es `config/financial-boundary.v1.json` y su gate técnico vive en `core/finance/financial-boundary.mjs`.
 
 ## 2. Pricing y unit economics
 
@@ -58,7 +66,7 @@ La modalidad Plus debe exigir, cuando sea legal y técnicamente aplicable:
 - checklist específico según categoría del activo;
 - escalado obligatorio de incidencias de identidad, titularidad, fraude o documentación.
 
-“Garantía adicional” significa controles y asistencia adicionales; no debe comercializarse como garantía financiera, seguro, custodia o garantía de buen fin salvo que exista cobertura contractual/regulatoria específica.
+“Garantía adicional” significa controles y asistencia adicionales; no debe comercializarse como garantía financiera, seguro, custodia o garantía de buen fin salvo que exista cobertura contractual/regulatoria específica de un tercero habilitado.
 
 ### Benchmark y regla competitiva
 La tarifa no debe publicitarse genéricamente como “más barata que todo el mercado”. Como referencias públicas actuales, Vinted indica una tasa de protección que suele ser 5% + 0,70 €, mientras Milanuncios Express publica 7% + 0,10 €, mínimo 1,70 € y máximo 30 €, pero sus servicios, límites y categorías no son equivalentes a FIA&CO. Por ello, toda comparación comercial deberá hacerse sobre servicios comparables y actualizarse antes de campaña.
@@ -112,11 +120,12 @@ Los materiales de este repositorio son especificaciones de producto, no asesoram
 - cookies/analítica cuando proceda;
 - facturación e impuestos;
 - KYC/AML cuando sea aplicable;
-- encaje regulatorio de cualquier flujo de pago, custodia, escrow, wallet o intermediación;
+- encaje regulatorio de cualquier flujo de pago;
+- proveedor financiero/de pagos y sus responsabilidades;
 - proveedores y contratos de encargado del tratamiento;
 - procedimiento de reclamaciones y consumidores.
 
-**Regla de lanzamiento:** ninguna funcionalidad debe mover/custodiar fondos o presentarse como servicio financiero regulado hasta validación jurídica y técnica específica.
+**Regla permanente:** FIA no debe mover ni custodiar fondos ni presentarse como proveedor financiero regulado. Cualquier pago real se ejecuta fuera de la capacidad financiera de FIA mediante un proveedor legalmente habilitado, sujeto a sus propias obligaciones regulatorias y de protección de fondos cuando correspondan.
 
 ## 6. Producción y seguridad
 
@@ -135,7 +144,9 @@ Gate técnico para datos/usuarios reales:
 - rate limiting y protección antiabuso;
 - política de retención/borrado;
 - plan de respuesta a incidentes;
-- revisión de seguridad previa al lanzamiento.
+- revisión de seguridad previa al lanzamiento;
+- aislamiento de tenant y grants interempresa explícitos;
+- verificación de proveedor financiero antes de habilitar cualquier flujo de pago real.
 
 ## 7. Backoffice operativo
 
@@ -151,7 +162,9 @@ Vista mínima por expediente:
 - bloqueos;
 - última actividad;
 - siguiente acción y fecha objetivo;
-- resultado de cierre.
+- resultado de cierre;
+- frontera financiera `NON_CUSTODIAL`;
+- proveedor de pago seleccionado y estado de verificación cuando aplique.
 
 Colas recomendadas: Nuevas, Esperando cliente, Revisión, Alto Valor/Plus, Bloqueadas, Listas para avanzar, Cerradas.
 
@@ -190,6 +203,7 @@ Preparar y mantener alineados:
 - explicación del proceso;
 - pricing cuando esté validado;
 - explicación transparente de Plus/Alto Valor y sus controles;
+- explicación `NON_CUSTODIAL` cuando se mencione pago o seguridad económica;
 - plantilla de propuesta;
 - seguimiento comercial;
 - registro de objeciones.
@@ -202,7 +216,7 @@ Antes de promoción abierta ejecutar 3–5 pilotos controlados, incluyendo si es
 
 Registrar: objeciones, pasos confusos, documentos solicitados, intervenciones manuales, incidencias, tiempo por etapa, disposición a pagar y recomendación.
 
-No considerar un piloto autorización para mover fondos ni para saltarse los gates jurídico/técnico.
+No considerar un piloto autorización para mover/custodiar fondos ni para saltarse los gates jurídico/técnico.
 
 ## Gate de promoción abierta
 
