@@ -1,0 +1,33 @@
+{
+  "version": "trust-entry-scenarios.v1",
+  "syntheticOnly": true,
+  "scenarios": [
+    {
+      "id": "MACHINERY_OPERATION",
+      "sector": "maquinaria profesional",
+      "entry": "TRUST_TRANSACTION",
+      "title": "Venta de maquinaria con entrega coordinada",
+      "friction": "Una operación de alto valor pasa por varias etapas y cuesta reconstruir quién confirmó cada paso.",
+      "valueMetrics": ["tiempo de ciclo", "incidencias", "eventos trazables", "carga administrativa"],
+      "realDataRequiredForDemo": false
+    },
+    {
+      "id": "WORKSHOP_DOCUMENTS",
+      "sector": "taller / servicio técnico",
+      "entry": "DOCUMENT_FLOW",
+      "title": "Reparación bloqueada por documentación o confirmaciones",
+      "friction": "El trabajo se retrasa porque falta información, aprobación o documentación y se persigue por llamadas y correo.",
+      "valueMetrics": ["tiempo bloqueado", "reenvíos", "llamadas/emails", "horas administrativas"],
+      "realDataRequiredForDemo": false
+    },
+    {
+      "id": "B2B_QUOTES",
+      "sector": "instalación / servicios B2B",
+      "entry": "QUOTE_RECOVERY",
+      "title": "Presupuestos que quedan sin seguimiento",
+      "friction": "Se envían presupuestos y algunos no vuelven a revisarse a tiempo, perdiendo respuestas u oportunidades.",
+      "valueMetrics": ["tiempo a seguimiento", "respuestas", "oportunidades recuperadas", "horas administrativas"],
+      "realDataRequiredForDemo": false
+    }
+  ]
+}
