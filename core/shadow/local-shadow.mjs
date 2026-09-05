@@ -1,4 +1,11 @@
 const SENSITIVE_KEY_PATTERN = /(name|email|phone|mobile|address|dni|nif|passport|iban|account|secret|token|password|credential|message|body|thread|document|file|customer|client)/i;
+const SAFE_METADATA_KEYS = new Set([
+  'sensitiveInputFieldCountDetected',
+  'sourceValuesExported',
+  'identifiersExported',
+  'rawTextExported',
+  'localSourceRetentionByFiaCore'
+]);
 
 function finiteNonNegative(value) {
   const n = Number(value);
@@ -28,7 +35,7 @@ function outputHasForbiddenKey(value) {
   if (Array.isArray(value)) return value.some(outputHasForbiddenKey);
   if (!value || typeof value !== 'object') return false;
   for (const [key, child] of Object.entries(value)) {
-    if (SENSITIVE_KEY_PATTERN.test(key) || /raw|records|rows|items|sourceData/i.test(key)) return true;
+    if (!SAFE_METADATA_KEYS.has(key) && (SENSITIVE_KEY_PATTERN.test(key) || /raw|records|rows|items|sourceData/i.test(key))) return true;
     if (outputHasForbiddenKey(child)) return true;
   }
   return false;
