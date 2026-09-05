@@ -1,0 +1,32 @@
+{
+  "policyVersion": "human-presence-check.v1",
+  "purpose": "FIRST_CONTACT_ABUSE_REDUCTION",
+  "verdicts": ["PENDING", "HUMAN_LIKELY", "INCONCLUSIVE", "AUTOMATION_SUSPECTED"],
+  "principles": {
+    "notIdentityVerification": true,
+    "notTrustLevelElevation": true,
+    "notSecurityBoundaryAlone": true,
+    "noBiometricInference": true,
+    "noBehavioralBiometricStorage": true,
+    "noRawPointerCoordinatesStored": true,
+    "noKeystrokeTimingStored": true,
+    "noFingerprinting": true,
+    "rawInteractionEventsPersisted": false,
+    "coarseSessionSignalsOnly": true,
+    "serverVerificationRequiredForProductionAbuseGate": true
+  },
+  "coarseSignals": [
+    "MASCOT_INTERACTION",
+    "POINTER_OR_TOUCH_PRESENT",
+    "KEYBOARD_OR_FORM_INTERACTION",
+    "PAGE_VISIBLE_AND_FOCUSED",
+    "MINIMUM_SESSION_DURATION",
+    "HONEYPOT_EMPTY"
+  ],
+  "productionFuture": [
+    "SERVER_ISSUED_NONCE",
+    "RATE_LIMIT",
+    "REPLAY_PROTECTION",
+    "OPTIONAL_PRIVACY_REVIEWED_THIRD_PARTY_CHALLENGE"
+  ]
+}
