@@ -13,6 +13,7 @@ css/style.css
 css/home-production.css
 css/unified-app.css
 css/fia-guide.css
+css/fia-purchase-search.css
 css/brand-i18n.css
 css/action-index.css
 
@@ -21,6 +22,7 @@ js/i18n.js
 js/unified-app.js
 js/fia-guide.js
 js/fia-security-search.js
+js/fia-purchase-search.js
 
 # Current public assets
 assets/fia-co-trust-compute.svg
