@@ -66,7 +66,7 @@ export function evaluateInteractionRisk(input = {}, context = {}) {
     ));
   }
 
-  if (/(mueve|mover|custodia|custodiar|transfiere|transferir|retira|retirar|paga desde fia|cobrar desde fia|cobra desde fia).*(fondos|dinero|cuenta|pago)?/.test(text)) {
+  if (/(mueve|mover|mueva|muevas|movimiento de|custodia|custodiar|custodie|custodiar|custodi[eoa]|transfiere|transferir|transfiera|transfieran|retira|retirar|retire|paga desde fia|pague desde fia|cobrar desde fia|cobra desde fia|cobre desde fia).*(fondos|dinero|cuenta|pago)?/.test(text)) {
     signals.push(signal(
       'FINANCIAL_EXECUTION_REQUEST',
       INTERACTION_RISK_CATEGORIES.FINANCIAL_BOUNDARY,
