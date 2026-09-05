@@ -36,6 +36,7 @@ node tests/proof-pack-viewer-context.test.mjs
 node tests/financial-boundary.test.mjs
 node tests/financial-copy-boundary.test.mjs
 node tests/trust-security-levels.test.mjs
+node tests/trust-value-framework.test.mjs
 node tests/trust-transaction.test.mjs
 node tests/trust-client-view.test.mjs
 node tests/trust-transaction-private-demo.test.mjs
@@ -43,3 +44,4 @@ node tests/trust-transaction-private-demo.test.mjs
 # FIA Trust Entry / first-manager hook
 node tests/trust-entry.test.mjs
 node tests/trust-entry-private-demo.test.mjs
+node tests/commercial-readiness-trust.test.mjs

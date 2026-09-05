@@ -1,5 +1,6 @@
 import { normalizeAccessContext } from '../identity/access-control.mjs';
 import { getTrustTransactionView, buildWhoSeesWhat } from './trust-transaction.mjs';
+import { buildTrustValueProgression } from './trust-value-framework.mjs';
 
 const OWNER_ROLES = new Set(['OWNER', 'ADMIN']);
 
@@ -82,6 +83,10 @@ export function buildTrustClientSnapshot(input = {}, options = {}) {
         .map(safeAuditEvent)
     : [];
 
+  const valueProgression = options.viewerSecurityProfile
+    ? buildTrustValueProgression(options.viewerSecurityProfile)
+    : null;
+
   return Object.freeze({
     schemaVersion: 'trust-client-snapshot.v1',
     generatedAt: clean(options.now || new Date().toISOString(), 40),
@@ -105,6 +110,7 @@ export function buildTrustClientSnapshot(input = {}, options = {}) {
       sourceDataFilteredBeforeClient: true,
       clientSideHidingIsSecurityBoundary: false
     }),
+    valueProgression: valueProgression ? clone(valueProgression) : null,
     auditTimeline: auditEvents,
     financialBoundary: clone(trustView.financialBoundary)
   });

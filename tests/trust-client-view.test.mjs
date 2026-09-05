@@ -110,6 +110,10 @@ assert.deepEqual(Object.keys(ownerSnapshot.transaction.fields).sort(), ['amount'
 assert.ok(ownerSnapshot.security.whoSeesWhat.organizations.some(item => item.organizationId === 'org-b'));
 assert.equal(ownerSnapshot.financialBoundary.mode, 'NON_CUSTODIAL');
 assert.equal(ownerSnapshot.financialBoundary.fia.custodiesClientFunds, false);
+assert.equal(ownerSnapshot.valueProgression.current.level, 'L3_SHARED');
+assert.equal(ownerSnapshot.valueProgression.next.level, 'L4_ADVANCED');
+assert.match(ownerSnapshot.valueProgression.current.utility.join(' '), /dos empresas|Compartir/i);
+assert.equal(ownerSnapshot.valueProgression.claimsPolicy.valueMustBeMeasuredAgainstBaseline, true);
 
 const ownerViewerSnapshot = buildTrustClientSnapshot({
   operation,
@@ -135,6 +139,7 @@ assert.equal(partnerSnapshot.auditTimeline.length, 0);
 assert.equal(partnerSnapshot.security.whoSeesWhat, null);
 assert.equal('amount' in partnerSnapshot.transaction.fields, false);
 assert.equal('clientEmail' in partnerSnapshot.transaction.fields, false);
+assert.equal(partnerSnapshot.valueProgression.current.level, 'L3_SHARED');
 
 assert.throws(() => buildTrustClientSnapshot({
   operation,
