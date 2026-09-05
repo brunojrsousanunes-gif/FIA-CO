@@ -1,0 +1,38 @@
+{
+  "version": "trust-control-evidence-policy.v1",
+  "defaultDecision": "NOT_SATISFIED_WITHOUT_VALID_EVIDENCE",
+  "automatedEvidenceCanSatisfy": [
+    "tenantBoundaryReady",
+    "auditReady",
+    "strongAuthenticationReady",
+    "secretsManaged",
+    "dataMinimizationReady",
+    "retentionPolicyReady",
+    "securityTestsPassed",
+    "dataPermitsReady",
+    "grantExpiryReady",
+    "grantRevocationReady",
+    "purposeLimitationReady",
+    "crossOrgIsolationTestsPassed"
+  ],
+  "requiresUserHumanOrExternalEvidenceLater": [
+    "organizationIdentified",
+    "termsAccepted",
+    "incidentContactDefined",
+    "identityVerified",
+    "partnerIdentityVerified",
+    "legalRoleValidated",
+    "processorTermsReady",
+    "subprocessorsDocumented",
+    "personalDataWorkflowReviewed",
+    "enhancedSecurityReviewPassed",
+    "regulatedProviderGateReady"
+  ],
+  "rules": {
+    "expiredEvidence": "DENY",
+    "invalidDigest": "DENY",
+    "missingEvidence": "DENY",
+    "humanOrExternalEvidenceAutoElevatesByDefault": false,
+    "selfDeclaredExternalVerificationAccepted": false
+  }
+}
