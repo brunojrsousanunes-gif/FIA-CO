@@ -24,6 +24,7 @@ node tests/preprod-audit-evidence-contract.test.mjs
 node tests/preprod-technical-gate.test.mjs
 node tests/preprod-observability-recovery.test.mjs
 node tests/preprod-session-token.test.mjs
+node tests/preprod-client-service.test.mjs
 node tests/kill-switch.test.mjs
 node tests/retention-policy.test.mjs
 node tests/incident-response.test.mjs
