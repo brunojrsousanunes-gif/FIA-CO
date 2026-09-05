@@ -1,32 +1,22 @@
-# Current public routes
+# Public routes
 index.html
-beta-mobile.html
-app-beta.html
-integrations.html
-tx-advanced.html
 legal-center.html
 robots.txt
 sitemap.xml
 
-# Current public styles
+# Public styles
 css/style.css
 css/home-production.css
-css/unified-app.css
 css/fia-guide.css
-css/fia-purchase-search.css
 css/fia-human-presence.css
 css/fia-first-contact.css
 css/brand-i18n.css
 css/action-index.css
 
-# Current public scripts
-js/i18n.js
-js/unified-app.js
-js/fia-guide.js
-js/fia-security-search.js
-js/fia-purchase-search.js
+# Public scripts
+js/fia-public-guide.js
 js/fia-human-presence.js
 js/fia-first-contact.js
 
-# Current public assets
+# Public assets
 assets/fia-co-trust-compute.svg
