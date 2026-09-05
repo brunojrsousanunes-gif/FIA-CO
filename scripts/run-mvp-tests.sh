@@ -6,6 +6,7 @@ node tests/homepage-v2.test.mjs
 node tests/unified-app.test.js
 node tests/action-index-legal.test.js
 node tests/v1-consolidation-scan.test.js
+node tests/fia-guide.test.mjs
 
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
@@ -29,6 +30,7 @@ node tests/kill-switch.test.mjs
 node tests/retention-policy.test.mjs
 node tests/incident-response.test.mjs
 node tests/authorized-ai-context.test.mjs
+node tests/interaction-risk-engine.test.mjs
 
 # FIA Recover / Founding Demonstrator contracts
 node tests/recover-engine.test.mjs
@@ -49,6 +51,7 @@ node tests/trust-value-framework.test.mjs
 node tests/trust-control-evidence.test.mjs
 node tests/trust-control-evidence-policy.test.mjs
 node tests/trust-evidence-manifest.test.mjs
+node tests/trust-capability-search.test.mjs
 node tests/trust-transaction.test.mjs
 node tests/trust-client-view.test.mjs
 node tests/trust-client-control-evidence.test.mjs
