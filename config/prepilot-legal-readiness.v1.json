@@ -1,0 +1,17 @@
+{
+  "version": "prepilot-legal-readiness.v1",
+  "status": "REVIEW_REQUIRED",
+  "autoApprovalAllowed": false,
+  "items": [
+    { "id": "processing_roles", "status": "REVIEW_REQUIRED", "description": "Determinar responsable/encargado u otros roles por tratamiento." },
+    { "id": "pilot_terms", "status": "DRAFT_REQUIRED", "description": "Acuerdo y alcance del piloto." },
+    { "id": "privacy_information", "status": "DRAFT_REQUIRED", "description": "Información de privacidad, finalidad, conservación y derechos aplicables." },
+    { "id": "processor_terms", "status": "REVIEW_REQUIRED", "description": "Contrato de encargado/DPA cuando corresponda." },
+    { "id": "subprocessors", "status": "REVIEW_REQUIRED", "description": "Inventario y condiciones de subencargados/proveedores." },
+    { "id": "communications_basis", "status": "REVIEW_REQUIRED", "description": "Base y reglas para comunicaciones comerciales/operativas." },
+    { "id": "incident_obligations", "status": "REVIEW_REQUIRED", "description": "Procedimiento y obligaciones ante incidentes/brechas." },
+    { "id": "proof_pack_reuse", "status": "DRAFT_REQUIRED", "description": "Autorización separada para reutilización identificada/anonimizada del caso." },
+    { "id": "financial_boundary", "status": "POLICY_DEFINED_REVIEW_REQUIRED", "description": "FIA permanece NON_CUSTODIAL y no se presenta como proveedor financiero." }
+  ],
+  "rule": "Ningún estado de este archivo equivale a asesoramiento, aprobación jurídica o cumplimiento certificado."
+}
