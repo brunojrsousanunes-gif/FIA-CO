@@ -10,8 +10,7 @@ function boundaries() {
     identityVerified: false,
     trustLevelElevated: false,
     productionSecurityBoundary: false,
-    ddosMitigation: false,
-    intendedUse: 'BOT_AND_FIRST_CONTACT_ABUSE_SIGNAL'
+    intendedUse: 'FIRST_CONTACT_HUMAN_PRESENCE_SIGNAL'
   });
 }
 
