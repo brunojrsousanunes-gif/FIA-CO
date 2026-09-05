@@ -1,0 +1,140 @@
+{
+  "version": "synthetic-pilot-rehearsals.v1",
+  "syntheticOnly": true,
+  "cases": [
+    {
+      "id": "MACHINERY_TRUST_TRANSACTION",
+      "expectedEntry": "TRUST_TRANSACTION",
+      "operationKind": "machinery-sale",
+      "discoverySignals": {
+        "traceabilityPain": 3,
+        "operationComplexity": 3,
+        "highTicketRisk": 3,
+        "needForAuditability": 3,
+        "followUpPain": 1,
+        "documentVolume": 1,
+        "partnerFrequency": 1
+      },
+      "requestedFields": [
+        {"key":"operation_ref","purpose":"Identificar la operación sintética","classification":"INTERNAL","required":true},
+        {"key":"asset_category","purpose":"Clasificar el activo sin identificar a una persona","classification":"INTERNAL","required":true},
+        {"key":"operation_status","purpose":"Mostrar el estado trazable","classification":"INTERNAL","required":true}
+      ],
+      "metricKeys": ["cycle_hours","traceable_events","administrative_minutes","incidents"],
+      "syntheticOperation": {"amount":72400,"currency":"EUR","buyer":"synthetic-buyer","seller":"synthetic-seller"},
+      "syntheticFields": [
+        {"key":"operation_ref","label":"Referencia","classification":"INTERNAL","value":"SYN-MACH-001"},
+        {"key":"asset_category","label":"Categoría","classification":"INTERNAL","value":"tractor"},
+        {"key":"operation_status","label":"Estado","classification":"INTERNAL","value":"IN_PROGRESS"}
+      ],
+      "shadowRecords": [
+        {"cycleHours":30,"blocked":false,"missingRequiredInput":false,"amount":72400},
+        {"cycleHours":42,"blocked":true,"missingRequiredInput":true,"amount":53000},
+        {"cycleHours":24,"blocked":false,"missingRequiredInput":false,"amount":61000}
+      ],
+      "economicEvents": [
+        {"type":"HUMAN_MINUTES","amount":35},
+        {"type":"AI_COST","amount":0.08},
+        {"type":"INFRA_COST","amount":0}
+      ]
+    },
+    {
+      "id": "WORKSHOP_DOCUMENT_FLOW",
+      "expectedEntry": "DOCUMENT_FLOW",
+      "operationKind": "workshop-service",
+      "discoverySignals": {
+        "documentVolume": 3,
+        "missingDocumentPain": 3,
+        "reworkPain": 3,
+        "documentWaitingTime": 3,
+        "traceabilityPain": 1,
+        "followUpPain": 1,
+        "partnerFrequency": 1
+      },
+      "requestedFields": [
+        {"key":"job_ref","purpose":"Identificar el trabajo sintético","classification":"INTERNAL","required":true},
+        {"key":"required_item_state","purpose":"Saber qué elemento documental bloquea el trabajo","classification":"INTERNAL","required":true},
+        {"key":"service_state","purpose":"Medir tiempo de ciclo y bloqueo","classification":"INTERNAL","required":true}
+      ],
+      "metricKeys": ["blocked_hours","missing_items","rework_events","administrative_minutes"],
+      "syntheticOperation": {"amount":2850,"currency":"EUR","buyer":"synthetic-customer","seller":"synthetic-workshop"},
+      "syntheticFields": [
+        {"key":"job_ref","label":"Trabajo","classification":"INTERNAL","value":"SYN-WRK-014"},
+        {"key":"required_item_state","label":"Elemento pendiente","classification":"INTERNAL","value":"PENDING"},
+        {"key":"service_state","label":"Estado","classification":"INTERNAL","value":"BLOCKED"}
+      ],
+      "shadowRecords": [
+        {"cycleHours":18,"blocked":true,"missingRequiredInput":true},
+        {"cycleHours":9,"blocked":false,"missingRequiredInput":false},
+        {"cycleHours":26,"blocked":true,"missingRequiredInput":true}
+      ],
+      "economicEvents": [
+        {"type":"HUMAN_MINUTES","amount":28},
+        {"type":"AI_COST","amount":0.05}
+      ]
+    },
+    {
+      "id": "B2B_QUOTE_RECOVERY",
+      "expectedEntry": "QUOTE_RECOVERY",
+      "operationKind": "b2b-quote",
+      "discoverySignals": {
+        "quoteVolume": 3,
+        "followUpPain": 3,
+        "lostOpportunityRisk": 3,
+        "manualCommercialWork": 3,
+        "traceabilityPain": 1,
+        "documentVolume": 1,
+        "partnerFrequency": 0
+      },
+      "requestedFields": [
+        {"key":"quote_ref","purpose":"Identificar el presupuesto sintético","classification":"INTERNAL","required":true},
+        {"key":"quote_status","purpose":"Controlar el seguimiento","classification":"INTERNAL","required":true},
+        {"key":"next_follow_up_bucket","purpose":"Medir el próximo seguimiento sin contacto personal","classification":"INTERNAL","required":true}
+      ],
+      "metricKeys": ["follow_up_rate","response_rate","first_follow_up_hours","administrative_minutes"],
+      "syntheticOperation": {"amount":11800,"currency":"EUR","buyer":"synthetic-company-buyer","seller":"synthetic-service-provider"},
+      "syntheticFields": [
+        {"key":"quote_ref","label":"Presupuesto","classification":"INTERNAL","value":"SYN-Q-221"},
+        {"key":"quote_status","label":"Estado","classification":"INTERNAL","value":"WAITING"},
+        {"key":"next_follow_up_bucket","label":"Seguimiento","classification":"INTERNAL","value":"48H"}
+      ],
+      "shadowRecords": [
+        {"followedUp":true,"responded":true,"amount":11800},
+        {"followedUp":true,"responded":false,"amount":6400},
+        {"followedUp":false,"responded":false,"amount":9200},
+        {"followedUp":false,"responded":false,"amount":4700}
+      ],
+      "economicEvents": [
+        {"type":"HUMAN_MINUTES","amount":22},
+        {"type":"AI_COST","amount":0.06}
+      ]
+    },
+    {
+      "id": "PARTNER_COORDINATION_FUTURE",
+      "expectedEntry": "PARTNER_COORDINATION",
+      "operationKind": "cross-company-handoff",
+      "discoverySignals": {
+        "partnerFrequency": 3,
+        "handoffFriction": 3,
+        "callsAndEmailsPain": 3,
+        "crossCompanyWaitingTime": 3,
+        "traceabilityPain": 1,
+        "followUpPain": 0,
+        "documentVolume": 1
+      },
+      "requestedFields": [
+        {"key":"handoff_ref","purpose":"Identificar un handoff sintético","classification":"INTERNAL","required":true}
+      ],
+      "metricKeys": ["handoff_hours","calls_emails","waiting_hours"],
+      "syntheticOperation": {"amount":5000,"currency":"EUR","buyer":"synthetic-a","seller":"synthetic-b"},
+      "syntheticFields": [
+        {"key":"handoff_ref","label":"Handoff","classification":"INTERNAL","value":"SYN-H-008"}
+      ],
+      "shadowRecords": [
+        {"handoffHours":15,"blocked":true},
+        {"handoffHours":9,"blocked":false}
+      ],
+      "economicEvents": []
+    }
+  ]
+}
