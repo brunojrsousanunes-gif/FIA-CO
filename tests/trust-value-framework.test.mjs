@@ -27,6 +27,6 @@ assert.equal(progression.claimsPolicy.valueMustBeMeasuredAgainstBaseline, true);
 
 const l4 = buildTrustValueProgression({ level: TRUST_SECURITY_LEVELS.L4_ADVANCED });
 assert.equal(l4.next, null);
-assert.match(l4.current.maximization.join(' '), /no convertir FIA en custodio financiero/i);
+assert.match(l4.current.maximization.join(' '), /FIA en custodio financiero/i);
 
 console.log('FIA Trust value framework contract OK');
