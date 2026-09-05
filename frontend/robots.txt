@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /beta-mobile.html
+Disallow: /app-beta.html
+Disallow: /integrations.html
+Disallow: /tx-advanced.html
 
 Sitemap: https://brunojrsousanunes-gif.github.io/FIA-CO/sitemap.xml
