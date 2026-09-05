@@ -1,234 +1,335 @@
 # FIA&CO — Commercial Readiness v1
 
-Estado: precomercialización. Este documento convierte la preparación comercial en un sistema operativo verificable antes de promoción abierta.
+Estado: `PRECOMMERCIAL / FOUNDING_DEMONSTRATOR_PENDING`.
 
-## 1. Propuesta comercial
+Este documento define cómo presentar FIA antes de promoción abierta. La estrategia actual es B2B local, con varias puertas de entrada reutilizando un único núcleo de seguridad, operaciones, permisos, auditoría y medición.
+
+## 1. Propuesta comercial actual
 
 ### Cliente inicial
-Particulares y, en una fase posterior, profesionales que necesitan coordinar una compraventa de un activo con evidencias, hitos, incidencias y trazabilidad entre las partes.
 
-### Promesa
-FIA&CO organiza el proceso de una operación entre partes para que cada paso, evidencia, bloqueo y autorización quede visible y trazable.
+Empresas B2B pequeñas y medianas con alguno de estos problemas:
 
-### Qué hace
-- estructura la operación y sus estados;
-- recoge evidencias y requisitos mínimos;
-- detecta incidencias que impiden avanzar;
-- evita instrucciones duplicadas en el motor demo;
-- ofrece una experiencia compartida para las partes.
+- presupuestos que se quedan sin seguimiento;
+- operaciones importantes difíciles de coordinar;
+- documentación que genera esperas, llamadas o errores;
+- colaboración frecuente con talleres, transporte, renting, proveedores u otros partners;
+- exceso de trabajo manual alrededor de procesos repetitivos.
 
-### Qué FIA no debe prometer
-- custodia de dinero por FIA;
-- ejecución o intermediación regulada de pagos por FIA;
-- garantías financieras por FIA;
-- verificación legal definitiva de identidad, titularidad o documentación;
-- operación con datos reales hasta completar los controles de producción.
+Sectores iniciales de exploración:
 
-**Frontera permanente:** FIA mantiene un modelo `NON_CUSTODIAL`. Cuando una operación requiera un pago real, la ejecución corresponde a una entidad financiera o proveedor de servicios de pago legalmente habilitado y validado para producción. FIA no debe afirmar que los fondos del cliente están depositados en el Banco de España.
+- maquinaria profesional/agrícola;
+- talleres, recambios y servicio técnico;
+- instaladores, reformas y servicios B2B;
+- transporte/logística;
+- renting/financiación como partner cuando aparezca dentro de una operación real.
 
-Texto corto aprobado cuando una pantalla o promoción mencione pagos o seguridad económica:
+No depender de un único sector ni de una única puerta de entrada.
+
+## 2. Arquitectura comercial: Seguridad -> Utilidad -> Maximización
+
+Principio:
+
+> **Más seguridad verificada permite más acceso autorizado; más acceso autorizado permite más utilidad; la utilidad medida permite maximizar progresivamente el proceso.**
+
+Cada propuesta debe responder:
+
+1. qué riesgo se controla;
+2. qué capacidad concreta se desbloquea;
+3. qué métrica demostrará que esa capacidad merece ampliarse.
+
+No vender seguridad como un producto separado ni maximización como una promesa genérica.
+
+Fuente: `docs/FIA-SECURITY-UTILITY-MAXIMIZATION-V1.md`.
+
+## 3. Puertas de entrada
+
+FIA mantiene un núcleo común y varias formas de demostrar valor.
+
+### A. Trust Transaction
+
+Gancho:
+
+> probar una operación aislada y ver cada permiso, evento y evidencia sin conectar toda la empresa.
+
+Valor a medir:
+
+- trazabilidad;
+- tiempo de coordinación;
+- incidencias;
+- accesos y revocaciones;
+- carga administrativa.
+
+### B. Quote Recovery
+
+Gancho:
+
+> evitar que presupuestos u oportunidades queden olvidados.
+
+Valor a medir:
+
+- presupuestos seguidos;
+- tiempo a seguimiento;
+- respuestas;
+- oportunidades recuperadas;
+- valor `CONFIRMED / ASSISTED / ESTIMATED`;
+- horas administrativas.
+
+### C. Document Flow
+
+Gancho:
+
+> saber qué documento falta, quién debe aportarlo y qué bloquea una operación.
+
+Valor a medir:
+
+- documentos pendientes;
+- tiempo de ciclo;
+- errores/reenvíos;
+- llamadas/emails;
+- horas administrativas.
+
+No productizar todavía este módulo sin evidencia de piloto.
+
+### D. Partner Coordination
+
+Gancho:
+
+> coordinar dos empresas sin compartir toda la información de ninguna de ellas.
+
+Valor a medir:
+
+- llamadas/emails evitados;
+- esperas;
+- incidencias;
+- tiempo de handoff;
+- reutilización del flujo con partners recurrentes.
+
+Requiere nivel `L3_SHARED`; no forma parte de la primera operación real.
+
+## 4. FIA Trust Levels
+
+### L0_DEMO
+
+- datos sintéticos;
+- sin credenciales;
+- sin integraciones;
+- sin acciones reales.
+
+Objetivo: comprender el proceso y seleccionar un problema medible.
+
+### L1_ISOLATED
+
+- una empresa;
+- una operación;
+- datos mínimos;
+- auditoría;
+- sin intercambio interempresa.
+
+Objetivo: demostrar utilidad real con riesgo limitado.
+
+### L2_VERIFIED
+
+- identidad/autenticación reforzada;
+- secretos/minimización/retención;
+- integraciones oficiales aprobadas;
+- automatización interna segura.
+
+Objetivo: optimizar tareas que L1 ya demostró valiosas.
+
+### L3_SHARED
+
+- aislamiento interempresa probado;
+- partner verificado;
+- finalidad, campos, caducidad y revocación;
+- acceso `DENY` por defecto.
+
+Objetivo: coordinar dos organizaciones con información mínima.
+
+### L4_ADVANCED
+
+- revisión jurídica/técnica reforzada;
+- flujos personales específicos;
+- subencargados documentados;
+- datos críticos fuera del intercambio interempresa.
+
+Objetivo: orquestar procesos de mayor complejidad solo con evidencia y controles suficientes.
+
+## 5. Frontera financiera permanente
+
+FIA mantiene modelo `NON_CUSTODIAL` en todos los niveles.
 
 > **FIA no recibe, custodia ni mueve fondos. Los pagos reales se ejecutan mediante un proveedor de servicios de pago o entidad financiera legalmente habilitada.**
 
-La política fuente de verdad es `config/financial-boundary.v1.json` y su gate técnico vive en `core/finance/financial-boundary.mjs`.
+FIA no debe afirmar que los fondos del cliente están depositados en el Banco de España.
 
-## 2. Pricing y unit economics
+La política fuente de verdad es `config/financial-boundary.v1.json`.
 
-### Tarifa de introducción
-Hipótesis comercial para pilotos y lanzamiento, sujeta a validación jurídica, fiscal y de unit economics:
+## 6. Precio: hipótesis de Founding Demonstrator
 
-- hasta 2.999 €: 2,9% del valor, mínimo 0,99 € y máximo 19,90 €;
-- desde 3.000 €: la operación pasa a modalidad **FIA&CO Plus / Alto Valor**, con controles adicionales y tarifa específica.
+No publicar aún una tarifa general.
 
-### FIA&CO Plus / Alto Valor
-Objetivo: monetizar el trabajo y riesgo operativo adicional sin perder el posicionamiento de precio bajo.
+Hipótesis de trabajo para primeros demostradores B2B:
 
-Hipótesis inicial:
+- setup promocional: `0–99 EUR` cuando el alcance sea limitado;
+- mensualidad piloto: `79–129 EUR/mes`;
+- después de validación: estudiar setup `199–499 EUR` y `149–249 EUR/mes` para workflows de recuperación/operación reutilizables;
+- FIA Ops de mayor complejidad se valorará después de evidencia real.
 
-- 3.000–4.999 €: 0,95%, mínimo 24,90 €, máximo 39,90 €;
-- 5.000–9.999 €: 0,75%, mínimo 39,90 €, máximo 59,90 €;
-- 10.000–24.999 €: 0,55%, mínimo 59,90 €, máximo 99,90 €;
-- 25.000 € o más: 0,35%, mínimo 99,90 €, con tope promocional inicial de 199,90 €.
+El descuento compra colaboración, medición y aprendizaje; no un testimonio positivo.
 
-Los porcentajes decrecen con el valor para evitar que la comisión crezca desproporcionadamente. Estos precios son hipótesis de penetración, no tarifas definitivas.
+No escalar adquisición pagada hasta demostrar:
 
-### Controles adicionales para Alto Valor
-La modalidad Plus debe exigir, cuando sea legal y técnicamente aplicable:
+- disposición a pagar;
+- margen de contribución positivo;
+- soporte humano sostenible;
+- reutilización del flujo.
 
-- verificación reforzada de identidad de las partes mediante proveedor adecuado;
-- comprobación reforzada de evidencias/documentación del expediente;
-- revisión de coherencia entre titularidad declarada, activo y contraparte cuando proceda;
-- doble confirmación en hitos críticos;
-- revisión humana antes de liberar cualquier instrucción crítica;
-- registro de auditoría reforzado;
-- detección y bloqueo de duplicidades/anomalías;
-- canal de soporte prioritario durante la operación;
-- checklist específico según categoría del activo;
-- escalado obligatorio de incidencias de identidad, titularidad, fraude o documentación.
+## 7. Funnel inicial
 
-“Garantía adicional” significa controles y asistencia adicionales; no debe comercializarse como garantía financiera, seguro, custodia o garantía de buen fin salvo que exista cobertura contractual/regulatoria específica de un tercero habilitado.
+`DISCOVERY -> L0_DEMO -> CANDIDATE_OPERATION -> L1_ISOLATED -> REVIEW -> NEXT_LEVEL_OR_STOP -> PAID_CONTINUATION`
 
-### Benchmark y regla competitiva
-La tarifa no debe publicitarse genéricamente como “más barata que todo el mercado”. Como referencias públicas actuales, Vinted indica una tasa de protección que suele ser 5% + 0,70 €, mientras Milanuncios Express publica 7% + 0,10 €, mínimo 1,70 € y máximo 30 €, pero sus servicios, límites y categorías no son equivalentes a FIA&CO. Por ello, toda comparación comercial deberá hacerse sobre servicios comparables y actualizarse antes de campaña.
+Reglas:
 
-Milanuncios Express publica actualmente un máximo de valor de artículo de 2.400 €, por lo que el tramo FIA&CO desde 3.000 € debe tratarse como una propuesta de alto valor distinta y no como comparación directa.
+- discovery no solicita datos sensibles;
+- L0 usa solo información sintética;
+- una operación candidata debe tener problema y métrica claros;
+- L1 no salta a integración completa;
+- cada aumento de nivel requiere utilidad demostrada y controles adicionales;
+- STOP es un resultado válido si no existe valor suficiente.
 
-### Unit economics
-Antes de activar precios reales registrar por operación: ingreso, minutos de soporte, coste de PSP/proveedores, KYC/verificación, revisión humana, incidencias, fraude/reembolsos y margen bruto. No escalar adquisición pagada hasta demostrar margen de contribución positivo.
+## 8. Primera reunión
 
-## 3. Funnel
+Objetivo:
 
-`LEAD -> QUALIFIED -> OPPORTUNITY -> PROPOSAL -> ONBOARDING -> ACTIVE_OPERATION -> CLOSED -> REPEAT/REFERRAL`
+> conseguir una conversación de 15 minutos con la persona que decide y detectar un problema que pueda medirse.
 
-Criterios mínimos:
+No abrir con “IA”, “n8n”, “agentes” o una lista de funcionalidades.
 
-- LEAD: contacto y consentimiento de seguimiento.
-- QUALIFIED: caso de uso, partes, activo y necesidad compatibles.
-- OPPORTUNITY: intención y horizonte temporal identificados.
-- PROPOSAL: alcance, precio y exclusiones comunicados.
-- ONBOARDING: datos/documentos mínimos solicitados y términos aceptados cuando proceda.
-- ACTIVE_OPERATION: expediente creado y responsable asignado.
-- CLOSED: operación cerrada/cancelada con motivo registrado.
+Orden recomendado:
 
-Todo lead debe tener estado, responsable, fecha de última acción y siguiente acción.
+1. entender cómo gestionan presupuestos/operaciones/documentación;
+2. identificar fricción;
+3. enseñar Trust Entry con datos ficticios;
+4. relacionar seguridad, utilidad y medición;
+5. si existe encaje, proponer una única operación L1;
+6. si no existe encaje, no pedir accesos.
 
-## 4. Onboarding
+## 9. Mensaje comercial de trabajo
 
-Checklist mínima antes de una operación real:
+No es un eslogan definitivo.
 
-- identificar a las partes y su rol;
-- registrar medio de contacto y consentimiento aplicable;
-- describir activo/operación y valor orientativo;
-- recopilar solo documentación necesaria;
-- informar finalidad, conservación y tratamiento de datos;
-- aceptar términos vigentes;
-- registrar incidencias/conflictos;
-- crear expediente con identificador no sensible;
-- impedir avance si falta un requisito obligatorio;
-- activar automáticamente el checklist Plus si el valor es >= 3.000 €.
+Versión conceptual:
 
-No usar documentación real en la demo pública.
+> **FIA aumenta progresivamente la capacidad operativa de una empresa: protege y hace trazable el proceso, después automatiza o conecta aquello que ya puede gestionar con seguridad, y solo amplía donde el resultado demuestra valor.**
 
-## 5. Legal y compliance — gate obligatorio
+Versión corta de reunión:
 
-Los materiales de este repositorio son especificaciones de producto, no asesoramiento jurídico. Antes de cobrar o procesar operaciones reales, asesoría jurídica competente debe validar como mínimo:
+> **Primero controlamos una operación con el mínimo acceso. Si demuestra utilidad, aumentamos capacidad y automatización sin perder trazabilidad ni seguridad.**
 
-- modelo contractual y responsabilidades;
-- Términos y Condiciones;
-- Política de Privacidad, RGPD y base jurídica;
-- conservación, acceso, rectificación y eliminación de datos;
-- cookies/analítica cuando proceda;
-- facturación e impuestos;
-- KYC/AML cuando sea aplicable;
-- encaje regulatorio de cualquier flujo de pago;
-- proveedor financiero/de pagos y sus responsabilidades;
-- proveedores y contratos de encargado del tratamiento;
-- procedimiento de reclamaciones y consumidores.
+La formulación final debe validarse con objeciones y lenguaje real de los gerentes.
 
-**Regla permanente:** FIA no debe mover ni custodiar fondos ni presentarse como proveedor financiero regulado. Cualquier pago real se ejecuta fuera de la capacidad financiera de FIA mediante un proveedor legalmente habilitado, sujeto a sus propias obligaciones regulatorias y de protección de fondos cuando correspondan.
+## 10. Métricas obligatorias
 
-## 6. Producción y seguridad
+### Valor cliente
 
-Gate técnico para datos/usuarios reales:
+Según caso:
+
+- oportunidades recuperadas;
+- tiempo de seguimiento;
+- tiempo de ciclo;
+- horas administrativas;
+- incidencias;
+- llamadas/emails;
+- documentos pendientes;
+- esperas entre empresas.
+
+### Economía FIA
+
+- ingreso;
+- coste IA;
+- coste workflow/infraestructura;
+- proveedores variables;
+- minutos humanos FIA;
+- margen de contribución;
+- MRR / horas humanas.
+
+### Evidencia
+
+Separar siempre:
+
+- `CONFIRMED`;
+- `ASSISTED`;
+- `ESTIMATED`.
+
+No publicar porcentajes de optimización o ROI sin metodología y evidencia.
+
+## 11. Producción y seguridad
+
+Antes de datos/usuarios reales:
 
 - separación demo/staging/producción;
-- autenticación robusta y autorización por rol/operación;
-- secretos fuera del repositorio y rotación;
-- cifrado en tránsito y almacenamiento cuando aplique;
+- autenticación y autorización por organización/operación;
+- tenant isolation;
+- secretos fuera del repositorio;
+- cifrado cuando aplique;
 - mínimo privilegio;
-- logs de auditoría sin secretos ni datos innecesarios;
-- idempotencia en acciones críticas;
-- backups y restauración probada;
-- monitorización y alertas;
-- gestión de vulnerabilidades/dependencias;
-- rate limiting y protección antiabuso;
-- política de retención/borrado;
-- plan de respuesta a incidentes;
-- revisión de seguridad previa al lanzamiento;
-- aislamiento de tenant y grants interempresa explícitos;
-- verificación de proveedor financiero antes de habilitar cualquier flujo de pago real.
+- auditoría;
+- backups/restauración si existe persistencia;
+- monitorización/alertas;
+- gestión de dependencias;
+- rate limiting/antiabuso;
+- retención/borrado;
+- respuesta a incidentes;
+- Data Permit;
+- kill switch;
+- revisión jurídica/privacidad aplicable.
 
-## 7. Backoffice operativo
+## 12. Kit de venta mínimo
 
-Vista mínima por expediente:
+Mantener alineados:
 
-- ID de operación;
-- estado;
-- valor y nivel Base/Plus;
-- partes/roles (sin exponer más datos de los necesarios);
-- responsable interno;
-- evidencias requeridas/recibidas;
-- incidencias abiertas;
-- bloqueos;
-- última actividad;
-- siguiente acción y fecha objetivo;
-- resultado de cierre;
-- frontera financiera `NON_CUSTODIAL`;
-- proveedor de pago seleccionado y estado de verificación cuando aplique.
+- Trust Entry demo privada con datos ficticios;
+- vista Trust Transaction privada;
+- pitch conceptual y versión de 15–30 segundos;
+- matriz Seguridad / Utilidad / Maximización por nivel;
+- FAQ de seguridad/datos;
+- explicación `NON_CUSTODIAL`;
+- scorecard Founding Demonstrator;
+- baseline y plantilla de medición;
+- Proof Pack restringido después de resultados válidos;
+- registro de objeciones del gerente.
 
-Colas recomendadas: Nuevas, Esperando cliente, Revisión, Alto Valor/Plus, Bloqueadas, Listas para avanzar, Cerradas.
+No preparar campañas masivas antes de aprender el lenguaje y objeciones de los primeros decisores.
 
-## 8. Métricas
+## 13. Pilotos
 
-Instrumentar desde el piloto:
+Los primeros proyectos son Founding Demonstrators, no clientes ordinarios.
 
-- leads por fuente;
-- % lead -> qualified;
-- % qualified -> proposal;
-- % proposal -> onboarding;
-- % onboarding -> operación;
-- % operación -> cierre;
-- tiempo de onboarding;
-- tiempo de ciclo de operación;
-- incidencias por operación;
-- tasa de bloqueo/cancelación;
-- ticket medio;
-- mix Base/Plus;
-- ingreso y coste variable por operación;
-- margen de contribución por tramo de valor;
-- CAC cuando exista inversión;
-- repetición y recomendación.
+Cada uno debe producir:
 
-Evitar analítica con PII innecesaria.
+`INGRESO INICIAL + APRENDIZAJE + EVIDENCIA COMERCIAL RESTRINGIDA`
 
-## 9. Kit de venta
+Antes de promoción abierta buscar al menos:
 
-Preparar y mantener alineados:
-
-- landing con propuesta y CTA;
-- demo guiada con datos ficticios;
-- pitch de 30 segundos;
-- deck comercial;
-- FAQ de confianza/seguridad;
-- explicación del proceso;
-- pricing cuando esté validado;
-- explicación transparente de Plus/Alto Valor y sus controles;
-- explicación `NON_CUSTODIAL` cuando se mencione pago o seguridad económica;
-- plantilla de propuesta;
-- seguimiento comercial;
-- registro de objeciones.
-
-Pitch de trabajo: “FIA&CO convierte una compraventa entre partes en un proceso guiado y trazable: requisitos, evidencias, incidencias y próximos pasos visibles en un mismo flujo.”
-
-## 10. Pilotos
-
-Antes de promoción abierta ejecutar 3–5 pilotos controlados, incluyendo si es viable al menos un caso simulado de Alto Valor. Cada piloto debe tener consentimiento adecuado, alcance definido, responsable y retrospectiva.
-
-Registrar: objeciones, pasos confusos, documentos solicitados, intervenciones manuales, incidencias, tiempo por etapa, disposición a pagar y recomendación.
-
-No considerar un piloto autorización para mover/custodiar fondos ni para saltarse los gates jurídico/técnico.
+- 3 pilotos con evidencia;
+- 2 clientes dispuestos a continuar pagando;
+- 2 Proof Packs comercialmente útiles y autorizados;
+- margen de contribución positivo;
+- ausencia de incidentes críticos;
+- patrón suficientemente reutilizable.
 
 ## Gate de promoción abierta
 
 GO solo cuando:
 
-1. propuesta y segmento inicial estén definidos;
-2. funnel y responsable de seguimiento estén operativos;
-3. onboarding tenga checklist y política de datos;
-4. pricing Base y Plus haya sido contrastado en pilotos;
-5. revisión jurídica haya aprobado el alcance comercial real;
-6. revisión técnica haya aprobado el uso de datos reales;
-7. métricas y backoffice permitan detectar fallos;
-8. 3–5 pilotos hayan producido evidencia suficiente y no queden bloqueadores críticos.
+1. exista al menos una puerta de entrada con valor repetido;
+2. el mensaje Seguridad -> Utilidad -> Maximización sea comprendido por decisores reales;
+3. pricing tenga evidencia de disposición a pagar;
+4. revisión jurídica haya aprobado el alcance real;
+5. revisión técnica haya aprobado datos reales;
+6. métricas y backoffice permitan detectar fallos;
+7. los pilotos produzcan evidencia suficiente;
+8. el soporte humano sea sostenible.
 
-Hasta entonces, promoción limitada a discovery, lista de espera y pilotos explícitamente controlados.
+Hasta entonces, promoción limitada a discovery y pilotos controlados.
