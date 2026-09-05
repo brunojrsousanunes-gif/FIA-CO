@@ -1,0 +1,49 @@
+{
+  "policyVersion": "first-contact-policy.v1",
+  "mode": "LOW_TRUST_GUIDED_CONTACT",
+  "securityLevel": "L0_DEMO",
+  "informationLevel": "I0_PUBLIC",
+  "principles": {
+    "quickPresentationRequired": true,
+    "searchRestrictedToApprovedTopics": true,
+    "rawQueryPersistence": false,
+    "minimalInterestProfileAllowed": true,
+    "solutionsRequireOwnerApproval": true,
+    "simulationsRequireOwnerApproval": true,
+    "rankingsRequireOwnerApproval": true,
+    "livePurchaseSearchRequireOwnerApproval": true,
+    "operationalNavigationRequireOwnerApproval": true,
+    "trustLevelElevationAllowed": false,
+    "realDataAllowed": false,
+    "externalActionsAllowed": false
+  },
+  "approvedTopics": [
+    "FIA_OVERVIEW",
+    "SECURITY_AND_CONTROL",
+    "TRUST_LEVELS_OVERVIEW",
+    "QUOTE_RECOVERY_OVERVIEW",
+    "DOCUMENT_FLOW_OVERVIEW",
+    "TRUST_TRANSACTION_OVERVIEW",
+    "PARTNER_COORDINATION_OVERVIEW",
+    "PURCHASE_SEARCH_OVERVIEW",
+    "CONTACT_AND_NEXT_STEP"
+  ],
+  "storedProfileFields": [
+    "topicCounts",
+    "sectorHints",
+    "visitCount",
+    "lastSeenAt",
+    "humanPresenceVerdict"
+  ],
+  "neverStoreInFirstContact": [
+    "RAW_QUERY",
+    "PERSON_NAME",
+    "EMAIL",
+    "PHONE",
+    "IDENTIFIER",
+    "BANK_DATA",
+    "CREDENTIALS",
+    "FREE_TEXT_NOTES"
+  ],
+  "publicApprovalState": "OWNER_APPROVAL_REQUIRED"
+}

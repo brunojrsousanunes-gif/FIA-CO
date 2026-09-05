@@ -7,6 +7,7 @@ node tests/unified-app.test.js
 node tests/action-index-legal.test.js
 node tests/v1-consolidation-scan.test.js
 node tests/fia-guide.test.mjs
+node tests/first-contact-ui.test.mjs
 
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
@@ -32,6 +33,7 @@ node tests/incident-response.test.mjs
 node tests/authorized-ai-context.test.mjs
 node tests/interaction-risk-engine.test.mjs
 node tests/human-presence-check.test.mjs
+node tests/first-contact-gate.test.mjs
 
 # FIA Recover / Founding Demonstrator contracts
 node tests/recover-engine.test.mjs
