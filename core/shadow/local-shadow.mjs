@@ -83,7 +83,7 @@ export function buildLocalShadowAggregate(records = [], options = {}) {
     sourceValuesExported: false,
     identifiersExported: false,
     rawTextExported: false,
-    sourceRecordsRetainedByFiaCore: false,
+    localSourceRetentionByFiaCore: false,
     note: 'El agregado está diseñado para salir del entorno local sin incluir filas, identificadores ni contenido textual original.'
   });
 
