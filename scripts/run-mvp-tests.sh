@@ -63,3 +63,6 @@ node tests/local-shadow.test.mjs
 node tests/data-steward-delegation.test.mjs
 node tests/trust-entry-private-demo.test.mjs
 node tests/commercial-readiness-trust.test.mjs
+
+# End-to-end internal rehearsal across diversified entry scenarios
+node tests/synthetic-pilot-rehearsal.test.mjs
