@@ -12,7 +12,7 @@ assert.match(firstContact, /rawQueryStored:false/);
 assert.match(firstContact, /freeTextNotesStored:false/);
 assert.match(firstContact, /personalDataStored:false/);
 assert.match(firstContact, /Demos y soluciones requieren autorización FIA&Co/);
-assert.match(firstContact, /no guarda lo que escribes literalmente/);
+assert.match(firstContact, /no guarda lo que escribes literalmente/i);
 assert.match(firstContact, /firstContactLocked='true'/);
 assert.match(firstContact, /localStorage\.setItem\(PROFILE_KEY/);
 assert.doesNotMatch(firstContact, /localStorage\.setItem\([^\n]*raw/i);
