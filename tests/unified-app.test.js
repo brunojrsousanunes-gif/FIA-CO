@@ -1,31 +1,30 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const html=fs.readFileSync('frontend/beta-mobile.html','utf8');
-const js=fs.readFileSync('frontend/js/unified-app.js','utf8');
+const shell=fs.readFileSync('frontend/js/fia-capability-shell.js','utf8');
+const legacy=fs.readFileSync('frontend/js/unified-app.js','utf8');
 const css=fs.readFileSync('frontend/css/unified-app.css','utf8');
 const allowlist=fs.readFileSync('config/pages-public-allowlist.txt','utf8');
 
-for(const view of ['overview','operations','logistics','evidence','identity','wallet','premium','dashboard']){
-  assert.ok(html.includes(`data-view="${view}"`),`missing unified view: ${view}`);
+for(const area of ['HOME','OPPORTUNITIES','OPERATIONS','DOCUMENTS','SECURITY']){
+  assert.ok(html.includes(`data-view="${area}"`),`missing need-to-know view: ${area}`);
 }
-assert.ok(html.includes('Todo FIA&CO, junto.'),'unified product message missing');
-assert.ok(html.includes('SIN DINERO REAL'),'real-money guardrail missing');
-assert.ok(html.includes('NO_PII'),'PII guardrail missing');
-assert.ok(html.includes('SHADOW / READ-ONLY'),'Premium read-only guardrail missing');
-assert.ok(html.includes('css/unified-app.css'),'unified stylesheet not referenced');
-assert.ok(html.includes('js/unified-app.js'),'unified script not referenced');
-assert.ok(allowlist.includes('css/unified-app.css'),'unified stylesheet not allowlisted');
-assert.ok(allowlist.includes('js/unified-app.js'),'unified script not allowlisted');
-assert.ok(js.includes("fia_unified_beta_v2"),'current shared local state missing');
-assert.equal(js.includes('purgeLegacyStorage'),false,'automatic legacy storage purge must stay disabled');
-assert.equal(js.includes("localStorage.removeItem('fia_unified_beta_v1')"),false,'v1 storage must not be deleted automatically');
-assert.equal(js.includes("localStorage.removeItem('fia_cart_v1')"),false,'legacy cart storage must not be deleted automatically');
-assert.ok(js.includes('operations:[]')&&js.includes('evidence:[]')&&js.includes('participants:[]'),'empty initial state missing');
-for(const stale of ['ROC-4587','LOG-1932','Compradora Demo S.L.','Proveedor Demo S.A.','Transportes Demo Norte','DOC-7731']){
-  assert.equal(js.includes(stale),false,`stale seeded fixture remains: ${stale}`);
-}
-assert.ok(js.includes("SUGGEST_REVIEW"),'Premium recommendation contract missing');
-assert.equal(/\bfetch\s*\(/.test(js),false,'unified demo must not call network APIs');
-assert.equal(/XMLHttpRequest|WebSocket|EventSource/.test(js),false,'unified demo must not open remote transports');
+assert.ok(html.includes('ACCESO SEGÚN FUNCIÓN Y SEGURIDAD'),'access principle missing');
+assert.ok(html.includes('js/fia-capability-shell.js'),'capability shell not referenced');
+assert.equal(html.includes('js/unified-app.js'),false,'all-modules legacy runtime must not load in simplified app');
+assert.equal(html.includes('data-view="wallet"'),false,'wallet view must not be exposed');
+assert.equal(html.includes('data-view="premium"'),false,'premium view must not be exposed');
+assert.equal(html.includes('data-view="logistics"'),false,'deep logistics view must not be exposed');
+assert.ok(shell.includes("visibleAreas:Object.freeze(['HOME','SECURITY'])"),'safe fallback must expose only HOME and SECURITY');
+assert.ok(shell.includes('productionAuthorization:false'),'client rendering must not claim production authorization');
+assert.ok(shell.includes('renderingIsAuthorization:false'),'capability shell must state rendering is not authorization');
+assert.equal(/localStorage\.(?:getItem|setItem)/.test(shell),false,'capability shell must not derive access from localStorage');
+assert.equal(/sessionStorage\.(?:getItem|setItem)/.test(shell),false,'capability shell must not derive access from sessionStorage');
+assert.equal(allowlist.includes('beta-mobile.html'),false,'deep app must not be published on Pages');
+assert.equal(allowlist.includes('js/unified-app.js'),false,'legacy app runtime must not be published on Pages');
+assert.equal(allowlist.includes('css/unified-app.css'),false,'deep app stylesheet must not be published on Pages');
+assert.ok(legacy.includes("fia_unified_beta_v2"),'legacy internal demo state remains available for internal development');
+assert.equal(legacy.includes('purgeLegacyStorage'),false,'automatic legacy storage purge must stay disabled');
+assert.equal(/\bfetch\s*\(/.test(legacy),false,'legacy local demo must not call network APIs');
 assert.ok(css.includes('@media(max-width:760px)'),'mobile navigation breakpoint missing');
-console.log('unified app clean-state/non-destructive storage contract OK');
+console.log('need-to-know app shell contract OK');
