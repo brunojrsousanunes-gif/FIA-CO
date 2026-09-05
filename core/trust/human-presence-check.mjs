@@ -5,6 +5,16 @@ export const HUMAN_PRESENCE_VERDICTS = Object.freeze({
   AUTOMATION_SUSPECTED: 'AUTOMATION_SUSPECTED'
 });
 
+function boundaries() {
+  return Object.freeze({
+    identityVerified: false,
+    trustLevelElevated: false,
+    productionSecurityBoundary: false,
+    ddosMitigation: false,
+    intendedUse: 'BOT_AND_FIRST_CONTACT_ABUSE_SIGNAL'
+  });
+}
+
 export function evaluateHumanPresence(input = {}) {
   const sessionDurationMs = Number(input.sessionDurationMs || 0);
   const mascotInteraction = input.mascotInteraction === true;
@@ -20,9 +30,7 @@ export function evaluateHumanPresence(input = {}) {
       verdict: HUMAN_PRESENCE_VERDICTS.AUTOMATION_SUSPECTED,
       score: 0,
       reasons: Object.freeze(!honeypotEmpty ? ['HONEYPOT_TRIGGERED'] : ['SUSPICIOUS_BURST']),
-      identityVerified: false,
-      trustLevelElevated: false,
-      productionSecurityBoundary: false
+      ...boundaries()
     });
   }
 
@@ -45,8 +53,6 @@ export function evaluateHumanPresence(input = {}) {
     verdict,
     score,
     reasons: Object.freeze(reasons),
-    identityVerified: false,
-    trustLevelElevated: false,
-    productionSecurityBoundary: false
+    ...boundaries()
   });
 }
