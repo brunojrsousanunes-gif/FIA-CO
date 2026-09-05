@@ -1,0 +1,48 @@
+{
+  "policyVersion": "information-access-levels.v1",
+  "principle": "INFORMATION_SCOPE_IS_CONSTRAINED_BY_VERIFIED_SECURITY_LEVEL",
+  "levels": {
+    "L0_DEMO": {
+      "informationLevel": "I0_PUBLIC",
+      "allowedDataClasses": ["PUBLIC"],
+      "allowedSources": ["PUBLIC_WEB_OR_CATALOG", "SYNTHETIC"],
+      "crossOrganization": false,
+      "personalData": false
+    },
+    "L1_ISOLATED": {
+      "informationLevel": "I1_ISOLATED_BUSINESS",
+      "allowedDataClasses": ["PUBLIC", "INTERNAL", "COMMERCIAL_CONFIDENTIAL"],
+      "allowedSources": ["PUBLIC_WEB_OR_CATALOG", "AUTHORIZED_ISOLATED_ORG_DATA"],
+      "crossOrganization": false,
+      "personalData": false
+    },
+    "L2_VERIFIED": {
+      "informationLevel": "I2_CONNECTED_INTERNAL",
+      "allowedDataClasses": ["PUBLIC", "INTERNAL", "COMMERCIAL_CONFIDENTIAL"],
+      "allowedSources": ["PUBLIC_WEB_OR_CATALOG", "AUTHORIZED_ISOLATED_ORG_DATA", "APPROVED_INTERNAL_INTEGRATION"],
+      "crossOrganization": false,
+      "personalData": false
+    },
+    "L3_SHARED": {
+      "informationLevel": "I3_SHARED_BUSINESS",
+      "allowedDataClasses": ["PUBLIC", "INTERNAL", "COMMERCIAL_CONFIDENTIAL"],
+      "allowedSources": ["PUBLIC_WEB_OR_CATALOG", "AUTHORIZED_ISOLATED_ORG_DATA", "APPROVED_INTERNAL_INTEGRATION", "EXPLICIT_CROSS_ORG_GRANT"],
+      "crossOrganization": true,
+      "personalData": false
+    },
+    "L4_ADVANCED": {
+      "informationLevel": "I4_REVIEWED_PERSONAL",
+      "allowedDataClasses": ["PUBLIC", "INTERNAL", "COMMERCIAL_CONFIDENTIAL", "PERSONAL"],
+      "allowedSources": ["PUBLIC_WEB_OR_CATALOG", "AUTHORIZED_ISOLATED_ORG_DATA", "APPROVED_INTERNAL_INTEGRATION", "EXPLICIT_CROSS_ORG_GRANT", "REVIEWED_PERSONAL_DATA_WORKFLOW"],
+      "crossOrganization": true,
+      "personalData": "ONLY_WHEN_NECESSARY_AND_REVIEWED"
+    }
+  },
+  "permanentExclusions": {
+    "CRITICAL": true,
+    "CREDENTIALS": true,
+    "SECRETS": true,
+    "PAYMENT_CREDENTIALS": true,
+    "UNRELATED_PERSONAL_DATA": true
+  }
+}

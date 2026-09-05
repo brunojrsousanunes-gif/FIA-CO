@@ -1,0 +1,50 @@
+{
+  "policyVersion": "purchase-search-transparency.v1",
+  "mode": "TRANSPARENT_RANKING",
+  "informationPolicy": "information-access-levels.v1",
+  "principles": {
+    "queryStoredByDefault": false,
+    "securityLevelControlsInformationScope": true,
+    "informationScopeControlsRankingInputs": true,
+    "allowedInformationIsNotAutomaticallyUsed": true,
+    "actualInformationUsedMustBeVisible": true,
+    "excludedInformationMustBeVisible": true,
+    "sourceRequiredForLiveCandidate": true,
+    "sourceTimestampRequiredForLiveCandidate": true,
+    "rankingCriteriaVisible": true,
+    "rankingWeightsVisible": true,
+    "missingDataVisible": true,
+    "commercialRelationshipVisible": true,
+    "sponsorshipCanInfluenceRanking": false,
+    "syntheticResultsMustBeLabelled": true,
+    "liveResultsMustNotBeSynthetic": true,
+    "autonomousPurchase": false,
+    "fiaFundCustody": false,
+    "fiaFundMovement": false
+  },
+  "defaultWeights": {
+    "fit": 35,
+    "totalCost": 25,
+    "risk": 20,
+    "availability": 10,
+    "distance": 10
+  },
+  "managerDisclosure": [
+    "SEARCH_MODE",
+    "SECURITY_LEVEL",
+    "INFORMATION_LEVEL",
+    "INFORMATION_ALLOWED_BY_LEVEL",
+    "INFORMATION_ACTUALLY_USED",
+    "INFORMATION_EXCLUDED",
+    "SOURCES",
+    "FETCHED_AT",
+    "CRITERIA",
+    "WEIGHTS",
+    "SCORE_BREAKDOWN",
+    "MISSING_DATA",
+    "CONFIDENCE",
+    "COMMERCIAL_RELATIONSHIP",
+    "SPONSORSHIP_EFFECT_ON_RANKING",
+    "ACTIONS_NOT_TAKEN"
+  ]
+}
