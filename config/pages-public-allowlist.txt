@@ -20,6 +20,7 @@ css/action-index.css
 js/i18n.js
 js/unified-app.js
 js/fia-guide.js
+js/fia-security-search.js
 
 # Current public assets
 assets/fia-co-trust-compute.svg
