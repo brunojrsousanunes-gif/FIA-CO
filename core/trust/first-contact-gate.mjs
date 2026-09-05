@@ -43,7 +43,9 @@ function containsSensitiveValue(raw) {
 
 export function classifyFirstContactTopic(query) {
   const text = normalize(query);
-  if (/\b(comprar|compra|buscar.*(?:tractor|maquina|maquinaria|equipo|vehiculo)|ofertas? de|comparar compra)\b/.test(text)) return FIRST_CONTACT_TOPICS.PURCHASE_SEARCH_OVERVIEW;
+  const purchaseVerb = /\b(comprar|compra|adquirir|adquisicion|busco|buscar|necesito|encontrar|oferta|ofertas|comparar)\b/.test(text);
+  const productWord = /\b(tractor|tractores|maquina|maquinaria|equipo|equipos|vehiculo|vehiculos|herramienta|herramientas|pieza|piezas|recambio|recambios|producto|productos|material|materiales|apero|aperos|desbrozadora|remolque)\b/.test(text);
+  if (purchaseVerb && productWord) return FIRST_CONTACT_TOPICS.PURCHASE_SEARCH_OVERVIEW;
   if (/\b(presupuesto|seguimiento|oportunidad|cliente olvidado|recover)\b/.test(text)) return FIRST_CONTACT_TOPICS.QUOTE_RECOVERY_OVERVIEW;
   if (/\b(documento|papel|expediente|documentacion|document flow)\b/.test(text)) return FIRST_CONTACT_TOPICS.DOCUMENT_FLOW_OVERVIEW;
   if (/\b(proveedor|taller|partner|otra empresa|coordinacion|interempresa)\b/.test(text)) return FIRST_CONTACT_TOPICS.PARTNER_COORDINATION_OVERVIEW;
