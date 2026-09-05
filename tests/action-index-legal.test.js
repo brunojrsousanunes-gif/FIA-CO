@@ -2,14 +2,19 @@ const fs=require('fs');const assert=require('assert');
 const index=fs.readFileSync('frontend/index.html','utf8');
 const app=fs.readFileSync('frontend/beta-mobile.html','utf8');
 const legal=fs.readFileSync('frontend/legal-center.html','utf8');
-assert(index.includes('id="acciones"'));
-['Enviar y','Solicitar','Compraventa','Operaciones<br>condicionadas','Conciliación<br>inteligente','legal-center.html'].forEach(x=>assert(index.includes(x),x));
-assert(index.includes('SOLUCIONES EN UNA ÚNICA APP'));
-assert(index.includes('beta-mobile.html'));
-['data-view="operations"','data-view="logistics"','data-view="evidence"','data-view="identity"','data-view="wallet"','data-view="premium"','data-view="dashboard"','legal-center.html','Marco jurídico'].forEach(x=>assert(app.includes(x),x));
-assert(app.includes('SIN DINERO REAL')&&app.includes('NO_PII')&&app.includes('SHADOW / READ-ONLY'));
-['Derechos e intereses legítimos de FIA&CO','Obligaciones cuando resulten aplicables','Gate fotográfico antes de habilitar el pago','Derechos y obligaciones correlativas','Fuentes oficiales'].forEach(x=>assert(legal.includes(x),x));
-assert(legal.includes('www.boe.es')&&legal.includes('eur-lex.europa.eu')&&legal.includes('poderjudicial.es'));
-assert(/no convierte a FIA&CO en perito, transportista, asegurador ni garante/i.test(legal));
-assert(/validación jurídica|validación profesional/i.test(legal));
-console.log('unified action index and legal center tests passed');
+
+['id="que-resuelve"','id="seguridad"','id="contacto"','legal-center.html'].forEach(x=>assert(index.includes(x),x));
+assert(!index.includes('beta-mobile.html'),'public homepage must not link app beta');
+assert(!index.includes('SOLUCIONES EN UNA ÚNICA APP'),'public homepage must not expose full module map');
+
+['data-view="HOME"','data-view="OPPORTUNITIES"','data-view="OPERATIONS"','data-view="DOCUMENTS"','data-view="SECURITY"'].forEach(x=>assert(app.includes(x),x));
+assert(app.includes('js/fia-capability-shell.js'),'app must render through capability shell');
+assert(!app.includes('data-view="wallet"'),'wallet surface must not remain in simplified app');
+assert(!app.includes('data-view="premium"'),'premium internals must not remain in simplified app');
+assert(!app.includes('js/unified-app.js'),'simplified app must not load legacy all-modules script');
+
+['Qué hace FIA&CO y qué no hace.','Minimización y finalidad.','Acceso mínimo y progresivo.','FIA no recibe, custodia ni mueve fondos.'].forEach(x=>assert(legal.includes(x),x));
+assert(!legal.includes('app-beta.html'),'public legal center must not link deep app');
+assert(!legal.includes('Gate fotográfico antes de habilitar el pago'),'public legal center must not expose internal workflow strategy');
+assert(/validación correspondiente|revisarse antes de activar/i.test(legal));
+console.log('need-to-know app and legal surface tests passed');
