@@ -29,6 +29,27 @@ const AUTOMATED_SOURCES = new Set([
   TRUST_EVIDENCE_SOURCES.RUNTIME_OBSERVATION
 ]);
 
+const HUMAN_OR_EXTERNAL_SOURCES = new Set([
+  TRUST_EVIDENCE_SOURCES.HUMAN_ATTESTATION,
+  TRUST_EVIDENCE_SOURCES.EXTERNAL_VERIFICATION
+]);
+
+export const NON_AUTOMATABLE_TRUST_CONTROLS = Object.freeze([
+  'organizationIdentified',
+  'termsAccepted',
+  'incidentContactDefined',
+  'identityVerified',
+  'partnerIdentityVerified',
+  'legalRoleValidated',
+  'processorTermsReady',
+  'subprocessorsDocumented',
+  'personalDataWorkflowReviewed',
+  'enhancedSecurityReviewPassed',
+  'regulatedProviderGateReady'
+]);
+
+const NON_AUTOMATABLE = new Set(NON_AUTOMATABLE_TRUST_CONTROLS);
+
 const LEVEL_ORDER = Object.freeze([
   TRUST_SECURITY_LEVELS.L1_ISOLATED,
   TRUST_SECURITY_LEVELS.L2_VERIFIED,
@@ -115,6 +136,15 @@ function allRequiredControls() {
   return result;
 }
 
+function isEvidenceAdmissible(controlId, evidence, allowHumanOrExternalEvidence) {
+  if (!evidence) return false;
+  if (NON_AUTOMATABLE.has(controlId)) {
+    return Boolean(allowHumanOrExternalEvidence && HUMAN_OR_EXTERNAL_SOURCES.has(evidence.sourceType));
+  }
+  if (AUTOMATED_SOURCES.has(evidence.sourceType)) return true;
+  return Boolean(allowHumanOrExternalEvidence && HUMAN_OR_EXTERNAL_SOURCES.has(evidence.sourceType));
+}
+
 export function evaluateEvidenceBackedTrust(evidenceList = [], options = {}) {
   if (!Array.isArray(evidenceList)) throw new Error('INVALID_EVIDENCE_LIST');
   const allowHumanOrExternalEvidence = options.allowHumanOrExternalEvidence === true;
@@ -131,7 +161,7 @@ export function evaluateEvidenceBackedTrust(evidenceList = [], options = {}) {
   const controlStatus = [];
   for (const controlId of requiredControls) {
     const evidence = latest.get(controlId) || null;
-    const admissible = Boolean(evidence && (evidence.automated || allowHumanOrExternalEvidence));
+    const admissible = isEvidenceAdmissible(controlId, evidence, allowHumanOrExternalEvidence);
     checks[controlId] = Boolean(admissible && evidence.status === TRUST_EVIDENCE_STATUS.PASS);
     controlStatus.push(Object.freeze({
       controlId,
@@ -139,6 +169,7 @@ export function evaluateEvidenceBackedTrust(evidenceList = [], options = {}) {
       evidenceId: evidence?.evidenceId || null,
       sourceType: evidence?.sourceType || null,
       automated: evidence?.automated === true,
+      nonAutomatableControl: NON_AUTOMATABLE.has(controlId),
       evidencePresentButWithheld: Boolean(evidence && !admissible)
     }));
   }
@@ -151,6 +182,7 @@ export function evaluateEvidenceBackedTrust(evidenceList = [], options = {}) {
     checks: Object.freeze({ ...checks }),
     controlStatus: Object.freeze(controlStatus),
     validEvidenceCount: latest.size,
-    humanOrExternalEvidenceDoesNotAutoElevate: !allowHumanOrExternalEvidence
+    humanOrExternalEvidenceDoesNotAutoElevate: !allowHumanOrExternalEvidence,
+    nonAutomatableControls: NON_AUTOMATABLE_TRUST_CONTROLS
   });
 }
