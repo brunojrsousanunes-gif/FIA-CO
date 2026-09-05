@@ -67,6 +67,22 @@ function securityProgress(profile) {
   });
 }
 
+function safeEvidenceSummary(evidenceBackedTrust, visible) {
+  if (!visible || !evidenceBackedTrust) return null;
+  return Object.freeze({
+    automatedOnly: evidenceBackedTrust.automatedOnly === true,
+    validEvidenceCount: Number.isInteger(evidenceBackedTrust.validEvidenceCount) ? evidenceBackedTrust.validEvidenceCount : 0,
+    humanOrExternalEvidenceDoesNotAutoElevate: evidenceBackedTrust.humanOrExternalEvidenceDoesNotAutoElevate === true,
+    controls: Object.freeze((evidenceBackedTrust.controlStatus || []).map(item => Object.freeze({
+      controlId: clean(item.controlId, 100),
+      satisfied: item.satisfied === true,
+      sourceType: clean(item.sourceType, 40) || null,
+      automated: item.automated === true,
+      evidencePresentButWithheld: item.evidencePresentButWithheld === true
+    })))
+  });
+}
+
 export function buildTrustClientSnapshot(input = {}, options = {}) {
   const { operation, transaction, context } = input;
   if (!operation || !transaction) throw new Error('TRUST_SNAPSHOT_INPUT_REQUIRED');
@@ -76,6 +92,7 @@ export function buildTrustClientSnapshot(input = {}, options = {}) {
   const access = normalizeAccessContext(context);
   const trustView = getTrustTransactionView(transaction, access, options);
   const isOwnerOrganization = access.organizationId === transaction.ownerOrganizationId;
+  const canSeeControlEvidence = isOwnerOrganization && OWNER_ROLES.has(access.role);
 
   const auditEvents = isOwnerOrganization
     ? (input.auditEvents || [])
@@ -104,6 +121,7 @@ export function buildTrustClientSnapshot(input = {}, options = {}) {
     transaction: clone(trustView),
     security: Object.freeze({
       progress: securityProgress(options.viewerSecurityProfile),
+      controlEvidence: safeEvidenceSummary(options.evidenceBackedTrust, canSeeControlEvidence),
       whoSeesWhat: ownerSecuritySummary(transaction, access, options),
       auditTimelineVisible: isOwnerOrganization,
       auditIntegrityStatus: input.auditIntegrityVerified === true ? 'VERIFIED' : 'NOT_VERIFIED',
