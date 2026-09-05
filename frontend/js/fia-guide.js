@@ -6,7 +6,7 @@ const MAX_ALERTS=12;
 const el=(s,r=document)=>r.querySelector(s);
 const els=(s,r=document)=>[...r.querySelectorAll(s)];
 const norm=(v)=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim().slice(0,1600);
-const esc=(v)=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]));
 const appMode=()=>document.body.classList.contains('unified-app');
 const now=()=>new Date().toISOString();
 const severityRank={info:0,warning:1,high:2,critical:3};
@@ -18,7 +18,7 @@ function actualSensitiveValue(raw){const t=String(raw||'');return /\b[A-Z0-9._%+
 function interactionRisks(raw){const t=norm(raw),out=[];const push=(code,severity,title,message)=>out.push({code,severity,title,message});
  if(actualSensitiveValue(raw))push('REAL_SENSITIVE_VALUE_DETECTED','critical','Dato real o secreto detectado','No continúes con ese valor en la demo. Sustitúyelo por información ficticia.');
  if(/\b(contrasena|password|credencial|api key|token|secreto|secret)\b/.test(t))push('CREDENTIAL_TOPIC_DETECTED','high','Credencial o secreto','Las credenciales no deben introducirse en el asistente ni en contexto de IA.');
- if(/(mueve|mover|custodia|custodiar|transfiere|transferir|retira|retirar|paga desde fia|cobra desde fia).*(fondos|dinero|cuenta|pago)?/.test(t))push('FINANCIAL_EXECUTION_REQUEST','critical','Frontera financiera','FIA no recibe, custodia ni mueve fondos.');
+ if(/(mueve|mover|mueva|muevas|movimiento de|custodia|custodiar|custodie|custodi[eoa]|transfiere|transferir|transfiera|transfieran|retira|retirar|retire|paga desde fia|pague desde fia|cobra desde fia|cobre desde fia).*(fondos|dinero|cuenta|pago)?/.test(t))push('FINANCIAL_EXECUTION_REQUEST','critical','Frontera financiera','FIA no recibe, custodia ni mueve fondos.');
  if(/(comparte|compartir|envia|enviar|dar acceso|acceso a).*(proveedor|taller|partner|otra empresa|tercero)/.test(t))push('CROSS_ORG_ACCESS_REQUEST','high','Acceso entre empresas','La compartición interempresa requiere controles específicos y, en FIA, al menos L3_SHARED.');
  if(/(garantiza ventas|roi garantizado|100% seguro|cumple todo|cumplimiento garantizado|sin ningun riesgo)/.test(t))push('UNSUPPORTED_ASSURANCE_CLAIM','warning','Afirmación demasiado absoluta','Conviene reformularla con evidencia y límites, no como una garantía.');
  return out.sort((a,b)=>severityRank[b.severity]-severityRank[a.severity]);}
