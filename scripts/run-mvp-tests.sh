@@ -47,11 +47,13 @@ node tests/cost-circuit-breaker.test.mjs
 node tests/financial-boundary.test.mjs
 node tests/financial-copy-boundary.test.mjs
 node tests/trust-security-levels.test.mjs
+node tests/information-access-levels.test.mjs
 node tests/trust-value-framework.test.mjs
 node tests/trust-control-evidence.test.mjs
 node tests/trust-control-evidence-policy.test.mjs
 node tests/trust-evidence-manifest.test.mjs
 node tests/trust-capability-search.test.mjs
+node tests/purchase-search-transparency.test.mjs
 node tests/trust-transaction.test.mjs
 node tests/trust-client-view.test.mjs
 node tests/trust-client-control-evidence.test.mjs
