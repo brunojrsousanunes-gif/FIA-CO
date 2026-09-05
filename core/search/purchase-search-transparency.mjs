@@ -1,3 +1,5 @@
+import { getInformationAccessProfile, canUseInformationAtSecurityLevel } from '../trust/information-access-levels.mjs';
+
 const DEFAULT_WEIGHTS = Object.freeze({ fit: 35, totalCost: 25, risk: 20, availability: 10, distance: 10 });
 const METRICS = Object.freeze(Object.keys(DEFAULT_WEIGHTS));
 const PURCHASE_WORDS = /\b(comprar|compra|adquirir|adquisicion|busco|buscar|necesito|encontrar|precio|precios|oferta|ofertas)\b/;
@@ -37,6 +39,24 @@ function inferLocation(text) {
   return known.find(item => text.includes(item)) || null;
 }
 
+function evaluateRequestedInformation(securityLevel, requestedInformation = []) {
+  return Object.freeze((Array.isArray(requestedInformation) ? requestedInformation : []).map(item => {
+    const evaluation = canUseInformationAtSecurityLevel({
+      securityLevel,
+      dataClass: item?.dataClass,
+      sourceType: item?.sourceType,
+      personalWorkflowReviewed: item?.personalWorkflowReviewed
+    });
+    return Object.freeze({
+      key: String(item?.key || 'UNNAMED'),
+      dataClass: String(item?.dataClass || '').toUpperCase(),
+      sourceType: String(item?.sourceType || '').toUpperCase(),
+      allowed: evaluation.allowed,
+      reason: evaluation.reason
+    });
+  }));
+}
+
 export function detectPurchaseIntent(query) {
   const text = normalize(query);
   return PURCHASE_WORDS.test(text) && PRODUCT_WORDS.test(text);
@@ -57,18 +77,35 @@ export function buildTransparentPurchaseSearchPlan(input = {}) {
   const criteria = parsePurchaseCriteria(query);
   const sourceMode = String(input.sourceMode || 'DISCONNECTED').toUpperCase();
   const liveSourcesConnected = sourceMode === 'LIVE';
+  const securityLevel = String(input.securityLevel || 'L0_DEMO').toUpperCase();
+  const informationProfile = getInformationAccessProfile(securityLevel);
+  const requestedInformation = evaluateRequestedInformation(securityLevel, input.requestedInformation);
+  const deniedInformation = requestedInformation.filter(item => !item.allowed);
+
   return Object.freeze({
-    schemaVersion: 'transparent-purchase-search-plan.v1',
+    schemaVersion: 'transparent-purchase-search-plan.v2',
     intent: detectPurchaseIntent(query) ? 'PURCHASE_SEARCH' : 'UNKNOWN',
     searchMode: liveSourcesConnected ? 'LIVE' : 'DEMO_NO_LIVE_SOURCES',
     liveSourcesConnected,
     queryStored: false,
-    securityLevel: String(input.securityLevel || 'L0_DEMO'),
+    securityLevel,
+    informationLevel: informationProfile.informationLevel,
+    allowedDataClasses: informationProfile.allowedDataClasses,
+    allowedSourceTypes: informationProfile.allowedSources,
+    permanentExcludedDataClasses: informationProfile.permanentExcludedDataClasses,
     criteria,
     weights: Object.freeze({ ...DEFAULT_WEIGHTS }),
-    dataUsed: Object.freeze(['QUERY_CRITERIA', 'PUBLIC_PRODUCT_DATA_WHEN_CONNECTED']),
-    dataNotUsed: Object.freeze(['PRIVATE_COMPANY_DATA_BY_DEFAULT', 'CREDENTIALS', 'PAYMENT_DATA']),
+    requestedInformation,
+    deniedInformation,
+    canExecuteWithRequestedInformation: deniedInformation.length === 0,
+    dataUsed: Object.freeze(['QUERY_CRITERIA', ...(liveSourcesConnected ? ['PUBLIC_PRODUCT_DATA'] : ['SYNTHETIC_PRODUCT_DATA'])]),
+    dataAvailableIfAuthorized: informationProfile.allowedSources,
+    dataNotUsed: Object.freeze(['DATA_ABOVE_INFORMATION_LEVEL', 'CREDENTIALS', 'SECRETS', 'PAYMENT_CREDENTIALS', 'UNRELATED_PERSONAL_DATA']),
     disclosures: Object.freeze({
+      securityLevelVisible: true,
+      informationLevelVisible: true,
+      dataUsedVisible: true,
+      dataNotUsedVisible: true,
       rankingFormulaVisible: true,
       sourceVisible: true,
       fetchedAtVisible: true,
@@ -163,19 +200,25 @@ export function buildManagerPurchaseDecisionReceipt(input = {}) {
   const top = eligible[0] || null;
 
   return Object.freeze({
-    schemaVersion: 'manager-purchase-decision-receipt.v1',
+    schemaVersion: 'manager-purchase-decision-receipt.v2',
     generatedAt: input.generatedAt || new Date().toISOString(),
     mode: plan.searchMode,
-    recommendationStatus: plan.liveSourcesConnected
-      ? (top ? 'LIVE_RECOMMENDATION_AVAILABLE' : 'INSUFFICIENT_DATA_FOR_RECOMMENDATION')
-      : 'DEMO_ONLY_NO_LIVE_RECOMMENDATION',
-    recommendedCandidateId: plan.liveSourcesConnected ? top?.id || null : null,
+    securityLevel: plan.securityLevel,
+    informationLevel: plan.informationLevel,
+    recommendationStatus: !plan.canExecuteWithRequestedInformation
+      ? 'BLOCKED_BY_INFORMATION_LEVEL'
+      : plan.liveSourcesConnected
+        ? (top ? 'LIVE_RECOMMENDATION_AVAILABLE' : 'INSUFFICIENT_DATA_FOR_RECOMMENDATION')
+        : 'DEMO_ONLY_NO_LIVE_RECOMMENDATION',
+    recommendedCandidateId: plan.liveSourcesConnected && plan.canExecuteWithRequestedInformation ? top?.id || null : null,
     topScoredDemoCandidateId: plan.liveSourcesConnected ? null : top?.id || null,
     plan,
     rankedCandidates: ranked,
     managerExplanation: Object.freeze({
+      securityAndInformationLevelsVisible: true,
       whyThisOrderIsVisible: true,
       criteriaAndWeightsVisible: true,
+      dataUsedAndExcludedVisible: true,
       missingInformationVisible: true,
       sourceAndTimestampVisible: true,
       commercialRelationshipVisible: true,
@@ -183,6 +226,8 @@ export function buildManagerPurchaseDecisionReceipt(input = {}) {
       noGuaranteeOfPurchaseOutcome: true
     }),
     permanentBoundaries: Object.freeze({
+      criticalDataInSearch: false,
+      credentialsInSearchOrAi: false,
       fiaAutonomousPurchase: false,
       fiaFundCustody: false,
       fiaFundMovement: false
