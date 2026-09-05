@@ -34,6 +34,7 @@ node tests/authorized-ai-context.test.mjs
 node tests/interaction-risk-engine.test.mjs
 node tests/human-presence-check.test.mjs
 node tests/first-contact-gate.test.mjs
+node tests/hierarchy-security-access.test.mjs
 
 # FIA Recover / Founding Demonstrator contracts
 node tests/recover-engine.test.mjs
