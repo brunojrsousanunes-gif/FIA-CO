@@ -6,8 +6,10 @@ const app = fs.readFileSync(new URL('../frontend/beta-mobile.html', import.meta.
 const guide = fs.readFileSync(new URL('../frontend/js/fia-guide.js', import.meta.url), 'utf8');
 const securitySearch = fs.readFileSync(new URL('../frontend/js/fia-security-search.js', import.meta.url), 'utf8');
 const purchaseSearch = fs.readFileSync(new URL('../frontend/js/fia-purchase-search.js', import.meta.url), 'utf8');
+const humanPresence = fs.readFileSync(new URL('../frontend/js/fia-human-presence.js', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('../frontend/css/fia-guide.css', import.meta.url), 'utf8');
 const purchaseCss = fs.readFileSync(new URL('../frontend/css/fia-purchase-search.css', import.meta.url), 'utf8');
+const humanPresenceCss = fs.readFileSync(new URL('../frontend/css/fia-human-presence.css', import.meta.url), 'utf8');
 const allowlist = fs.readFileSync(new URL('../config/pages-public-allowlist.txt', import.meta.url), 'utf8');
 
 for (const html of [web, app]) {
@@ -44,15 +46,27 @@ assert.match(purchaseSearch, /Solo los criterios escritos en esta búsqueda/);
 assert.match(purchaseSearch, /Subir de nivel no autoriza a FIA a usar todo/);
 assert.match(purchaseSearch, /patrocinio aporta 0 puntos/);
 assert.match(purchaseSearch, /DEMO · SIN OFERTAS REALES/);
+assert.match(purchaseSearch, /fia-human-presence\.js/);
 assert.match(purchaseSearch, /queryStored:false/);
 assert.match(purchaseSearch, /fiaFundCustody:false/);
+
+assert.match(humanPresence, /HUMAN_LIKELY/);
+assert.match(humanPresence, /AUTOMATION_SUSPECTED/);
+assert.match(humanPresence, /Toca a FIA una vez/);
+assert.match(humanPresence, /identityVerified:false/);
+assert.match(humanPresence, /trustLevelElevated:false/);
+assert.match(humanPresence, /rawInteractionEventsStored:false/);
+assert.doesNotMatch(humanPresence, /localStorage/);
+assert.match(humanPresenceCss, /fia-human-challenge-ready/);
+
 assert.match(css, /fia-guide-level-meta/);
 assert.match(purchaseCss, /fia-purchase-result-card/);
-
 assert.match(allowlist, /css\/fia-guide\.css/);
 assert.match(allowlist, /css\/fia-purchase-search\.css/);
+assert.match(allowlist, /css\/fia-human-presence\.css/);
 assert.match(allowlist, /js\/fia-guide\.js/);
 assert.match(allowlist, /js\/fia-security-search\.js/);
 assert.match(allowlist, /js\/fia-purchase-search\.js/);
+assert.match(allowlist, /js\/fia-human-presence\.js/);
 
 console.log('fia-guide.test.mjs passed');
