@@ -57,20 +57,20 @@ function explicitLevel(text) {
 }
 
 function inferDataClass(text) {
-  if (/\b(critico|critical|credencial|contrasena|password|token|secret|secreto|clave privada|private key)\b/.test(text)) return 'CRITICAL';
-  if (/\b(personal|persona|dni|nif|telefono|email|direccion|direccion postal|empleado|nomina)\b/.test(text)) return 'PERSONAL';
-  if (/\b(margen|precio interno|tarifa interna|presupuesto|oferta|cliente|comercial confidencial|confidencial)\b/.test(text)) return 'COMMERCIAL_CONFIDENTIAL';
-  if (/\b(interno|procedimiento interno|nota interna|operacion interna)\b/.test(text)) return 'INTERNAL';
-  if (/\b(publico|publica|web|catalogo|catalogo publico)\b/.test(text)) return 'PUBLIC';
+  if (/\b(critico|criticos|critica|criticas|critical|credencial|credenciales|contrasena|password|token|tokens|secret|secreto|secretos|clave privada|private key)\b/.test(text)) return 'CRITICAL';
+  if (/\b(personal|personales|persona|personas|dni|nif|telefono|telefonos|email|emails|direccion|direcciones|direccion postal|empleado|empleados|nomina|nominas)\b/.test(text)) return 'PERSONAL';
+  if (/\b(margen|precio interno|tarifa interna|presupuesto|presupuestos|oferta|ofertas|cliente|clientes|comercial confidencial|confidencial)\b/.test(text)) return 'COMMERCIAL_CONFIDENTIAL';
+  if (/\b(interno|interna|internos|internas|procedimiento interno|nota interna|operacion interna)\b/.test(text)) return 'INTERNAL';
+  if (/\b(publico|publica|publicos|publicas|web|catalogo|catalogo publico)\b/.test(text)) return 'PUBLIC';
   return null;
 }
 
 function inferManagement(text) {
-  if (/\b(compartir|comparte|partner|proveedor|taller|renting|otra empresa|tercero|interempresa|cross org)\b/.test(text)) return 'CROSS_ORG';
-  if (/\b(oauth|gmail|workspace|integracion|integrar|automatizacion interna|automatizar interno)\b/.test(text)) return 'INTERNAL_INTEGRATION';
-  if (/\b(pago|fondos|dinero|custodia|transferencia|transferir|cobro)\b/.test(text)) return 'FINANCIAL';
-  if (/\b(demo|ficticio|sintetico|sintetica)\b/.test(text)) return 'SYNTHETIC';
-  if (/\b(operacion real|dato real|cliente real|expediente real)\b/.test(text)) return 'ISOLATED_REAL';
+  if (/\b(compartir|comparte|comparten|partner|proveedor|proveedores|taller|talleres|renting|otra empresa|otras empresas|tercero|terceros|interempresa|cross org)\b/.test(text)) return 'CROSS_ORG';
+  if (/\b(oauth|gmail|workspace|integracion|integraciones|integrar|automatizacion interna|automatizar interno)\b/.test(text)) return 'INTERNAL_INTEGRATION';
+  if (/\b(pago|pagos|fondos|dinero|custodia|custodiar|custodie|transferencia|transferencias|transferir|cobro|cobros)\b/.test(text)) return 'FINANCIAL';
+  if (/\b(demo|ficticio|ficticia|sintetico|sintetica)\b/.test(text)) return 'SYNTHETIC';
+  if (/\b(operacion real|dato real|datos reales|cliente real|expediente real)\b/.test(text)) return 'ISOLATED_REAL';
   return null;
 }
 
@@ -88,7 +88,7 @@ function minimumFor({ dataClass, management }) {
   return null;
 }
 
-function buildExplanation({ explicit, dataClass, management, minimum }) {
+function buildExplanation({ explicit, dataClass, management, minimum, explicitCompatible }) {
   if (management === 'FINANCIAL') {
     return Object.freeze({
       outcome: 'PERMANENT_BOUNDARY',
@@ -108,6 +108,13 @@ function buildExplanation({ explicit, dataClass, management, minimum }) {
       outcome: 'SPECIAL_REVIEW_REQUIRED',
       title: 'Dato crítico · tratamiento especial',
       message: 'Un dato CRITICAL no debe entrar en contexto de IA y no se desbloquea automáticamente por subir de nivel. Requiere una política de producción específica y revisión dedicada.'
+    });
+  }
+  if (explicit && minimum) {
+    return Object.freeze({
+      outcome: explicitCompatible ? 'LEVEL_COMPATIBLE' : 'LEVEL_TOO_LOW',
+      title: explicitCompatible ? `${explicit.title} es compatible` : `${explicit.title} no es suficiente`,
+      message: `Esta gestión requiere como mínimo ${minimum.title}. ${explicitCompatible ? 'Puede plantearse solo si los controles del nivel están realmente verificados.' : 'No debe habilitarse todavía.'}`
     });
   }
   if (explicit) {
@@ -138,11 +145,11 @@ export function searchTrustCapability(input = {}) {
   const dataClass = inferDataClass(text);
   const management = inferManagement(text);
   const minimum = minimumFor({ dataClass, management });
-  const explanation = buildExplanation({ explicit, dataClass, management, minimum });
-
   const explicitCompatible = explicit && minimum
     ? LEVEL_ORDER.indexOf(explicit.level) >= LEVEL_ORDER.indexOf(minimum.level)
     : null;
+  const explanation = buildExplanation({ explicit, dataClass, management, minimum, explicitCompatible });
+  const selectedDefinition = explicit || minimum;
 
   return Object.freeze({
     schemaVersion: 'trust-capability-search.v1',
@@ -155,8 +162,8 @@ export function searchTrustCapability(input = {}) {
     outcome: explanation.outcome,
     title: explanation.title,
     message: explanation.message,
-    capabilities: Object.freeze([...(explicit || minimum)?.capabilities || []]),
-    limits: Object.freeze([...(explicit || minimum)?.limits || []]),
+    capabilities: Object.freeze([...(selectedDefinition?.capabilities || [])]),
+    limits: Object.freeze([...(selectedDefinition?.limits || [])]),
     permanentBoundaries: Object.freeze({
       fiaFundCustody: false,
       fiaFundMovement: false,
