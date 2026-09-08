@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { runSyntheticOperationLifecycle } from '../core/pilot/synthetic-operation-lifecycle.mjs';
+import { buildSyntheticAssuranceReport, compareSyntheticAssuranceReports } from '../core/pilot/synthetic-assurance-report.mjs';
+
+const config=JSON.parse(fs.readFileSync('config/synthetic-operation-lifecycle.v1.json','utf8'));
+const results=config.cases.map(runSyntheticOperationLifecycle);
+const report=buildSyntheticAssuranceReport(results);
+assert.equal(report.decision,'PASS_SYNTHETIC_ASSURANCE');
+assert.equal(report.safeToContinueSynthetic,true);
+assert.equal(report.lifecycleCount,3);
+assert.equal(report.passedLifecycles,3);
+assert.equal(report.drillCount,10);
+assert.equal(report.severityCoverage.CRITICAL,2);
+assert.equal(report.boundaryViolations,0);
+assert.equal(report.protocolGaps,0);
+assert.equal(report.closureGaps,0);
+assert.equal(report.productionReady,false);
+assert.equal(report.marketValidated,false);
+assert.equal(report.complianceCertified,false);
+assert.equal(report.residualRisk,'REAL_INFRASTRUCTURE_AND_HUMAN_PROCEDURES_UNTESTED');
+
+const tampered=[...results,{...results[0],lifecycleId:'TAMPERED',realMoneyMoved:true}];
+const blocked=buildSyntheticAssuranceReport(tampered);
+assert.equal(blocked.decision,'BLOCK_REGRESSION');
+assert.equal(blocked.safeToContinueSynthetic,false);
+assert.ok(blocked.blockingFindings.includes('BOUNDARY:TAMPERED'));
+const comparison=compareSyntheticAssuranceReports(report,blocked);
+assert.equal(comparison.decision,'REGRESSION');
+assert.ok(comparison.regressions.includes('BOUNDARY_VIOLATIONS_INCREASED'));
+assert.equal(comparison.productionConclusionAllowed,false);
+console.log('synthetic-assurance-report: ok');
