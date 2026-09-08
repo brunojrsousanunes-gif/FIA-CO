@@ -1,0 +1,40 @@
+{
+  "version": "synthetic-operation-lifecycle.v1",
+  "syntheticOnly": true,
+  "cases": [
+    {
+      "id": "STANDARD_WITH_RECOVERED_INCIDENT",
+      "synthetic": true,
+      "syntheticAmount": 700,
+      "includeDispute": true,
+      "injectFaults": [
+        "DUPLICATE_EVENT",
+        "STALE_VERSION",
+        "EVIDENCE_HASH_MISMATCH",
+        "PSP_TIMEOUT"
+      ]
+    },
+    {
+      "id": "SECURITY_AND_PRIVACY_FAILURES",
+      "synthetic": true,
+      "syntheticAmount": 1250,
+      "includeDispute": false,
+      "injectFaults": [
+        "UNAUTHORIZED_ACCESS",
+        "MALWARE_DETECTED",
+        "SENSITIVE_DATA_IN_PUBLIC_INPUT",
+        "AI_UNSUPPORTED_DECISION"
+      ]
+    },
+    {
+      "id": "MISSING_DOCUMENTATION_WITHOUT_INTERRUPTION",
+      "synthetic": true,
+      "syntheticAmount": 300,
+      "includeDispute": false,
+      "injectFaults": [
+        "MISSING_OWNER_DOCUMENTATION",
+        "INVALID_STATE_TRANSITION"
+      ]
+    }
+  ]
+}
