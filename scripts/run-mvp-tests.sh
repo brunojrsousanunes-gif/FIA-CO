@@ -24,6 +24,8 @@ node tests/zero-cost-prepilot.test.mjs
 node tests/synthetic-failure-drills.test.mjs
 node tests/owner-input-register.test.mjs
 node tests/synthetic-operation-lifecycle.test.mjs
+node tests/synthetic-assurance-report.test.mjs
+node scripts/run-synthetic-operation-assurance.mjs >/dev/null
 
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
