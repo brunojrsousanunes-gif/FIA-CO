@@ -1,0 +1,24 @@
+{
+  "version": "project-legal-profile.v1",
+  "tradeName": "FIA&CO",
+  "legalStatus": "PROJECT_NOT_CONSTITUTED",
+  "operatingArea": {
+    "city": "Lugo",
+    "country": "España"
+  },
+  "publicServiceAddress": null,
+  "publicLegalContact": null,
+  "customDomain": null,
+  "commercialActivityEnabled": false,
+  "realCustomerOnboardingEnabled": false,
+  "publicOwnerIdentityConfigured": false,
+  "costStrategy": "ZERO_COST_UNTIL_CONTROLLED_PREPILOT",
+  "publicationRule": "No publicar datos personales ni presentar el proyecto como empresa constituida.",
+  "activationBlockers": [
+    "LEGAL_FORM_OR_PROFESSIONAL_STATUS",
+    "VALID_SERVICE_ADDRESS",
+    "LEGAL_CONTACT_CHANNEL",
+    "EXTERNAL_LEGAL_REVIEW",
+    "PRODUCTION_INFRASTRUCTURE"
+  ]
+}
