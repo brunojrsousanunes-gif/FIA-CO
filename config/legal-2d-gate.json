@@ -1,5 +1,5 @@
 {
-  "version": "LEGAL-2D-v1",
+  "version": "LEGAL-2D-v2",
   "status": "PREPARED_NOT_VALIDATED",
   "legalReadyForPilot": false,
   "externalReviewComplete": false,
@@ -8,5 +8,8 @@
   "pilotTermsReviewed": false,
   "productionCapabilitiesEnabled": false,
   "premiumMode": "shadow-read-only",
-  "nextAction": "external-professional-review"
+  "nextAction": "external-professional-review",
+  "biometricCapability": "REMOVED",
+  "identityArchitecture": "NON_BIOMETRIC",
+  "complianceGateVersion": "compliance-gates.v1"
 }
