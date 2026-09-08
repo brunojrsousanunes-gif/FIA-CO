@@ -14,7 +14,7 @@ Estado: demo / preproducción. Esta matriz no autoriza dinero real, PII real, pr
 | SEC-DOS-01 | Agotamiento de API/estado | Media | Media | body limits, rate limit, límites de mapas/estado | WAF/rate limiting distribuido/autoscaling | Parcial |
 | SEC-PROVIDER-01 | Proveedor externo comprometido | Alta | N/A | adaptadores MOCK_ONLY, sin secretos reales | allowlists, mTLS/OAuth, timeouts, circuit breaker, contract tests | Bloqueado |
 | SEC-AGENT-01 | Agente Premium ejecuta enforcement indebido | Crítica | Muy baja | shadow/read-only, enforcement=false, writeCapabilities=[] | autorización separada + control humano + auditabilidad | Bloqueado |
-| SEC-PRIV-01 | PII/biometría real en demo/logs | Crítica | Baja | política de no PII real y demos simuladas | DPIA/RGPD, minimización, retención y contratos | Bloqueado |
+| SEC-PRIV-01 | PII real en demo/logs o reintroducción de biometría | Crítica | Baja | política de no PII real; biometría excluida del producto | RGPD, minimización, retención y contratos | Bloqueado |
 
 ## Reglas de gobierno
 
