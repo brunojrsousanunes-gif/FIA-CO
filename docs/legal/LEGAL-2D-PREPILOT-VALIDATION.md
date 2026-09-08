@@ -18,7 +18,7 @@ Antes de piloto real, revisar para compraventa, transporte/logística, marketpla
 |---|---|---|
 | Ley/jurisdicción aplicable no validada para cliente/caso real | ALTA | Revisión profesional antes de piloto real |
 | Calificación regulatoria de pagos/custodia/intermediación | ALTA | Mantener no-custodial y dinero real bloqueado hasta dictamen/arquitectura adecuada |
-| KYC/KYB, biometría y PII real | ALTA | Bloqueado hasta necesidad/base jurídica/proveedor/controles validados |
+| KYC/KYB y PII real | ALTA | Bloqueado hasta necesidad/base jurídica/proveedor/controles validados; biometría eliminada del alcance |
 | Valor probatorio/retención de evidencias | MEDIA | Validar por jurisdicción y política de conservación |
 | Consumo/B2B y términos contractuales | MEDIA | Adaptar términos al perfil del piloto y revisión profesional |
 | Agente Premium con efectos vinculantes | ALTA | Mantener shadow/read-only y sin enforcement |
@@ -28,7 +28,7 @@ Antes de piloto real, revisar para compraventa, transporte/logística, marketpla
 - revisión jurídica externa no completada para el alcance real del piloto;
 - jurisdicción/ley aplicable sin validar;
 - riesgos jurídicos ALTOS abiertos sin tratamiento/aceptación profesional documentada;
-- dinero/custodia real, PII/biometría real, proveedor productivo o enforcement activados fuera de sus gates;
+- dinero/custodia real, PII real, proveedor productivo o enforcement activados fuera de sus gates, o cualquier incorporación de biometría;
 - términos/avisos/consentimientos del caso piloto no revisados;
 - ausencia de mecanismo humano de incidencia/escalado.
 
@@ -41,6 +41,7 @@ Entregar, como mínimo:
 - flujos de usuario del piloto y roles de las partes;
 - términos/avisos/consentimientos propuestos;
 - mapa de datos y retención;
+- decisión de identidad sin biometría;
 - lista de proveedores que se pretendan activar;
 - threat model y límites del Agente Premium;
 - registro de riesgos de este documento.
