@@ -21,6 +21,9 @@ node tests/dac7-readiness.test.mjs
 node tests/accessibility-release-gate.test.mjs
 node tests/project-legal-profile.test.mjs
 node tests/zero-cost-prepilot.test.mjs
+node tests/synthetic-failure-drills.test.mjs
+node tests/owner-input-register.test.mjs
+node tests/synthetic-operation-lifecycle.test.mjs
 
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
