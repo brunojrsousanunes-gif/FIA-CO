@@ -19,7 +19,7 @@ FIA&CO actúa como capa de orquestación entre una operación comercial, la empr
 
 ## Verificación del repartidor
 - La identidad primaria debe validarla la empresa de paquetería o un proveedor KYC/identidad autorizado/contratado para ese fin.
-- FIA&CO no necesita conservar copias de DNI/pasaporte en la demo ni biometría bruta.
+- FIA&CO no necesita conservar copias de DNI/pasaporte en la demo ni ningún dato biométrico.
 - La credencial de repartidor deberá ser firmada o verificable, con caducidad, revocación y vinculación al tenant/empresa.
 - Puede añadirse segundo factor o autenticación del dispositivo para evitar suplantación.
 - Los eventos sensibles (recogida, entrega, cambio de repartidor) requieren sesión válida y autorización server-side.
@@ -41,7 +41,7 @@ Casos comerciales previstos:
 - Autorización por empresa/tenant, repartidor y rol con mínimo privilegio.
 - Base de datos transaccional y registro de auditoría inmutable o resistente a manipulación.
 - Cifrado en tránsito y reposo, minimización y retención limitada de datos.
-- No almacenar datos de tarjeta, claves privadas, biometría bruta o credenciales bancarias.
+- No almacenar datos de tarjeta, claves privadas, datos biométricos o credenciales bancarias.
 - Separación estricta demo/staging/producción.
 - Límites de importe/riesgo y revisión humana para excepciones.
 - Evaluación jurídica, protección de datos y contratos con transportista, proveedor de identidad y PSP antes de fondos reales.
