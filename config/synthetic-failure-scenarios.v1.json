@@ -1,0 +1,16 @@
+{
+  "version": "synthetic-failure-scenarios.v1",
+  "syntheticOnly": true,
+  "scenarios": [
+    {"id":"F-001","type":"MISSING_OWNER_DOCUMENTATION","stage":"SETUP","expectedDecision":"CONTINUE_SYNTHETIC_WITH_PLACEHOLDER"},
+    {"id":"F-002","type":"DUPLICATE_EVENT","stage":"OPERATION","expectedDecision":"IGNORE_DUPLICATE"},
+    {"id":"F-003","type":"STALE_VERSION","stage":"OPERATION","expectedDecision":"RELOAD_AND_REVIEW"},
+    {"id":"F-004","type":"INVALID_STATE_TRANSITION","stage":"OPERATION","expectedDecision":"BLOCK_TRANSITION"},
+    {"id":"F-005","type":"EVIDENCE_HASH_MISMATCH","stage":"EVIDENCE","expectedDecision":"QUARANTINE_EVIDENCE"},
+    {"id":"F-006","type":"UNAUTHORIZED_ACCESS","stage":"ACCESS","expectedDecision":"DENY_AND_ESCALATE"},
+    {"id":"F-007","type":"PSP_TIMEOUT","stage":"PAYMENT_SIMULATION","expectedDecision":"NO_RETRY_WITHOUT_STATUS_CHECK"},
+    {"id":"F-008","type":"MALWARE_DETECTED","stage":"EVIDENCE","expectedDecision":"QUARANTINE_EVIDENCE"},
+    {"id":"F-009","type":"SENSITIVE_DATA_IN_PUBLIC_INPUT","stage":"INPUT","expectedDecision":"REJECT_AND_PURGE"},
+    {"id":"F-010","type":"AI_UNSUPPORTED_DECISION","stage":"DECISION","expectedDecision":"HUMAN_REVIEW_REQUIRED"}
+  ]
+}
