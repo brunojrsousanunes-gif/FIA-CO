@@ -1,0 +1,30 @@
+{
+  "version": "synthetic-adversarial-campaign.v1",
+  "syntheticOnly": true,
+  "campaigns": [
+    {
+      "id": "COMBINED_OPERATION_PRESSURE",
+      "faults": ["DUPLICATE_EVENT","STALE_VERSION","PSP_TIMEOUT"],
+      "recoveryAttempts": [
+        {"attempt":1,"status":"FAILED","reason":"PSP_STATUS_STILL_UNKNOWN"},
+        {"attempt":2,"status":"RECOVERED","evidence":["STATUS_CHECKED","NO_DUPLICATE_APPLIED","LATEST_VERSION_RELOADED"]}
+      ]
+    },
+    {
+      "id": "SECURITY_PRIVACY_PRESSURE",
+      "faults": ["UNAUTHORIZED_ACCESS","SENSITIVE_DATA_IN_PUBLIC_INPUT","AI_UNSUPPORTED_DECISION"],
+      "recoveryAttempts": [
+        {"attempt":1,"status":"FAILED","reason":"HUMAN_REVIEW_MISSING"},
+        {"attempt":2,"status":"RECOVERED","evidence":["ACCESS_DENIED","RAW_INPUT_PURGED","HUMAN_REVIEW_ASSIGNED"]}
+      ]
+    },
+    {
+      "id": "EVIDENCE_INTEGRITY_PRESSURE",
+      "faults": ["EVIDENCE_HASH_MISMATCH","MALWARE_DETECTED"],
+      "recoveryAttempts": [
+        {"attempt":1,"status":"FAILED","reason":"REPLACEMENT_NOT_VERIFIED"},
+        {"attempt":2,"status":"RECOVERED","evidence":["ORIGINAL_QUARANTINED","REPLACEMENT_SCANNED","NEW_HASH_VERIFIED"]}
+      ]
+    }
+  ]
+}
