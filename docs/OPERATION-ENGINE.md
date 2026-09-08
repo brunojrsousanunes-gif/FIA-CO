@@ -19,7 +19,7 @@ DISPUTED y CANCELLED bloquean el flujo normal. Las transiciones no declaradas so
 FIA&CO genera una instrucción lógica. La ejecución de fondos pertenece a un PSP/banco autorizado.
 
 ## Evidencia y privacidad
-Cada cambio produce un evento con identificador, tipo, actor lógico, fecha y metadatos mínimos. No guardar biometría bruta, documentos de identidad, PAN/CVV, claves privadas, contraseñas bancarias o evidencias logísticas innecesarias. En producción los identificadores deberán ser pseudónimos y el registro tendrá política de retención.
+Cada cambio produce un evento con identificador, tipo, actor lógico, fecha y metadatos mínimos. No tratar ni guardar biometría; tampoco guardar documentos de identidad, PAN/CVV, claves privadas, contraseñas bancarias o evidencias logísticas innecesarias. En producción los identificadores deberán ser pseudónimos y el registro tendrá política de retención.
 
 ## Seguridad para producción
 La implementación JavaScript de esta rama es una especificación ejecutable/demo, no una autoridad transaccional. Antes de dinero o usuarios reales: motor server-side, autenticación fuerte, autorización por rol/tenant, base transaccional, bloqueo/concurrencia, idempotencia, firmas de webhooks, anti-replay, secretos externos, TLS, auditoría resistente a manipulación, backups, recuperación, monitorización y separación demo/staging/producción.

@@ -16,7 +16,7 @@ Entornos separados: `dev`, `beta`, `pilot`, `production`. Credenciales distintas
 El futuro API gateway debe aplicar límites por identidad + IP/ASN + operación, con ventanas y burst control. Endpoints de login/recuperación, creación de operaciones, evidencias, incidencias y agente requieren límites específicos. Respuesta 429 sin filtrar existencia de cuentas. Detección de replay, idempotency keys y backoff. Los umbrales serán configurables por entorno; este bloque no activa bloqueo real.
 
 ## SEC-4D — Logging / SIEM readiness
-Eventos JSON normalizados: `event_id`, `correlation_id`, `timestamp`, `environment`, `actor_pseudonym`, `action`, `resource_type`, `outcome`, `severity`, `policy_version`. Prohibido registrar contraseñas, tokens, biometría, documentos completos, datos bancarios o payloads de evidencias. Preparado para exportación futura a SIEM/Fortinet mediante adaptador; actualmente sin exportación externa.
+Eventos JSON normalizados: `event_id`, `correlation_id`, `timestamp`, `environment`, `actor_pseudonym`, `action`, `resource_type`, `outcome`, `severity`, `policy_version`. Prohibido registrar contraseñas, tokens, cualquier dato biométrico, documentos completos, datos bancarios o payloads de evidencias. Preparado para exportación futura a SIEM/Fortinet mediante adaptador; actualmente sin exportación externa.
 
 ## SEC-4E — Backup y recuperación
 - Datos productivos futuros: backup cifrado, segregado y probado.

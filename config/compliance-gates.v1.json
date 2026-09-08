@@ -1,0 +1,37 @@
+{
+  "version": "compliance-gates.v1",
+  "status": "PREPRODUCTION_BLOCKED",
+  "legalReadyForPilot": false,
+  "externalLegalReviewCompleted": false,
+  "jurisdictionValidated": false,
+  "productionInfrastructureReady": false,
+  "capabilities": {
+    "REAL_MONEY": false,
+    "CLIENT_FUNDS_CUSTODY": false,
+    "REAL_PII": false,
+    "BIOMETRICS": false,
+    "BINDING_AUTOMATED_DECISION": false,
+    "PRODUCTION_MARKETPLACE": false,
+    "PRODUCTION_EVIDENCE_UPLOAD": false,
+    "PRODUCTION_AI_ACTIONS": false
+  },
+  "permanentBoundaries": {
+    "fiaReceivesFunds": false,
+    "fiaCustodiesFunds": false,
+    "fiaMovesFunds": false,
+    "fiaStoresBiometricTemplates": false,
+    "aiMayCreateBindingLegalEffects": false
+  },
+  "requiredEvidence": [
+    "EXTERNAL_LEGAL_REVIEW",
+    "JURISDICTION_VALIDATION",
+    "PRIVACY_CONTROLS_VERIFIED",
+    "PARTY_CLASSIFICATION_VERIFIED",
+    "CONTRACT_VERSIONING_VERIFIED",
+    "PSP_BOUNDARY_VERIFIED",
+    "MARKETPLACE_DSA_FLOW_VERIFIED",
+    "RETENTION_AND_DELETION_VERIFIED",
+    "ACCESSIBILITY_FLOW_VERIFIED",
+    "INCIDENT_RESPONSE_VERIFIED"
+  ]
+}
