@@ -34,6 +34,21 @@ export class AuditIntegrityError extends Error {
   }
 }
 
+
+export function verifyAuditSnapshot(events = [], organizationId) {
+  if (!Array.isArray(events)) throw new AuditIntegrityError();
+  const chain = events.filter(event => !organizationId || event.organizationId === organizationId);
+  let prevHash = 'GENESIS';
+  for (let index = 0; index < chain.length; index += 1) {
+    const event = chain[index];
+    if (event.seq !== index + 1 || event.prevHash !== prevHash || event.hash !== digest(event)) {
+      throw new AuditIntegrityError();
+    }
+    prevHash = event.hash;
+  }
+  return true;
+}
+
 export function createMemoryAuditLog({ idFactory, clock } = {}) {
   const events = [];
   const makeId = idFactory || (() => `audit_${crypto.randomUUID()}`);
