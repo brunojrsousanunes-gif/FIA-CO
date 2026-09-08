@@ -13,6 +13,12 @@ node tests/first-contact-ui.test.mjs
 node tests/compliance-gate.test.mjs
 node tests/party-classification.test.mjs
 node tests/sensitive-data-policy.test.mjs
+node tests/versioned-contract.test.mjs
+node tests/data-subject-rights.test.mjs
+node tests/notice-action.test.mjs
+node tests/evidence-metadata.test.mjs
+node tests/dac7-readiness.test.mjs
+node tests/accessibility-release-gate.test.mjs
 
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
