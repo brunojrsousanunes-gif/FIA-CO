@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { assertOperationRepository, createMemoryOperationRepository } from '../repositories/operation-repository.mjs';
 
 export async function exportOperationBackup(repository, { organizationId, pageSize = 200 } = {}) {
@@ -36,4 +37,23 @@ export async function restoreOperationBackup(backup, { repository } = {}) {
   }
 
   return target;
+}
+
+
+function backupDigest(body) {
+  return crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
+}
+
+export async function exportVerifiedOperationBackup(repository, options = {}) {
+  const base = await exportOperationBackup(repository, options);
+  const body = { ...base, integrityVersion: 1 };
+  return Object.freeze({ ...body, integrityDigest: backupDigest(body) });
+}
+
+export async function restoreVerifiedOperationBackup(backup, options = {}) {
+  if (!backup || !backup.integrityDigest) throw new Error('BACKUP_INTEGRITY_REQUIRED');
+  const { integrityDigest, ...body } = backup;
+  if (backupDigest(body) !== integrityDigest) throw new Error('BACKUP_INTEGRITY_FAILED');
+  const compatible = { version: body.version, organizationId: body.organizationId, operations: body.operations };
+  return restoreOperationBackup(compatible, options);
 }

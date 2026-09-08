@@ -29,6 +29,9 @@ node scripts/run-synthetic-operation-assurance.mjs >/dev/null
 node tests/audit-snapshot-adversarial.test.mjs
 node tests/synthetic-adversarial-campaign.test.mjs
 node scripts/run-synthetic-adversarial-campaign.mjs >/dev/null
+node tests/verified-operation-backup.test.mjs
+node tests/synthetic-operational-resilience.test.mjs
+node scripts/run-synthetic-resilience-campaign.mjs >/dev/null
 
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js

@@ -1,0 +1,25 @@
+{
+  "version": "synthetic-resilience-campaign.v1",
+  "syntheticOnly": true,
+  "stalledAfterMinutes": 60,
+  "humanReviewDeadlineMinutes": 30,
+  "delayedHumanReviewMinutes": 95,
+  "events": [
+    {"id":"evt-3","sequence":3},
+    {"id":"evt-1","sequence":1},
+    {"id":"evt-2","sequence":2},
+    {"id":"evt-2","sequence":2}
+  ],
+  "baseline": {
+    "concurrentConflictDetected": true,
+    "restartRecoveryVerified": true,
+    "corruptBackupDetected": true,
+    "outOfOrderEventsRecovered": true,
+    "duplicateEventsIgnored": 1,
+    "closedOperationProtected": true,
+    "stalledOperationsDetected": 1,
+    "criticalIncidentsEscalated": 2,
+    "humanReviewBreachesDetected": 1,
+    "boundaryViolations": 0
+  }
+}
