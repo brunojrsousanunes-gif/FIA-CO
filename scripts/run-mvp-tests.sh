@@ -9,6 +9,11 @@ node tests/v1-consolidation-scan.test.js
 node tests/fia-guide.test.mjs
 node tests/first-contact-ui.test.mjs
 
+# Compliance architecture
+node tests/compliance-gate.test.mjs
+node tests/party-classification.test.mjs
+node tests/sensitive-data-policy.test.mjs
+
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
 node tests/legal-2bc.test.js
