@@ -16,21 +16,28 @@ Estado: **PREPRODUCTION_BLOCKED**. Esta arquitectura implementa límites técnic
 - Gate central de capacidades productivas cerrado por defecto.
 - Fronteras permanentes contra custodia de fondos, biometría y decisiones jurídicas automatizadas.
 - Clasificación obligatoria P2P, B2C, C2B o B2B antes de elegir contrato.
-- Verificación de comerciantes y de representantes antes de contratar.
+- Contratos versionados: resumen de términos, hash coincidente, aceptación bilateral y copia duradera.
+- Registro de solicitudes de derechos RGPD con verificación no biométrica, revisión humana y bloqueo ante conservación legítima.
+- Aviso y acción DSA con localización, motivación, decisión humana y vía de reclamación.
+- Trazabilidad de comerciantes sin guardar el documento fuente en el frontend.
+- Manifiesto de evidencias privadas con lista de formatos, límite, hash, antimalware, metadatos y retención.
+- Gate DAC7 que impide declarar hasta validar alcance y completar diligencia del vendedor.
+- Gate de accesibilidad con evidencias obligatorias y sin fingir una certificación.
 - Exclusión de DNI/NIE/NIF, IBAN, tarjetas y secretos del historial de búsqueda, analítica y contexto de IA.
 - Continuidad de `legalReadyForPilot=false` hasta revisión externa y validación de jurisdicción.
 
-## Controles pendientes de infraestructura productiva
+## Pendiente de infraestructura productiva
 
-- Ejecución real de borrado y propagación a copias de seguridad.
-- Portal de derechos RGPD y registro de consentimientos.
-- Almacenamiento privado de evidencias con análisis antimalware y acceso temporal.
-- Integración PSP con tokenización, webhooks firmados y conciliación.
-- Flujo DSA de aviso, retirada, motivación y reclamación.
-- Expediente DAC7, cuando la clasificación fiscal confirme aplicabilidad.
-- Contratos versionados y justificantes en soporte duradero.
+- API autenticada, base de datos cifrada, gestión de claves y separación por organización.
+- Ejecución real y auditable de borrado, incluida la política sobre copias de seguridad.
+- Portal de ejercicio de derechos y canal operativo de reclamaciones.
+- Almacenamiento privado real con enlaces temporales y análisis antimalware.
+- PSP elegido: tokenización, webhooks firmados, conciliación y gestión de reembolsos.
+- Generación y entrega real de contratos en soporte duradero.
+- Presentación DAC7, únicamente si la clasificación fiscal confirma aplicabilidad.
 - Pruebas de accesibilidad y seguridad de extremo a extremo.
+- Textos finales con la identidad legal, domicilio y contacto del prestador.
 
 ## Regla de activación
 
-Ninguna capacidad productiva se activa desde la interfaz. Requiere que el servidor valide el gate, exista evidencia verificable de cada control y se complete revisión jurídica externa del alcance concreto.
+Ninguna capacidad productiva se activa desde la interfaz. El servidor deberá validar el gate, existir evidencia verificable de cada control y completarse la revisión jurídica externa del alcance concreto.
