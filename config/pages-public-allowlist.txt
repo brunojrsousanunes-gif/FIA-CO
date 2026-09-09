@@ -30,3 +30,4 @@ assets/fia-co-trust-compute.svg
 assets/fia-piggy-assistant-v1.webp
 assets/fia-piggy-assistant-gold.webp
 assets/fia-barcelona-office-hero.webp
+assets/fia-barcelona-office-hero-left.webp
