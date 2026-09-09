@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "fia-form-coverage.v1",
+  "policy": {
+    "newCapabilityRequiresFormAssessment": true,
+    "requiredBeforeReady": [
+      "form-or-not-applicable",
+      "field-minimisation",
+      "validation",
+      "retention",
+      "recipient-and-channel",
+      "human-review",
+      "legal-review-status"
+    ],
+    "productionSendDefault": false,
+    "secretCollectionOnPublicSurface": false
+  },
+  "models": [
+    "vehicle-sale",
+    "b2b-goods",
+    "b2b-service",
+    "quote-followup",
+    "purchase-request",
+    "transport-order",
+    "evidence-handover",
+    "incident-report",
+    "provider-qualification",
+    "payment-provider",
+    "document-request",
+    "operation-close"
+  ]
+}
