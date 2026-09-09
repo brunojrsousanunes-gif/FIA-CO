@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {attemptPrepilotBlockerResolution} from '../core/pilot/prepilot-blocker-resolution.mjs';
+const config=JSON.parse(fs.readFileSync('config/prepilot-blocker-resolution.v1.json','utf8'));
+const report=attemptPrepilotBlockerResolution(config);
+assert.equal(report.decision,'PASS_SYNTHETIC_PREPARATION');
+assert.equal(report.blockersAttempted,6);
+assert.equal(report.blockersPrepared,6);
+assert.equal(report.blockersResolvedForRealUsers,0);
+assert.equal(report.blockersRemaining,6);
+assert.equal(report.artifactsPrepared,22);
+assert.equal(report.externalDependencies,4);
+assert.equal(report.realUserDecision,'NOT_READY_FOR_REAL_USERS');
+assert.equal(report.automaticLegalApproval,false);
+assert.equal(report.automaticDisputeVerdict,false);
+assert.equal(report.productionSecretsUsed,false);
+assert.equal(report.biometricsUsed,false);
+assert.equal(report.realDataUsed,false);
+assert.equal(report.realMoneyMoved,false);
+assert.equal(report.externalActionsExecuted,false);
+for(const item of report.attempts){assert.equal(item.status,'PREPARED_SYNTHETIC');assert.equal(item.resolvedForRealUsers,false);assert.ok(item.preparedArtifacts.length>=3);}
+assert.throws(()=>attemptPrepilotBlockerResolution({...config,syntheticOnly:false}),/SYNTHETIC_ZERO_COST_ONLY/);
+console.log('prepilot-blocker-resolution: ok');
