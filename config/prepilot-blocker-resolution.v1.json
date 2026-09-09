@@ -16,7 +16,8 @@
       "category": "LEGAL_MANDATORY",
       "preparedArtifacts": [
         "legal-notice-template",
-        "missing-fields-gate"
+        "missing-fields-gate",
+        "publication-readiness-check"
       ],
       "requires": [
         "legalForm",
