@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import { runSyntheticOperationLifecycle } from '../core/pilot/synthetic-operation-lifecycle.mjs';
+import { buildSyntheticAssuranceReport } from '../core/pilot/synthetic-assurance-report.mjs';
+import { runSyntheticAdversarialCampaign,summarizeAdversarialCampaign } from '../core/pilot/synthetic-adversarial-campaign.mjs';
+import { runSyntheticOperationalResilience } from '../core/pilot/synthetic-operational-resilience.mjs';
+import { evaluateSyntheticFraudDispute,summarizeSyntheticFraudDisputes } from '../core/pilot/synthetic-fraud-dispute.mjs';
+import { buildConsolidatedSimulationReport } from '../core/pilot/consolidated-simulation-report.mjs';
+
+const read=path=>JSON.parse(fs.readFileSync(path,'utf8'));
+const lifecycle=read('config/synthetic-operation-lifecycle.v1.json').cases.map(runSyntheticOperationLifecycle);
+const operationAssurance=buildSyntheticAssuranceReport(lifecycle);
+const adversarialResults=[];
+for(const item of read('config/synthetic-adversarial-campaign.v1.json').campaigns)adversarialResults.push(await runSyntheticAdversarialCampaign({...item,syntheticOnly:true}));
+const adversarial=summarizeAdversarialCampaign(adversarialResults);
+const resilience=await runSyntheticOperationalResilience(read('config/synthetic-resilience-campaign.v1.json'));
+const disputeResults=read('config/synthetic-fraud-dispute-cases.v1.json').cases.map(item=>evaluateSyntheticFraudDispute({...item,synthetic:true}));
+const disputes=summarizeSyntheticFraudDisputes(disputeResults);
+const report=buildConsolidatedSimulationReport({operationAssurance,adversarial,resilience,disputes});
+process.stdout.write(JSON.stringify(report,null,2)+'\n');
+if(report.decision!=='PASS_SIMULATION_PROGRAM')process.exitCode=1;

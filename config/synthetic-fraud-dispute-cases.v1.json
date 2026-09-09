@@ -1,0 +1,18 @@
+{
+  "version": "synthetic-fraud-dispute-cases.v1",
+  "syntheticOnly": true,
+  "cases": [
+    {"id":"FD-001","type":"FALSE_DELIVERY_CLAIM","expectedDecision":"OPEN_DISPUTE"},
+    {"id":"FD-002","type":"BUYER_DENIES_VERIFIED_DELIVERY","expectedDecision":"REQUEST_MORE_EVIDENCE"},
+    {"id":"FD-003","type":"CONTRADICTORY_EVIDENCE","expectedDecision":"HUMAN_REVIEW_REQUIRED"},
+    {"id":"FD-004","type":"DAMAGED_OR_INCOMPLETE_ITEM","expectedDecision":"OPEN_DISPUTE"},
+    {"id":"FD-005","type":"CANCELLATION_AFTER_DISPATCH","expectedDecision":"HUMAN_REVIEW_REQUIRED"},
+    {"id":"FD-006","type":"DUPLICATE_REFUND_REQUEST","expectedDecision":"BLOCK_OPERATION"},
+    {"id":"FD-007","type":"TERMS_CHANGED_AFTER_ACCEPTANCE","expectedDecision":"BLOCK_OPERATION"},
+    {"id":"FD-008","type":"COLLUSION_SIGNAL","expectedDecision":"HUMAN_REVIEW_REQUIRED"},
+    {"id":"FD-009","type":"IDENTITY_IMPERSONATION","expectedDecision":"BLOCK_OPERATION"},
+    {"id":"FD-010","type":"PRESSURE_TO_RELEASE_DURING_DISPUTE","expectedDecision":"BLOCK_OPERATION"},
+    {"id":"FD-011","type":"LATE_CLAIM","expectedDecision":"HUMAN_REVIEW_REQUIRED"},
+    {"id":"FD-012","type":"UNRESPONSIVE_PARTY","expectedDecision":"HUMAN_REVIEW_REQUIRED"}
+  ]
+}
