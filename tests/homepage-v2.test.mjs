@@ -7,7 +7,9 @@ ok(!/<script(?![^>]*src=)[^>]*>/i.test(html),'homepage must not contain inline s
 ok(html.includes('id="que-resuelve"'),'homepage must explain user-facing needs');
 ok(html.includes('id="seguridad"'),'homepage must explain public security principles');
 ok(html.includes('id="contacto"'),'homepage must expose first-contact entry');
-ok(html.includes('MENOS RUIDO.')&&html.includes('MÁS CONTROL.'),'homepage must keep a simple public proposition');
+ok(html.includes('TU OPERACIÓN.')&&html.includes('TODO A LA VISTA.'),'homepage must keep a simple public proposition');
+ok(html.includes('class="quick-dock"'),'homepage must expose the portal action dock');
+ok(html.includes('class="assistant-showcase"'),'homepage must give FIA a prominent assistant panel');
 ok(html.includes('Primer contacto sin datos reales'),'homepage must communicate low-data entry');
 ok(html.includes('FIA no recibe, custodia ni mueve fondos'),'homepage must preserve financial boundary');
 ok(html.includes('js/fia-public-guide.js'),'homepage must use the minimal public guide');
