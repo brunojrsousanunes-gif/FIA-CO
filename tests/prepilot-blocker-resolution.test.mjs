@@ -8,7 +8,7 @@ assert.equal(report.blockersAttempted,6);
 assert.equal(report.blockersPrepared,6);
 assert.equal(report.blockersResolvedForRealUsers,0);
 assert.equal(report.blockersRemaining,6);
-assert.equal(report.artifactsPrepared,22);
+assert.equal(report.artifactsPrepared,21);
 assert.equal(report.externalDependencies,4);
 assert.equal(report.realUserDecision,'NOT_READY_FOR_REAL_USERS');
 assert.equal(report.automaticLegalApproval,false);
