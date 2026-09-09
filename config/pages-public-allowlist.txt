@@ -2,6 +2,7 @@
 index.html
 legal-center.html
 provider-connection-demo.html
+form-models.html
 robots.txt
 sitemap.xml
 
@@ -13,6 +14,7 @@ css/fia-human-presence.css
 css/fia-first-contact.css
 css/brand-i18n.css
 css/action-index.css
+css/form-models.css
 
 # Public scripts
 js/fia-public-guide.js
@@ -20,6 +22,7 @@ js/fia-human-presence.js
 js/fia-first-contact.js
 js/fia-resource-actions.js
 js/provider-connection-demo.js
+js/form-models.js
 
 # Public assets
 assets/fia-co-trust-compute.svg
