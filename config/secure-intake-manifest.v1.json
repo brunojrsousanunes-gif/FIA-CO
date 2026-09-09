@@ -1,0 +1,268 @@
+{
+  "schemaVersion": "secure-intake-manifest.v1",
+  "project": "FIA&CO",
+  "repositoryMayStoreValues": false,
+  "secureSubmissionRequired": true,
+  "items": [
+    {
+      "n": 1,
+      "id": "OPERATING_STATUS",
+      "group": "OWNER_NOW",
+      "kind": "INFORMATION",
+      "label": "Forma con la que operarás: autónomo, sociedad u otra",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 2,
+      "id": "LEGAL_NAME",
+      "group": "OWNER_NOW",
+      "kind": "INFORMATION",
+      "label": "Nombre legal completo del titular o razón social",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "PERSONAL"
+    },
+    {
+      "n": 3,
+      "id": "TAX_ID_PROOF",
+      "group": "OWNER_NOW",
+      "kind": "DOCUMENT",
+      "label": "Justificante de NIF/NIE o CIF",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "HIGH"
+    },
+    {
+      "n": 4,
+      "id": "PUBLIC_SERVICE_ADDRESS",
+      "group": "OWNER_NOW",
+      "kind": "INFORMATION",
+      "label": "Domicilio o dirección válida que figurará en los avisos legales",
+      "requiredBefore": "PUBLIC_SERVICE",
+      "sensitivity": "PERSONAL"
+    },
+    {
+      "n": 5,
+      "id": "REGISTRY_DETAILS",
+      "group": "OWNER_NOW",
+      "kind": "DOCUMENT_OR_NA",
+      "label": "Datos registrales o confirmación documentada de que todavía no aplican",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 6,
+      "id": "LEGAL_CONTACT",
+      "group": "OWNER_NOW",
+      "kind": "INFORMATION",
+      "label": "Correo electrónico para privacidad y comunicaciones legales",
+      "requiredBefore": "PUBLIC_SERVICE",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 7,
+      "id": "ACTIVITY_CONFIRMATION",
+      "group": "OWNER_NOW",
+      "kind": "INFORMATION",
+      "label": "Confirmación de la actividad exacta y servicios que ofrecerá FIA&CO",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 8,
+      "id": "MARKETS_AND_USERS",
+      "group": "OWNER_NOW",
+      "kind": "INFORMATION",
+      "label": "Países iniciales y tipos de usuario: particulares, empresas o ambos",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 9,
+      "id": "PROCESSING_PURPOSES",
+      "group": "PRIVACY_DECISIONS",
+      "kind": "INFORMATION",
+      "label": "Finalidades reales para las que se recogerán datos",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 10,
+      "id": "DATA_AND_SUBJECT_CATEGORIES",
+      "group": "PRIVACY_DECISIONS",
+      "kind": "INFORMATION",
+      "label": "Categorías de datos y de personas afectadas",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 11,
+      "id": "LAWFUL_BASES",
+      "group": "PRIVACY_DECISIONS",
+      "kind": "PROFESSIONAL_REVIEW",
+      "label": "Base jurídica propuesta para cada tratamiento, pendiente de revisión profesional",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 12,
+      "id": "PROCESSOR_INVENTORY",
+      "group": "PRIVACY_DECISIONS",
+      "kind": "DOCUMENT",
+      "label": "Lista de proveedores que tratarán datos y función de cada uno",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 13,
+      "id": "INTERNATIONAL_TRANSFERS",
+      "group": "PRIVACY_DECISIONS",
+      "kind": "INFORMATION",
+      "label": "País de tratamiento y posibles transferencias internacionales por proveedor",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 14,
+      "id": "RETENTION_SCHEDULE",
+      "group": "PRIVACY_DECISIONS",
+      "kind": "INFORMATION",
+      "label": "Plazo o criterio de conservación para cada categoría de datos",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 15,
+      "id": "RIGHTS_CHANNEL",
+      "group": "PRIVACY_DECISIONS",
+      "kind": "INFORMATION",
+      "label": "Canal y persona que atenderán acceso, rectificación, supresión y demás derechos",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "PERSONAL"
+    },
+    {
+      "n": 16,
+      "id": "PSP_SELECTION_PROOF",
+      "group": "PSP_LATER",
+      "kind": "DOCUMENT",
+      "label": "Identidad y prueba de autorización registral del PSP seleccionado",
+      "requiredBefore": "PAYMENT_PILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 17,
+      "id": "PSP_SIGNED_TERMS",
+      "group": "PSP_LATER",
+      "kind": "DOCUMENT",
+      "label": "Contrato y condiciones firmadas con el PSP",
+      "requiredBefore": "PAYMENT_PILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 18,
+      "id": "APPROVED_FUNDS_FLOW",
+      "group": "PSP_LATER",
+      "kind": "DOCUMENT",
+      "label": "Diagrama aprobado de cobro, retención, liberación, devolución y conciliación",
+      "requiredBefore": "PAYMENT_PILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 19,
+      "id": "KYC_AML_RESPONSIBILITY",
+      "group": "PSP_LATER",
+      "kind": "DOCUMENT",
+      "label": "Reparto contractual de identificación, KYC/AML, fraude, disputas y reembolsos",
+      "requiredBefore": "PAYMENT_PILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 20,
+      "id": "BACKEND_PROVIDER",
+      "group": "INFRA_LATER",
+      "kind": "INFORMATION",
+      "label": "Proveedor, región y servicio del backend",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 21,
+      "id": "AUTH_CONFIGURATION",
+      "group": "INFRA_LATER",
+      "kind": "DOCUMENT",
+      "label": "Configuración de acceso, roles, MFA, sesiones y recuperación",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 22,
+      "id": "EVIDENCE_STORAGE",
+      "group": "INFRA_LATER",
+      "kind": "DOCUMENT",
+      "label": "Proveedor y región del almacenamiento privado de evidencias",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 23,
+      "id": "ENCRYPTION_AND_KEYS",
+      "group": "INFRA_LATER",
+      "kind": "DOCUMENT_NO_SECRETS",
+      "label": "Diseño de cifrado y gestión de claves, sin entregar claves ni contraseñas",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 24,
+      "id": "SECURITY_EVIDENCE",
+      "group": "INFRA_LATER",
+      "kind": "DOCUMENT",
+      "label": "Resultados de pruebas de acceso, restauración, borrado, registro y seguridad",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    },
+    {
+      "n": 25,
+      "id": "PRIMARY_REVIEWER",
+      "group": "HUMAN_BEFORE",
+      "kind": "INFORMATION",
+      "label": "Responsable principal de incidencias y disputas",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "PERSONAL"
+    },
+    {
+      "n": 26,
+      "id": "BACKUP_REVIEWER",
+      "group": "HUMAN_BEFORE",
+      "kind": "INFORMATION",
+      "label": "Responsable suplente de incidencias y disputas",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "PERSONAL"
+    },
+    {
+      "n": 27,
+      "id": "REVIEW_AVAILABILITY",
+      "group": "HUMAN_BEFORE",
+      "kind": "INFORMATION",
+      "label": "Horario, plazo de respuesta y sistema de sustitución",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "STANDARD"
+    },
+    {
+      "n": 28,
+      "id": "SECURE_CONTACT_ROUTE",
+      "group": "HUMAN_BEFORE",
+      "kind": "INFORMATION",
+      "label": "Canal seguro y probado para alertas y escalados",
+      "requiredBefore": "REAL_PREPILOT",
+      "sensitivity": "CONFIDENTIAL"
+    }
+  ],
+  "neverSubmit": [
+    "PASSWORD",
+    "API_KEY",
+    "PRIVATE_KEY",
+    "RECOVERY_CODE",
+    "FULL_PAYMENT_CARD",
+    "BANK_LOGIN"
+  ]
+}
