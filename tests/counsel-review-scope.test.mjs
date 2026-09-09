@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const scope=JSON.parse(fs.readFileSync('config/counsel-review-scope.v1.json','utf8'));
+assert.equal(scope.status,'DRAFT_FOR_SPECIALIST_REVIEW');
+assert.equal(scope.confirmedDecisions.intendedLegalForm,'SOCIEDAD_LIMITADA');
+assert.deepEqual(scope.confirmedDecisions.customerScope,['BUSINESS','CONSUMER']);
+assert.equal(scope.confirmedDecisions.firstPilotOperation,'BUSINESS_TO_BUSINESS');
+assert.equal(scope.confirmedDecisions.territory,'EUROPEAN_UNION');
+assert.equal(scope.confirmedDecisions.revenueModel,'COMBINED');
+assert.equal(scope.confirmedDecisions.initialHumanReviewerRole,'FOUNDER');
+assert.equal(scope.confirmedDecisions.backupReviewerStatus,'TO_BE_APPOINTED');
+assert.equal(scope.permanentBoundaries.fiaCustodiesFunds,false);
+assert.equal(scope.permanentBoundaries.automaticDisputeVerdict,false);
+assert.equal(scope.permanentBoundaries.realUsersEnabled,false);
+assert.equal(scope.permanentBoundaries.professionalLegalReviewPending,true);
+assert.ok(scope.unresolved.includes('SHAREHOLDER_AND_ADMINISTRATOR_STRUCTURE'));
+assert.ok(scope.unresolved.includes('INITIAL_EU_MEMBER_STATES'));
+console.log('counsel-review-scope: ok');
