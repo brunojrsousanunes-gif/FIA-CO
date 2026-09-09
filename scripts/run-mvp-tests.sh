@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Current public surface
 node tests/homepage-v2.test.mjs
+node tests/original-business-interface.test.mjs
 node tests/unified-app.test.js
 node tests/action-index-legal.test.js
 node tests/v1-consolidation-scan.test.js
