@@ -22,4 +22,4 @@
 
 /* Show the floating assistant only after the main assistant leaves view */
 .fia-guide-root{transition:opacity .2s ease,visibility .2s ease}
-.fia-guide-root.is-primary-visible{opacity:0;visibility:hidden;pointer-events:none}
+.fia-guide-root.is-primary-visible .fia-guide-launcher{opacity:0;visibility:hidden;pointer-events:none}
