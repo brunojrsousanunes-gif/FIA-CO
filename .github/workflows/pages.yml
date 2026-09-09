@@ -31,7 +31,6 @@ jobs:
         run: |
           node scripts/build-pages-public.mjs .pages-public-test
           test -f .pages-public-test/index.html
-          test -f .pages-public-test/beta-mobile.html
           rm -rf .pages-public-test
       - name: Run automated battery
         run: bash scripts/run-mvp-tests.sh
@@ -60,8 +59,7 @@ jobs:
           node scripts/build-pages-public.mjs pages-public
           printf '%s\n' "$GITHUB_SHA" > pages-public/deploy-version.txt
           test -f pages-public/index.html
-          test -f pages-public/beta-mobile.html
-          grep -Fq 'beta-mobile.html' pages-public/index.html
+          grep -Fq 'FIA-B2B-024' pages-public/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
@@ -94,7 +92,7 @@ jobs:
       BASE_URL: ${{ needs.deploy.outputs.page_url }}
       EXPECTED_SHA: ${{ github.sha }}
     steps:
-      - name: Verify company site and app
+      - name: Verify company site
         shell: bash
         run: |
           set -euo pipefail
@@ -109,7 +107,6 @@ jobs:
           deployed_sha="$(fetch deploy-version.txt | tr -d '\r\n')"
           test "$deployed_sha" = "$EXPECTED_SHA"
           homepage="$(fetch index.html)"
-          grep -Fq 'beta-mobile.html' <<<"$homepage"
-          app="$(fetch beta-mobile.html)"
-          grep -Fq 'FIA&CO — App beta' <<<"$app"
-          printf 'DEPLOY OK — commit %s — company site OK — app OK\n' "$EXPECTED_SHA"
+          grep -Fq 'FIA-B2B-024' <<<"$homepage"
+          grep -Fq 'FIA no recibe, custodia ni mueve fondos' <<<"$homepage"
+          printf 'DEPLOY OK — commit %s — company site OK\n' "$EXPECTED_SHA"
