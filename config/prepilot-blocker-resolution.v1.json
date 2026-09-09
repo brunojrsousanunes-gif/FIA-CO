@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "prepilot-blocker-resolution-config.v1",
+  "syntheticOnly": true,
+  "zeroCost": true,
+  "project": {
+    "tradeName": "FIA&CO",
+    "operatingArea": "Lugo, España",
+    "legalForm": null,
+    "publicLegalAddress": null,
+    "legalContactEmail": null,
+    "taxIdentifier": null
+  },
+  "controls": [
+    {
+      "id": "LEGAL_IDENTITY_AND_NOTICES",
+      "category": "LEGAL_MANDATORY",
+      "preparedArtifacts": [
+        "legal-notice-template",
+        "missing-fields-gate"
+      ],
+      "requires": [
+        "legalForm",
+        "publicLegalAddress",
+        "legalContactEmail",
+        "taxIdentifier"
+      ],
+      "externalDependency": false
+    },
+    {
+      "id": "PRIVACY_RECORDS_AND_PROCESSOR_TERMS",
+      "category": "LEGAL_MANDATORY",
+      "preparedArtifacts": [
+        "processing-register-template",
+        "processor-inventory",
+        "rights-workflow"
+      ],
+      "requires": [
+        "confirmedControllerIdentity",
+        "realProcessorList",
+        "signedProcessorTerms"
+      ],
+      "externalDependency": true
+    },
+    {
+      "id": "AUTHORIZED_PSP_CONTRACT_AND_FLOW",
+      "category": "LEGAL_MANDATORY",
+      "preparedArtifacts": [
+        "psp-adapter-contract",
+        "webhook-verification-policy",
+        "reconciliation-runbook"
+      ],
+      "requires": [
+        "authorizedPspSelected",
+        "signedPspAgreement",
+        "sandboxCredentials",
+        "approvedFundsFlow"
+      ],
+      "externalDependency": true
+    },
+    {
+      "id": "REAL_BACKEND_AUTHORIZATION",
+      "category": "SECURITY_REQUIRED",
+      "preparedArtifacts": [
+        "rbac-policy",
+        "session-revocation-policy",
+        "secret-boundary",
+        "deny-by-default-gate"
+      ],
+      "requires": [
+        "backendSelected",
+        "productionSecrets",
+        "deployedAuthorizationService",
+        "penetrationTest"
+      ],
+      "externalDependency": true
+    },
+    {
+      "id": "ENCRYPTED_PRIVATE_EVIDENCE_STORAGE",
+      "category": "SECURITY_REQUIRED",
+      "preparedArtifacts": [
+        "evidence-access-policy",
+        "encryption-envelope-contract",
+        "retention-deletion-policy",
+        "audit-reference-model"
+      ],
+      "requires": [
+        "privateStorageSelected",
+        "managedKeys",
+        "restoreTest",
+        "accessReview"
+      ],
+      "externalDependency": true
+    },
+    {
+      "id": "INCIDENT_AND_HUMAN_REVIEW_DUTY",
+      "category": "SECURITY_REQUIRED",
+      "preparedArtifacts": [
+        "incident-severity-matrix",
+        "dispute-review-checklist",
+        "escalation-runbook",
+        "duty-log-template"
+      ],
+      "requires": [
+        "namedPrimaryReviewer",
+        "namedBackupReviewer",
+        "availabilityWindow",
+        "testedContactRoute"
+      ],
+      "externalDependency": false
+    }
+  ],
+  "forbidden": [
+    "REAL_PERSONAL_DATA",
+    "REAL_MONEY",
+    "BIOMETRICS",
+    "PRODUCTION_SECRETS",
+    "AUTOMATIC_DISPUTE_VERDICT",
+    "EXTERNAL_ACTION"
+  ]
+}
