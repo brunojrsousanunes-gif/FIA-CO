@@ -43,6 +43,9 @@ node scripts/run-controlled-prepilot.mjs >/dev/null
 node tests/prepilot-blocker-resolution.test.mjs
 node scripts/run-prepilot-blocker-resolution.mjs >/dev/null
 
+node tests/secure-intake.test.mjs
+node scripts/run-secure-intake.mjs >/dev/null
+
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
 node tests/legal-2bc.test.js
