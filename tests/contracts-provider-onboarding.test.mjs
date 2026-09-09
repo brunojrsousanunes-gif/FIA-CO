@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const assistant=fs.readFileSync('frontend/js/fia-first-contact.js','utf8');
+const home=fs.readFileSync('frontend/index.html','utf8');
+const setup=fs.readFileSync('frontend/provider-connection-demo.html','utf8');
+const setupJs=fs.readFileSync('frontend/js/provider-connection-demo.js','utf8');
+assert.ok(assistant.includes("CONTRACT_MODELS"));
+assert.ok(assistant.includes("contrato|contratos|compraventa"));
+assert.ok(assistant.includes("PROVIDER_CONNECTION"));
+assert.ok(home.includes('data-fia-query="contrato de compraventa"'));
+assert.ok(home.includes('provider-connection-demo.html'));
+assert.ok(setup.includes('Bóveda del servidor'));
+assert.ok(setup.includes('Producción — bloqueado'));
+assert.ok(setup.includes('FIA&CO no recibe, custodia ni mueve fondos'));
+assert.ok(setupJs.includes("startsWith('DEMO_')"));
+assert.equal(setupJs.includes('localStorage'),false);
+assert.equal(setupJs.includes('fetch('),false);
+console.log('contracts-provider-onboarding: ok');
