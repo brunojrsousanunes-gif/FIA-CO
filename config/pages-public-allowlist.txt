@@ -23,7 +23,9 @@ js/fia-first-contact.js
 js/fia-resource-actions.js
 js/provider-connection-demo.js
 js/form-models.js
+js/portal-panels.js
 
 # Public assets
 assets/fia-co-trust-compute.svg
 assets/fia-piggy-assistant-v1.webp
+assets/fia-piggy-assistant-gold.webp
