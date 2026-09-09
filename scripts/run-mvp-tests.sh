@@ -37,6 +37,9 @@ node scripts/run-synthetic-fraud-disputes.mjs >/dev/null
 node tests/consolidated-simulation-report.test.mjs
 node scripts/run-consolidated-simulation-report.mjs >/dev/null
 
+node tests/controlled-prepilot.test.mjs
+node scripts/run-controlled-prepilot.mjs >/dev/null
+
 # Legal and transport requirements that remain source-of-truth inputs
 node tests/legal-2a.test.js
 node tests/legal-2bc.test.js

@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "controlled-prepilot-config.v1",
+  "syntheticOnly": true,
+  "users": [
+    {
+      "id": "SYN-BUYER-001",
+      "role": "BUYER",
+      "operationIds": [
+        "SYN-OP-001"
+      ]
+    },
+    {
+      "id": "SYN-SELLER-001",
+      "role": "SELLER",
+      "operationIds": [
+        "SYN-OP-001"
+      ]
+    }
+  ],
+  "operation": {
+    "id": "SYN-OP-001",
+    "stages": [
+      "CREATED",
+      "AGREED",
+      "TRACKING",
+      "DELIVERED",
+      "CLOSED"
+    ],
+    "realMoney": false,
+    "pspInstruction": false
+  },
+  "sensitiveData": [
+    {
+      "type": "DNI",
+      "value": "SYNTHETIC-DNI-00000000X",
+      "purposeEnded": true
+    },
+    {
+      "type": "IBAN",
+      "value": "SYNTHETIC-IBAN-ES00",
+      "purposeEnded": true
+    },
+    {
+      "type": "SEARCH_QUERY",
+      "value": "consulta delicada ficticia",
+      "purposeEnded": true
+    }
+  ],
+  "attacks": [
+    "LOST_ACCESS",
+    "STOLEN_SESSION",
+    "IMPERSONATION",
+    "DOCUMENT_LEAK"
+  ],
+  "dispute": {
+    "id": "SYN-DISPUTE-001",
+    "operationId": "SYN-OP-001",
+    "claimant": "SYN-BUYER-001",
+    "respondent": "SYN-SELLER-001"
+  },
+  "requirements": [
+    {
+      "id": "LEGAL_IDENTITY_AND_NOTICES",
+      "category": "LEGAL_MANDATORY",
+      "ready": false,
+      "ownerInputRequired": true
+    },
+    {
+      "id": "PRIVACY_RECORDS_AND_PROCESSOR_TERMS",
+      "category": "LEGAL_MANDATORY",
+      "ready": false,
+      "ownerInputRequired": false
+    },
+    {
+      "id": "AUTHORIZED_PSP_CONTRACT_AND_FLOW",
+      "category": "LEGAL_MANDATORY",
+      "ready": false,
+      "ownerInputRequired": false
+    },
+    {
+      "id": "REAL_BACKEND_AUTHORIZATION",
+      "category": "SECURITY_REQUIRED",
+      "ready": false,
+      "ownerInputRequired": false
+    },
+    {
+      "id": "ENCRYPTED_PRIVATE_EVIDENCE_STORAGE",
+      "category": "SECURITY_REQUIRED",
+      "ready": false,
+      "ownerInputRequired": false
+    },
+    {
+      "id": "INCIDENT_AND_HUMAN_REVIEW_DUTY",
+      "category": "SECURITY_REQUIRED",
+      "ready": false,
+      "ownerInputRequired": false
+    },
+    {
+      "id": "CUSTOM_DOMAIN_AND_BRANDED_MAIL",
+      "category": "DEFERRABLE",
+      "ready": false,
+      "ownerInputRequired": false
+    },
+    {
+      "id": "MARKETING_AUTOMATION",
+      "category": "DEFERRABLE",
+      "ready": false,
+      "ownerInputRequired": false
+    }
+  ]
+}
