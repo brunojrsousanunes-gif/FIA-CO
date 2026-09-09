@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync('frontend/index.html','utf8');
+const css=fs.readFileSync('frontend/css/home-production.css','utf8');
+for(const marker of ['control-board','FIA-B2B-024','Acuerdo','Comprueba','Resuelve','Cierra','Operaciones entre empresas.'])assert.ok(html.includes(marker),`missing interface marker: ${marker}`);
+assert.ok(html.includes('Demostración conceptual · Sin dinero ni datos reales'));
+assert.ok(html.includes('FIA&CO no recibe, custodia ni mueve fondos'));
+assert.ok(html.includes('revisión humana'));
+assert.equal(html.includes('hero-photo'),false);
+assert.equal(/<script(?![^>]*src=)/i.test(html),false);
+assert.ok(css.includes('@media(max-width:760px)'));
+assert.ok(css.includes('.control-board'));
+assert.ok(css.includes('.flow-grid'));
+console.log('original-business-interface: ok');
