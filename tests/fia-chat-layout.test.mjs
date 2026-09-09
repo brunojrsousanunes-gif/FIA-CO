@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const js=fs.readFileSync('frontend/js/fia-first-contact.js','utf8');
+const guide=fs.readFileSync('frontend/css/fia-guide.css','utf8');
+const home=fs.readFileSync('frontend/css/home-production.css','utf8');
+assert.ok(js.includes("fia-chat-bubble"));
+assert.ok(js.includes("bubble('user'"));
+assert.ok(js.includes("bubble('assistant'"));
+assert.ok(guide.includes('.fia-guide-launcher{width:88px;height:88px'));
+assert.ok(guide.includes('.fia-chat-bubble.user'));
+assert.ok(guide.includes('.fia-chat-bubble.assistant'));
+assert.ok(home.includes('grid-template-columns:minmax(0,58%) minmax(0,42%)'));
+assert.ok(home.includes('.control-board{grid-column:1;grid-row:1'));
+console.log('fia-chat-layout: ok');
