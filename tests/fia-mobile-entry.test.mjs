@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync('frontend/index.html','utf8');
+const actions=fs.readFileSync('frontend/js/fia-resource-actions.js','utf8');
+const guide=fs.readFileSync('frontend/js/fia-public-guide.js','utf8');
+assert.equal((html.match(/data-open-fia/g)||[]).length,2);
+assert.ok(html.includes('ABRIR ASISTENTE SEGURO'));
+assert.ok(html.includes('fia-guide.css?v='));
+assert.ok(html.includes('fia-public-guide.js?v='));
+assert.ok(actions.includes("querySelectorAll('[data-open-fia]')"));
+assert.ok(actions.includes('window.FIAGuide?.open?.()'));
+assert.ok(guide.includes("[data-fia-search] input"));
+assert.ok(guide.includes('fia-piggy-assistant-v1.webp?v='));
+console.log('fia-mobile-entry: ok');
