@@ -23,3 +23,4 @@ js/provider-connection-demo.js
 
 # Public assets
 assets/fia-co-trust-compute.svg
+assets/fia-piggy-assistant-v1.webp
