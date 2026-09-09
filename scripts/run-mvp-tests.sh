@@ -9,6 +9,7 @@ node tests/action-index-legal.test.js
 node tests/v1-consolidation-scan.test.js
 node tests/fia-guide.test.mjs
 node tests/first-contact-ui.test.mjs
+node tests/contracts-provider-onboarding.test.mjs
 
 # Compliance architecture
 node tests/compliance-gate.test.mjs

@@ -1,6 +1,7 @@
 # Public routes
 index.html
 legal-center.html
+provider-connection-demo.html
 robots.txt
 sitemap.xml
 
@@ -17,6 +18,8 @@ css/action-index.css
 js/fia-public-guide.js
 js/fia-human-presence.js
 js/fia-first-contact.js
+js/fia-resource-actions.js
+js/provider-connection-demo.js
 
 # Public assets
 assets/fia-co-trust-compute.svg

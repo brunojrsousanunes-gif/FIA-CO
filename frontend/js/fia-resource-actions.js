@@ -1,0 +1,1 @@
+(()=>{'use strict';document.querySelectorAll('[data-fia-query]').forEach(button=>button.addEventListener('click',()=>{window.FIAGuide?.open?.();const input=document.querySelector('[data-fia-search] input');if(!input)return;input.value=button.dataset.fiaQuery||'';input.focus();}));})();

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#100d19">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
+<title>FIA&CO — Preparación segura del proveedor de pago</title>
+<link rel="stylesheet" href="css/home-production.css">
+</head>
+<body class="provider-demo-page">
+<header class="topbar">
+<a class="brand" href="index.html" aria-label="Volver a FIA&CO"><img src="assets/fia-co-trust-compute.svg" alt="FIA&CO"></a>
+<p class="slogan">CONEXIÓN PREPARADA. SECRETOS FUERA DEL NAVEGADOR.</p>
+<a class="contact-btn" href="index.html">VOLVER</a>
+</header>
+<main class="provider-demo">
+<section class="provider-intro">
+<span class="eyebrow">Configuración demostrativa</span>
+<h1>Preparar un proveedor de pago.</h1>
+<p>Este modelo define qué datos serán necesarios para conectar FIA&CO con una entidad autorizada. No admite credenciales reales, no guarda lo escrito y no contacta servicios externos.</p>
+<div class="provider-boundary"><strong>FIA&CO no recibe, custodia ni mueve fondos.</strong><span>La ejecución corresponderá al proveedor autorizado que se contrate.</span></div>
+</section>
+<form class="provider-form" data-provider-form novalidate>
+<div class="provider-grid">
+<label>Tipo de proveedor<select name="provider" required><option value="">Seleccionar</option><option value="PSP">Proveedor de servicios de pago (PSP)</option><option value="BANK">Entidad bancaria con API</option></select></label>
+<label>Entorno<select name="environment" required><option value="SANDBOX">Pruebas — sandbox</option><option value="PRODUCTION" disabled>Producción — bloqueado</option></select></label>
+<label>Identificador comercial de prueba<input name="merchantId" inputmode="text" autocomplete="off" maxlength="40" placeholder="DEMO_COMERCIO_001" required></label>
+<label>Identificador público de prueba<input name="publicId" inputmode="text" autocomplete="off" maxlength="50" placeholder="DEMO_PUBLIC_001" required></label>
+</div>
+<fieldset class="secret-model">
+<legend>Credenciales secretas de producción</legend>
+<div><span>Clave privada/API</span><b>Bóveda del servidor · pendiente</b></div>
+<div><span>Secreto de webhook</span><b>Bóveda del servidor · pendiente</b></div>
+<div><span>Certificado o firma</span><b>Según proveedor · pendiente</b></div>
+<p>Nunca se introducirán ni conservarán en esta página. Se cargarán posteriormente mediante un canal administrativo seguro, con cifrado, registro de acceso y rotación.</p>
+</fieldset>
+<label class="provider-check"><input type="checkbox" name="ack" required> Confirmo que usaré únicamente identificadores ficticios que empiecen por <b>DEMO_</b>.</label>
+<button class="btn" type="submit">VALIDAR MODELO DE PRUEBA</button>
+<div class="provider-result" data-provider-result aria-live="polite">Pendiente de validación.</div>
+</form>
+<section class="provider-next"><h2>Para activarlo de verdad harán falta</h2><ol><li>Proveedor legalmente habilitado y contrato firmado.</li><li>Cuenta empresarial verificada y controles KYC/KYB.</li><li>Servidor seguro con bóveda de secretos; GitHub Pages no sirve para ello.</li><li>Webhooks firmados, permisos mínimos, rotación y registro de accesos.</li><li>Pruebas sandbox y aprobación humana antes de producción.</li></ol></section>
+</main>
+<script src="js/provider-connection-demo.js"></script>
+</body>
+</html>
