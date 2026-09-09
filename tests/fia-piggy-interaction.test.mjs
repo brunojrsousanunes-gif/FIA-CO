@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const guide=fs.readFileSync('frontend/js/fia-public-guide.js','utf8');
+const first=fs.readFileSync('frontend/js/fia-first-contact.js','utf8');
+const css=fs.readFileSync('frontend/css/fia-guide.css','utf8');
+const allow=fs.readFileSync('config/pages-public-allowlist.txt','utf8');
+assert.ok(guide.includes('assets/fia-piggy-assistant-v1.webp'));
+assert.ok(first.includes("animateMascot(root,'listening')"));
+assert.ok(first.includes("animateMascot(root,'replying')"));
+assert.ok(css.includes('@keyframes fia-pig-idle'));
+assert.ok(css.includes('@keyframes fia-pig-listen'));
+assert.ok(css.includes('@keyframes fia-pig-reply'));
+assert.ok(css.includes('transform-style:preserve-3d'));
+assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'));
+assert.ok(allow.includes('assets/fia-piggy-assistant-v1.webp'));
+console.log('fia-piggy-interaction: ok');
