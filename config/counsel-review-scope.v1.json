@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "counsel-review-scope.v1",
+  "status": "DRAFT_FOR_SPECIALIST_REVIEW",
+  "confirmedDecisions": {
+    "intendedLegalForm": "SOCIEDAD_LIMITADA",
+    "customerScope": [
+      "BUSINESS",
+      "CONSUMER"
+    ],
+    "firstPilotOperation": "BUSINESS_TO_BUSINESS",
+    "territory": "EUROPEAN_UNION",
+    "revenueModel": "COMBINED",
+    "initialHumanReviewerRole": "FOUNDER",
+    "backupReviewerStatus": "TO_BE_APPOINTED"
+  },
+  "pricingComponents": [
+    "FIXED_FEE",
+    "TRANSACTION_BASED_COMPONENT",
+    "SUBSCRIPTION_OR_SERVICE_COMPONENT"
+  ],
+  "permanentBoundaries": {
+    "fiaDirectPaymentServices": false,
+    "fiaCustodiesFunds": false,
+    "biometrics": false,
+    "automaticDisputeVerdict": false,
+    "realUsersEnabled": false,
+    "realDataEnabled": false,
+    "professionalLegalReviewPending": true
+  },
+  "unresolved": [
+    "SHAREHOLDER_AND_ADMINISTRATOR_STRUCTURE",
+    "REGISTERED_OFFICE",
+    "TAX_IDENTIFIER",
+    "LEGAL_CONTACT_EMAIL",
+    "EXACT_SERVICE_AND_PRICING_SCHEDULE",
+    "INITIAL_EU_MEMBER_STATES",
+    "APPLICABLE_LAW_AND_JURISDICTION",
+    "AUTHORIZED_PSP",
+    "BACKUP_REVIEWER",
+    "B2C_LAUNCH_TIMING"
+  ]
+}
