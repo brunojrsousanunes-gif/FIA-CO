@@ -3,6 +3,7 @@ index.html
 legal-center.html
 provider-connection-demo.html
 form-models.html
+operation-center.html
 robots.txt
 sitemap.xml
 
@@ -15,6 +16,7 @@ css/fia-first-contact.css
 css/brand-i18n.css
 css/action-index.css
 css/form-models.css
+css/operation-center.css
 
 # Public scripts
 js/fia-public-guide.js
@@ -24,6 +26,7 @@ js/fia-resource-actions.js
 js/provider-connection-demo.js
 js/form-models.js
 js/portal-panels.js
+js/operation-center.js
 
 # Public assets
 assets/fia-co-trust-compute.svg
