@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b1118">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
+<title>FIA&CO — Centro de operaciones</title>
+<link rel="stylesheet" href="css/operation-center.css?v=1">
+</head>
+<body>
+<header class="top"><a href="index.html">FIA&CO</a><span>Centro de operaciones</span><strong>DEMO SINTÉTICA</strong></header>
+<main class="shell">
+<section class="intro">
+ <div><span class="eyebrow">OPERACIÓN GUIADA</span><h1>Del acuerdo al cierre, bajo control.</h1><p>Crea una operación ficticia y avanza solo cuando estén preparados los controles necesarios.</p></div>
+ <aside><b>Entorno seguro</b><span>No introduzcas nombres reales, DNI, IBAN, correos, credenciales ni documentos privados.</span></aside>
+</section>
+
+<section class="statusbar" aria-label="Estado de la operación">
+ <div><small>REFERENCIA</small><strong data-reference>Sin crear</strong></div>
+ <div><small>ESTADO</small><strong data-status>PREPARACIÓN</strong></div>
+ <div><small>PROGRESO</small><strong data-percent>0 %</strong></div>
+ <button type="button" data-reset>Reiniciar y borrar</button>
+</section>
+
+<ol class="steps" aria-label="Fases de la operación">
+ <li class="active" data-step-indicator="create"><b>1</b><span>Creación</span></li>
+ <li data-step-indicator="agreement"><b>2</b><span>Acuerdo</span></li>
+ <li data-step-indicator="documents"><b>3</b><span>Documentos</span></li>
+ <li data-step-indicator="tracking"><b>4</b><span>Seguimiento</span></li>
+ <li data-step-indicator="delivery"><b>5</b><span>Entrega</span></li>
+ <li data-step-indicator="close"><b>6</b><span>Cierre</span></li>
+</ol>
+
+<div class="workspace">
+<section class="stage" data-stage="create">
+ <header><span>01</span><div><h2>Crear operación ficticia</h2><p>Identifica el caso sin datos reales.</p></div></header>
+ <div class="fields">
+  <label>Tipo de operación<select data-field="type"><option value="vehicle-sale">Compraventa de vehículo</option><option value="b2b-goods">Compraventa mercantil B2B</option><option value="b2b-service">Servicios B2B</option><option value="transport-order">Transporte o entrega</option></select></label>
+  <label>Empresa solicitante<input data-field="partyA" maxlength="60" value="Empresa Demo A" autocomplete="off"></label>
+  <label>Contraparte<input data-field="partyB" maxlength="60" value="Empresa Demo B" autocomplete="off"></label>
+  <label>Objeto ficticio<input data-field="subject" maxlength="90" value="Vehículo de demostración" autocomplete="off"></label>
+ </div>
+ <div class="actions"><button class="primary" type="button" data-action="create">Crear operación</button><a data-model-link href="form-models.html?model=vehicle-sale">Abrir modelo relacionado</a></div>
+</section>
+
+<section class="stage" data-stage="agreement" hidden>
+ <header><span>02</span><div><h2>Confirmar acuerdo</h2><p>Las dos partes deben conocer el objeto, las condiciones y la versión.</p></div></header>
+ <label class="check"><input type="checkbox" data-check="conditions"> Condiciones ficticias revisadas por ambas partes</label>
+ <label class="check"><input type="checkbox" data-check="version"> Versión del acuerdo identificada</label>
+ <label class="check"><input type="checkbox" data-check="human"> Confirmación humana registrada</label>
+ <div class="actions"><button class="primary" type="button" data-action="agreement">Confirmar acuerdo</button></div>
+</section>
+
+<section class="stage" data-stage="documents" hidden>
+ <header><span>03</span><div><h2>Comprobar documentación</h2><p>Marca únicamente evidencias simuladas.</p></div></header>
+ <label class="check"><input type="checkbox" data-check="model"> Modelo contractual preparado</label>
+ <label class="check"><input type="checkbox" data-check="authority"> Capacidad de las partes comprobada</label>
+ <label class="check"><input type="checkbox" data-check="minimum"> Minimización y finalidad revisadas</label>
+ <div class="actions"><button class="primary" type="button" data-action="documents">Validar documentación</button><a href="form-models.html?model=document-request">Solicitud documental</a></div>
+</section>
+
+<section class="stage" data-stage="tracking" hidden>
+ <header><span>04</span><div><h2>Iniciar seguimiento</h2><p>La referencia solo puede ser ficticia.</p></div></header>
+ <label>Referencia de entrega<input data-field="tracking" maxlength="40" placeholder="Ej. DEMO-ENTREGA-01" autocomplete="off"></label>
+ <label class="check"><input type="checkbox" data-check="prepared"> Preparación confirmada</label>
+ <div class="actions"><button class="primary" type="button" data-action="tracking">Iniciar seguimiento</button><button class="danger" type="button" data-action="incident">Simular incidencia</button></div>
+</section>
+
+<section class="stage" data-stage="delivery" hidden>
+ <header><span>05</span><div><h2>Confirmar entrega</h2><p>No se suben fotografías reales en esta demostración.</p></div></header>
+ <label class="check"><input type="checkbox" data-check="before"> Evidencia ficticia previa al envío registrada</label>
+ <label class="check"><input type="checkbox" data-check="after"> Evidencia ficticia de recepción registrada</label>
+ <label class="check"><input type="checkbox" data-check="accepted"> Recepción aceptada por una persona</label>
+ <div class="actions"><button class="primary" type="button" data-action="delivery">Confirmar entrega</button><button class="danger" type="button" data-action="incident">Simular incidencia</button></div>
+</section>
+
+<section class="stage" data-stage="close" hidden>
+ <header><span>06</span><div><h2>Cerrar operación</h2><p>FIA registra el estado comunicado; no recibe ni mueve fondos.</p></div></header>
+ <label>Estado comunicado por el proveedor<select data-field="payment"><option value="">Selecciona</option><option value="authorized">Autorizado</option><option value="settled">Liquidado entre proveedor y partes</option><option value="not-required">No aplicable</option></select></label>
+ <label class="check"><input type="checkbox" data-check="reviewed"> Revisión final humana completada</label>
+ <div class="actions"><button class="primary" type="button" data-action="close">Cerrar operación</button><button type="button" data-download disabled>Descargar resumen</button></div>
+</section>
+
+<aside class="side">
+ <section class="next"><small>PRÓXIMA ACCIÓN</small><strong data-next>Crea la operación ficticia</strong><p data-message>Los campos contienen ejemplos y pueden modificarse sin usar datos reales.</p></section>
+ <section class="incident" data-incident hidden><small>OPERACIÓN CONGELADA</small><strong>Incidencia simulada abierta</strong><p>Ninguna fase puede avanzar hasta que una persona revise y contenga el problema.</p><button type="button" data-action="resolve">Resolver tras revisión humana</button></section>
+ <section class="boundaries"><h3>Límites activos</h3><ul><li>Sin conexiones externas</li><li>Sin credenciales ni datos sensibles</li><li>Sin custodia o movimiento de fondos</li><li>Decisiones críticas humanas</li></ul></section>
+ <section class="log"><h3>Trazabilidad</h3><ol data-log><li><time>Ahora</time><span>Centro preparado; todavía no existe ninguna operación.</span></li></ol></section>
+ </aside>
+</div>
+</main>
+<script src="js/operation-center.js?v=1"></script>
+</body>
+</html>
