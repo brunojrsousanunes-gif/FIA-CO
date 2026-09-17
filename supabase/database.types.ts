@@ -547,6 +547,84 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_verifications: {
+        Row: {
+          organization_id: string
+          verification_status: string
+          verification_method: string | null
+          legal_name: string | null
+          tax_id_last4: string | null
+          evidence_ref: string | null
+          verified_at: string | null
+          verified_by: string | null
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          organization_id: string
+          verification_status?: string
+          verification_method?: string | null
+          legal_name?: string | null
+          tax_id_last4?: string | null
+          evidence_ref?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          organization_id?: string
+          verification_status?: string
+          verification_method?: string | null
+          legal_name?: string | null
+          tax_id_last4?: string | null
+          evidence_ref?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      organization_provider_qualifications: {
+        Row: {
+          organization_id: string
+          capability: string
+          qualification_status: string
+          evidence_ref: string | null
+          verified_at: string | null
+          verified_by: string | null
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          organization_id: string
+          capability: string
+          qualification_status?: string
+          evidence_ref?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          organization_id?: string
+          capability?: string
+          qualification_status?: string
+          evidence_ref?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -670,6 +748,19 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      mark_operation_notification_read: {
+        Args: { target_notification: number }
+        Returns: {
+          created_at: string
+          event_type: string
+          id: number
+          message: string
+          operation_id: string
+          read_at: string | null
+          recipient_organization_id: string | null
+        }
+        SetofOptions: { from: "*"; to: "operation_notifications"; isOneToOne: true; isSetofReturn: false }
       }
     }
     Enums: {
