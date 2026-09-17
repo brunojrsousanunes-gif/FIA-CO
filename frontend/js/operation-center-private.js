@@ -1,13 +1,14 @@
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './supabase-public-config.js';
+import { createSupabaseBrowserClient } from './supabase-browser-client.js';
 
 const $=(selector,root=document)=>root.querySelector(selector);
 const $$=(selector,root=document)=>[...root.querySelectorAll(selector)];
 const state={accessToken:'',user:null,operations:[],selected:null,detail:null,memberships:[]};
 const ui={auth:$('[data-auth]'),app:$('[data-private-app]'),form:$('[data-login-form]'),email:$('[data-email]'),password:$('[data-password]'),message:$('[data-private-message]'),identity:$('[data-identity]'),list:$('[data-operation-list]'),refresh:$('[data-refresh]'),logout:$('[data-logout]'),detail:$('[data-operation-detail]')};
+const supabase=createSupabaseBrowserClient({url:SUPABASE_URL,publishableKey:SUPABASE_PUBLISHABLE_KEY,getAccessToken:()=>state.accessToken});
 
 function setMessage(text,type=''){ui.message.textContent=text;ui.message.className=type;}
-function headers(extra={}){return{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${state.accessToken||SUPABASE_PUBLISHABLE_KEY}`,...extra};}
-async function api(path,options={}){const response=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:headers(options.headers)});const body=response.status===204?null:await response.json().catch(()=>null);if(!response.ok){const error=new Error(body?.message||body?.error_description||'REQUEST_FAILED');error.status=response.status;error.code=body?.code||body?.error_code||'REQUEST_FAILED';throw error;}return body;}
+const api=(path,options={})=>supabase.request(path,options);
 const money=cents=>cents==null?'Pendiente':new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(cents)/100);
 const line=(strong,small='')=>{const p=document.createElement('p'),b=document.createElement('strong');b.textContent=strong;p.append(b);if(small){const span=document.createElement('span');span.className='muted';span.textContent=` · ${small}`;p.append(span);}return p;};
 
@@ -48,6 +49,6 @@ async function createRecovery(value){const [sender,carrier]=value.split('|');awa
 async function resolveIncident(){const incident=state.detail.incidents.find(item=>item.status==='open');if(!incident)return;await mutate(`/rest/v1/operation_incidents?id=eq.${encodeURIComponent(incident.id)}`,{status:'resolved',resolved_by:state.user.id,resolved_at:new Date().toISOString(),resolution_note:'Pieza sintética entregada y recuperación revisada'},'Incidencia resuelta; el expediente vuelve al último estado válido.',true,'PATCH');}
 async function mutate(path,body,success,preferReturn=false,method='POST'){setMessage('Procesando…');try{await api(path,{method,headers:{'Content-Type':'application/json',Prefer:preferReturn?'return=representation':'return=minimal'},body:JSON.stringify(body)});setMessage(success,'success');await loadOperations();}catch(error){setMessage(`Acción bloqueada: ${error.message||error.code}.`,'error');}}
 
-async function signIn(event){event.preventDefault();const email=ui.email.value.trim(),password=ui.password.value;if(!email||!password)return setMessage('Introduce las credenciales de demostración.','error');setMessage('Verificando acceso…');try{const payload=await api('/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});saveSession(payload);render();await loadOperations();}catch{clearSession();setMessage('Acceso denegado. Comprueba las credenciales de demostración.','error');}}
+async function signIn(event){event.preventDefault();const email=ui.email.value.trim(),password=ui.password.value;if(!email||!password)return setMessage('Introduce las credenciales de demostración.','error');setMessage('Verificando acceso…');try{const payload=await supabase.signInWithPassword(email,password);saveSession(payload);render();await loadOperations();}catch{clearSession();setMessage('Acceso denegado. Comprueba las credenciales de demostración.','error');}}
 
 ui.form.addEventListener('submit',signIn);ui.refresh.addEventListener('click',loadOperations);ui.logout.addEventListener('click',clearSession);$('[data-open-incident]').addEventListener('click',openIncident);$('[data-resolve-incident]').addEventListener('click',resolveIncident);$$('[data-recovery]').forEach(button=>button.addEventListener('click',()=>createRecovery(button.dataset.recovery)));window.addEventListener('pagehide',()=>{state.accessToken='';state.user=null;});restoreSession();render();if(state.accessToken)loadOperations();
