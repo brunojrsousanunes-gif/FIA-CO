@@ -16,7 +16,7 @@ assert.match(privateClient,/createSupabaseBrowserClient/);
 assert.match(privateClient,/supabase\.signInWithPassword/);
 assert.match(privateClient,/supabase\.signUp/);
 assert.doesNotMatch(privateClient,/function headers\(/);
-assert.match(html,/operation-center-private\.js\?v=pilot-access-v1/);
+assert.match(html,/operation-center-private\.js\?v=pilot-security-v2/);
 assert.match(build,/SUPABASE_PUBLISHABLE_KEY/);
 assert.match(build,/secret\/service_role key must never be emitted/);
 

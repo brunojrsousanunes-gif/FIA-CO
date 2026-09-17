@@ -1,4 +1,5 @@
 # Public routes
+_headers
 index.html
 legal-center.html
 provider-connection-demo.html
