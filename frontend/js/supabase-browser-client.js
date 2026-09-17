@@ -33,7 +33,12 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})
     });
   }
-  return Object.freeze({request,signInWithPassword});
+  function signUp(email,password,data={}){
+    return request('/auth/v1/signup',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,data})
+    });
+  }
+  return Object.freeze({request,signInWithPassword,signUp});
 }
 
 export{validatePublicConfig};

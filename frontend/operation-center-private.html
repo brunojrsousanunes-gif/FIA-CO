@@ -9,6 +9,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src https://etttredbkbcgqwciipls.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
 <title>FIA&CO — Acceso privado</title>
 <link rel="stylesheet" href="css/operation-center-private.css?v=2">
+<link rel="stylesheet" href="css/pilot-access.css?v=1">
 </head>
 <body>
 <header class="top"><a href="index.html">FIA&CO</a><span>Centro de Operaciones</span><strong>ENTORNO PRIVADO DE PRUEBAS</strong></header>
@@ -28,11 +29,32 @@
 <label>Contraseña de demostración<input type="password" data-password autocomplete="current-password" required minlength="12"></label>
 <button type="submit">Entrar</button>
 </form>
+<details class="registration">
+<summary>Solicitar una cuenta piloto</summary>
+<form data-register-form>
+<label>Nombre visible<input type="text" data-register-name autocomplete="name" required minlength="2" maxlength="120"></label>
+<label>Correo electrónico<input type="email" data-register-email autocomplete="email" required></label>
+<label>Contraseña<input type="password" data-register-password autocomplete="new-password" required minlength="12"></label>
+<label>Empresa ficticia solicitada<select data-register-company required><option value="SYN-NARINO">Nariño · comprador</option><option value="SYN-RECALVO">Recalvo · vendedor</option><option value="SYN-AGRICOLA-MORENO">Agrícola Moreno · logística</option><option value="SYN-FRAN">Fran · piezas</option><option value="SYN-GSM">GSM · transporte</option><option value="SYN-INFA">Infa · piezas</option></select></label>
+<button type="submit">Crear cuenta y solicitar acceso</button>
+</form>
+<small>Crear la cuenta no concede acceso operativo. La empresa y los permisos necesitan aprobación de FIA&CO.</small>
+</details>
 <p class="notice">La sesión se conserva solo en esta pestaña y se elimina al cerrarla.</p>
 </section>
 
 <section class="card" data-private-app hidden>
 <div class="toolbar"><span data-identity></span><button class="secondary" type="button" data-refresh>Actualizar</button><button type="button" data-logout>Salir</button></div>
+<div class="access-state" data-access-state></div>
+<section class="access-request" data-access-request hidden>
+<h2>Solicitar acceso piloto</h2>
+<p>Tu cuenta todavía no pertenece a ninguna empresa. Puedes solicitar una entidad ficticia; FIA&CO revisará la petición antes de habilitar operaciones.</p>
+<form data-access-request-form>
+<label>Nombre visible<input type="text" data-access-name required minlength="2" maxlength="120"></label>
+<label>Empresa ficticia<select data-access-company required><option value="SYN-NARINO">Nariño · comprador</option><option value="SYN-RECALVO">Recalvo · vendedor</option><option value="SYN-AGRICOLA-MORENO">Agrícola Moreno · logística</option><option value="SYN-FRAN">Fran · piezas</option><option value="SYN-GSM">GSM · transporte</option><option value="SYN-INFA">Infa · piezas</option></select></label>
+<button type="submit">Enviar solicitud</button>
+</form>
+</section>
 <h1>Operaciones autorizadas</h1>
 <p>Solo aparecen operaciones permitidas por las políticas RLS de tu empresa y rol.</p>
 <ul data-operation-list></ul>
@@ -51,6 +73,6 @@
 </section>
 <p data-private-message role="status" aria-live="polite"></p>
 </main>
-<script type="module" src="js/operation-center-private.js?v=supabase-client-v1"></script>
+<script type="module" src="js/operation-center-private.js?v=pilot-access-v1"></script>
 </body>
 </html>

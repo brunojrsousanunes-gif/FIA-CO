@@ -14,8 +14,9 @@ const html=fs.readFileSync('frontend/operation-center-private.html','utf8');
 const build=fs.readFileSync('scripts/render-supabase-public-config.mjs','utf8');
 assert.match(privateClient,/createSupabaseBrowserClient/);
 assert.match(privateClient,/supabase\.signInWithPassword/);
+assert.match(privateClient,/supabase\.signUp/);
 assert.doesNotMatch(privateClient,/function headers\(/);
-assert.match(html,/operation-center-private\.js\?v=supabase-client-v1/);
+assert.match(html,/operation-center-private\.js\?v=pilot-access-v1/);
 assert.match(build,/SUPABASE_PUBLISHABLE_KEY/);
 assert.match(build,/secret\/service_role key must never be emitted/);
 
