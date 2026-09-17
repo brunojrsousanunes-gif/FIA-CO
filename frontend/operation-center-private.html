@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#071018">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src https://etttredbkbcgqwciipls.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<title>FIA&CO — Acceso privado</title>
+<link rel="stylesheet" href="css/operation-center-private.css?v=1">
+</head>
+<body>
+<header class="top"><a href="index.html">FIA&CO</a><span>Centro de Operaciones</span><strong>ENTORNO PRIVADO DE PRUEBAS</strong></header>
+<main>
+<section class="card" data-auth>
+<p>Acceso restringido</p>
+<h1>Centro de Operaciones privado</h1>
+<p>Utiliza exclusivamente las credenciales ficticias asignadas. No introduzcas DNI, IBAN, documentos, fotografías ni datos reales.</p>
+<form data-login-form>
+<label>Correo de demostración<input type="email" data-email autocomplete="username" required></label>
+<label>Contraseña de demostración<input type="password" data-password autocomplete="current-password" required minlength="12"></label>
+<button type="submit">Entrar</button>
+</form>
+<p class="notice">La sesión se conserva solo en esta pestaña y se elimina al cerrarla.</p>
+</section>
+
+<section class="card" data-private-app hidden>
+<div class="toolbar"><span data-identity></span><button class="secondary" type="button" data-refresh>Actualizar</button><button type="button" data-logout>Salir</button></div>
+<h1>Operaciones autorizadas</h1>
+<p>Solo aparecen operaciones permitidas por las políticas RLS de tu empresa y rol.</p>
+<ul data-operation-list></ul>
+</section>
+<p data-private-message role="status" aria-live="polite"></p>
+</main>
+<script type="module" src="js/operation-center-private.js?v=1"></script>
+</body>
+</html>
