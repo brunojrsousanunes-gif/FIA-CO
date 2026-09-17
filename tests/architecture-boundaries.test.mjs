@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const sql=fs.readFileSync('supabase/migrations/20260917150000_architecture_boundaries.sql','utf8');
+const sql=fs.readFileSync('supabase/migrations/20260917122224_architecture_boundaries.sql','utf8');
+const hardening=fs.readFileSync('supabase/migrations/20260917122344_architecture_boundaries_hardening.sql','utf8');
+const anonBoundary=fs.readFileSync('supabase/migrations/20260917122558_architecture_boundaries_anon_revoke.sql','utf8');
 const demo=fs.readFileSync('frontend/beta-mobile.html','utf8');
 assert.match(sql,/validate_evidence_role/);
 assert.match(sql,/EVIDENCE_ROLE_NOT_ALLOWED/);
@@ -13,6 +15,13 @@ assert.match(sql,/qualification_status='pending'/);
 assert.match(sql,/mark_operation_notification_read/);
 assert.match(sql,/AUTH_REQUIRED/);
 assert.doesNotMatch(sql,/service_role|sb_secret_/);
+assert.match(hardening,/security invoker/);
+assert.match(hardening,/grant update \(read_at\)/);
+assert.match(hardening,/organization_verifications_verified_by_idx/);
+assert.match(hardening,/organization_provider_qualifications_verified_by_idx/);
+assert.doesNotMatch(hardening,/security definer/);
+assert.match(anonBoundary,/revoke all on table public\.organization_verifications from anon/);
+assert.match(anonBoundary,/revoke all on table public\.organization_provider_qualifications from anon/);
 assert.match(demo,/data-mode="demo"/);
 assert.match(demo,/data-data-boundary="local-only"/);
 console.log('architecture boundaries contract: ok');
