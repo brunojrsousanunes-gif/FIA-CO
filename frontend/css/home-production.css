@@ -42,3 +42,41 @@ body.portal-ready{overflow-x:hidden}.portal-ready main>.flow-section,.portal-rea
 @media(max-width:760px){.portal-ready main>.portal-detail-panel.is-open{padding:12px}.portal-ready main>.portal-detail-panel.is-open>.wrap{min-height:calc(100vh - 24px);padding:64px 18px 26px;border-radius:16px}.portal-panel-close{right:12px;top:12px}.portal-ready main>.portal-detail-panel.is-open .flow-grid,.portal-ready main>.portal-detail-panel.is-open .module-grid,.portal-ready main>.portal-detail-panel.is-open .policy-grid,.portal-ready main>.portal-detail-panel.is-open .resource-grid,.portal-ready main>.portal-detail-panel.is-open .sector-grid,.portal-ready main>.portal-detail-panel.is-open .contact-grid{grid-template-columns:1fr}.portal-ready main>.portal-detail-panel.is-open .flow-grid article{transform:none}}
 
 .board-open{display:flex;align-items:center;justify-content:center;min-height:46px;margin-top:16px;border-radius:10px;background:#0d1822;color:#fff;text-decoration:none;font-size:.75rem;font-weight:950;letter-spacing:.04em}.board-open:hover,.board-open:focus-visible{background:#007fa8}
+
+/* Visual cohesion: clearer boundaries without changing the portal structure */
+.topbar{border-bottom:1px solid #2e3a46}
+.nav{border-bottom-color:#33414f;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.quick-dock{border-color:#344250;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.quick-dock a,.quick-dock button{border-right-color:#344250}
+.hero-shell.portal-hero{background-image:linear-gradient(115deg,rgba(0,50,70,.72),rgba(0,112,151,.46) 54%,rgba(4,31,42,.70)),url('../assets/fia-barcelona-office-hero-focus.webp')}
+.portal-hero .hero-copy{background:linear-gradient(180deg,rgba(3,52,70,.18),rgba(3,52,70,.34));border-left:1px solid rgba(224,249,255,.22);border-right:1px solid rgba(224,249,255,.22)}
+.portal-hero .hero-copy>p{color:#f3fcff;text-shadow:0 2px 12px rgba(0,31,43,.65)}
+.portal-hero .hero-list{padding:15px 18px;border:1px solid rgba(226,249,255,.32);border-radius:14px;background:rgba(4,48,64,.42);box-shadow:0 12px 30px rgba(0,31,43,.2)}
+.portal-hero .control-board{border:1px solid rgba(8,37,50,.72);border-radius:18px;box-shadow:0 26px 52px rgba(0,35,48,.38)}
+.portal-hero .control-board:before{border-radius:16px 16px 0 0;border-bottom:1px solid rgba(0,69,92,.45)}
+.assistant-showcase{border:1px solid rgba(8,37,50,.72);border-radius:18px;box-shadow:0 26px 52px rgba(0,35,48,.4)}
+.assistant-bubble{border-color:#88d9ec;background:#eefbfe}
+.trust-strip{border-top:1px solid #d4dbe0;border-bottom:1px solid #d4dbe0;box-shadow:0 8px 22px rgba(15,32,43,.06)}
+
+@media(max-width:760px){
+  .topbar{border-bottom-color:#3b4855;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+  .nav{position:relative;box-shadow:none}
+  .nav-inner{gap:18px;border-bottom:1px solid #3b4855}
+  .quick-dock{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;padding:0;gap:0;border-bottom:1px solid #3b4855}
+  .quick-dock a,.quick-dock button{min-width:0;min-height:60px;padding:7px 3px;gap:4px;flex-direction:column;border-right:1px solid #344250;font-size:.62rem;line-height:1.1}
+  .quick-dock a:last-child{border-right:0}
+  .quick-dock b{font-size:1.08rem}
+  .hero-shell.portal-hero{background-image:linear-gradient(180deg,rgba(0,56,76,.76),rgba(0,105,140,.52) 38%,rgba(3,38,51,.82)),url('../assets/fia-barcelona-office-hero-focus.webp');background-position:62% center}
+  .portal-hero .hero-copy{padding:34px 18px 28px;background:rgba(2,53,71,.36);border:0;border-bottom:1px solid rgba(226,249,255,.38)}
+  .portal-hero .hero-copy h1{font-size:clamp(2.65rem,13vw,3.7rem);line-height:.92;margin-bottom:19px}
+  .portal-hero .hero-copy>p{font-size:.95rem;line-height:1.55}
+  .portal-hero .hero-list{width:100%;margin-top:20px;padding:13px 14px;gap:9px;background:rgba(3,42,56,.58)}
+  .portal-hero .hero-list li{font-size:.82rem}
+  .hero-actions{width:100%;margin-top:22px}
+  .portal-hero .control-board{margin:16px 12px 18px;padding:19px;border-radius:18px}
+  .portal-hero .control-board:before{margin:-19px -19px 18px;padding:22px 15px;border-radius:17px 17px 0 0}
+  .assistant-showcase{margin:0 12px 22px;padding:18px;border-radius:18px}
+  .assistant-orbit{width:176px;margin:0 auto 7px;border-width:4px}
+  .assistant-bubble{margin-top:7px}
+  .trust-strip{border-left:0;border-right:0;border-top-color:#c7d0d7;border-bottom-color:#c7d0d7}
+}
