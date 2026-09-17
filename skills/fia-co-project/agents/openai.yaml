@@ -1,0 +1,4 @@
+interface:
+  display_name: "FIA&CO Project"
+  short_description: "Opera y presenta FIA&CO con seguridad"
+  default_prompt: "Usa $fia-co-project para continuar FIA&CO aplicando sus reglas de seguridad y método de trabajo."
