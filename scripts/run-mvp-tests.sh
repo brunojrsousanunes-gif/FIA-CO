@@ -13,6 +13,7 @@ node tests/contracts-provider-onboarding.test.mjs
 node tests/fia-chat-layout.test.mjs
 node tests/fia-piggy-interaction.test.mjs
 node tests/fia-mobile-entry.test.mjs
+node tests/homepage-role-visuals.test.mjs
 
 # Compliance architecture
 node tests/compliance-gate.test.mjs
