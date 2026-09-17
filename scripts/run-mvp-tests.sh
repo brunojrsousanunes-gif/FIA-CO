@@ -16,6 +16,7 @@ node tests/fia-mobile-entry.test.mjs
 node tests/homepage-role-visuals.test.mjs
 node tests/supabase-browser-config.test.mjs
 node tests/architecture-boundaries.test.mjs
+node tests/pilot-access.test.mjs
 
 # Compliance architecture
 node tests/compliance-gate.test.mjs

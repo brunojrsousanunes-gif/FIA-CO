@@ -547,6 +547,50 @@ export type Database = {
         }
         Relationships: []
       }
+      pilot_access_requests: {
+        Row: {
+          id: string
+          user_id: string
+          organization_id: string
+          requested_member_role: string
+          status: string
+          reviewed_by: string | null
+          reviewed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          organization_id: string
+          requested_member_role?: string
+          status?: string
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          organization_id?: string
+          requested_member_role?: string
+          status?: string
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pilot_access_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_verifications: {
         Row: {
           organization_id: string
@@ -761,6 +805,21 @@ export type Database = {
           recipient_organization_id: string | null
         }
         SetofOptions: { from: "*"; to: "operation_notifications"; isOneToOne: true; isSetofReturn: false }
+      }
+      request_pilot_access: {
+        Args: { target_demo_code: string; target_display_name: string }
+        Returns: {
+          id: string
+          user_id: string
+          organization_id: string
+          requested_member_role: string
+          status: string
+          reviewed_by: string | null
+          reviewed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        SetofOptions: { from: "*"; to: "pilot_access_requests"; isOneToOne: true; isSetofReturn: false }
       }
     }
     Enums: {

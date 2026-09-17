@@ -1,0 +1,6 @@
+select{width:100%;padding:.9rem 1rem;border:1px solid var(--line);border-radius:10px;background:#071018;color:var(--text)}
+.registration,.access-request,.access-state{margin:1.2rem 0;padding:1rem;border:1px solid var(--line);border-radius:12px;background:#09131c}
+.registration summary{cursor:pointer;color:var(--gold);font-weight:800}
+.registration form{margin-top:1rem}
+.registration small{display:block;margin-top:.8rem;color:var(--muted)}
+.access-state:empty{display:none}
