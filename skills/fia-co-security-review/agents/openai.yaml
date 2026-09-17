@@ -1,0 +1,7 @@
+interface:
+  display_name: "FIA&CO Security Review"
+  short_description: "Audita código, Skills, secretos y permisos"
+  default_prompt: "Usa $fia-co-security-review para revisar este cambio antes de producción y bloquear riesgos críticos."
+
+policy:
+  allow_implicit_invocation: true
