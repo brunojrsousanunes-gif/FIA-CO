@@ -32,3 +32,6 @@ js/operation-center.js
 assets/fia-co-trust-compute.svg
 assets/fia-piggy-assistant-gold.webp
 assets/fia-barcelona-office-hero-focus.webp
+assets/fia-role-seller.webp
+assets/fia-role-carrier.webp
+assets/fia-role-buyer.webp
