@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#071018">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src https://etttredbkbcgqwciipls.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<title>FIA&CO — Acceso privado</title>
+<link rel="stylesheet" href="css/operation-center-private.css?v=2">
+</head>
+<body>
+<header class="top"><a href="index.html">FIA&CO</a><span>Centro de Operaciones</span><strong>ENTORNO PRIVADO DE PRUEBAS</strong></header>
+<main>
+<section class="card" data-auth>
+<p>Acceso restringido</p>
+<h1>Centro de Operaciones privado</h1>
+<p>Utiliza exclusivamente las credenciales ficticias asignadas. No introduzcas DNI, IBAN, documentos, fotografías ni datos reales.</p>
+<aside class="scenario" aria-label="Plantilla sintética autorizada">
+<strong>Plantilla sintética · compra de maquinaria</strong>
+<div class="participants"><span><b>Vendedor</b> Recalvo</span><span><b>Logística</b> Agrícola Moreno</span><span><b>Comprador</b> Nariño</span></div>
+<p>Si falla una pieza antes de finalizar, el tractor queda bloqueado y se abre una suboperación: Fran o Infa expiden la pieza; GSM o Agrícola Moreno organizan su transporte. Solo después se recupera el expediente principal.</p>
+<small>Entidades ficticias para pruebas. No representan ni implican relación con empresas reales.</small>
+</aside>
+<form data-login-form>
+<label>Correo de demostración<input type="email" data-email autocomplete="username" required></label>
+<label>Contraseña de demostración<input type="password" data-password autocomplete="current-password" required minlength="12"></label>
+<button type="submit">Entrar</button>
+</form>
+<p class="notice">La sesión se conserva solo en esta pestaña y se elimina al cerrarla.</p>
+</section>
+
+<section class="card" data-private-app hidden>
+<div class="toolbar"><span data-identity></span><button class="secondary" type="button" data-refresh>Actualizar</button><button type="button" data-logout>Salir</button></div>
+<h1>Operaciones autorizadas</h1>
+<p>Solo aparecen operaciones permitidas por las políticas RLS de tu empresa y rol.</p>
+<ul data-operation-list></ul>
+<section class="operation-detail" data-operation-detail hidden>
+<div class="detail-head"><div><small>Expediente compartido</small><h2 data-operation-title></h2></div><span class="status" data-operation-status></span></div>
+<div class="metrics"><span><small>Presupuesto total</small><b data-total></b></span><span><small>Costes + logística</small><b data-costs></b></span><span><small>Margen calculado</small><b data-margin></b></span></div>
+<div class="detail-grid">
+<article><h3>Participantes y responsabilidad</h3><div data-participants></div></article>
+<article><h3>Presupuestos logísticos</h3><div data-quotes></div></article>
+<article><h3>Coste desglosado</h3><div data-cost-items></div></article>
+<article><h3>Incidencias y recuperación</h3><div data-incidents></div><button class="danger" type="button" data-open-incident>Simular fallo de una pieza</button><div class="actions" data-recovery-actions><button type="button" data-recovery="SYN-FRAN|SYN-GSM">Fran + GSM</button><button type="button" data-recovery="SYN-INFA|SYN-AGRICOLA-MORENO">Infa + Agrícola Moreno</button></div><button class="secondary" type="button" data-resolve-incident>Resolver tras entregar la pieza</button></article>
+<article><h3>Confirmaciones automáticas</h3><div class="actions" data-confirmation-actions></div></article>
+<article><h3>Trazabilidad inalterable</h3><div data-audit></div></article>
+</div>
+</section>
+</section>
+<p data-private-message role="status" aria-live="polite"></p>
+</main>
+<script type="module" src="js/operation-center-private.js?v=2"></script>
+</body>
+</html>
