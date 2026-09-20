@@ -18,6 +18,7 @@ node tests/supabase-browser-config.test.mjs
 node tests/architecture-boundaries.test.mjs
 node tests/pilot-access.test.mjs
 node tests/pilot-security-hardening.test.mjs
+node tests/pilot-negative-security-contracts.test.mjs
 
 # Compliance architecture
 node tests/compliance-gate.test.mjs

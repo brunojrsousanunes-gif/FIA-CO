@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const sql=fs.readFileSync('supabase/migrations/20260917195000_pilot_security_hardening.sql','utf8');
+const sql=fs.readFileSync('supabase/migrations/20260917232700_pilot_security_hardening.sql','utf8');
 const app=fs.readFileSync('frontend/js/operation-center-private.js','utf8');
 const html=fs.readFileSync('frontend/operation-center-private.html','utf8');
 const headers=fs.readFileSync('frontend/_headers','utf8');
@@ -16,6 +16,9 @@ assert.match(sql,/confirmations_bound_account_insert/);
 assert.doesNotMatch(app,/fia_demo_session/);
 assert.doesNotMatch(app,/sessionStorage\.setItem\([^\n]*access_token/);
 assert.match(html,/únicamente en memoria/);
+assert.match(html,/data-register-password[^>]+minlength="16"/);
+assert.match(app,/password\.length<16/);
+assert.match(app,/contraseña única de al menos 16 caracteres/);
 assert.match(headers,/Content-Security-Policy:.*frame-ancestors 'none'/);
 assert.match(headers,/X-Frame-Options: DENY/);
 assert.match(headers,/Permissions-Policy:/);
