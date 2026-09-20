@@ -34,11 +34,11 @@
 <form data-register-form>
 <label>Nombre visible<input type="text" data-register-name autocomplete="name" required minlength="2" maxlength="120"></label>
 <label>Correo electrónico<input type="email" data-register-email autocomplete="email" required></label>
-<label>Contraseña<input type="password" data-register-password autocomplete="new-password" required minlength="12"></label>
+<label>Contraseña<input type="password" data-register-password autocomplete="new-password" required minlength="16"></label>
 <label>Empresa ficticia solicitada<select data-register-company required><option value="SYN-NARINO">Nariño · comprador</option><option value="SYN-RECALVO">Recalvo · vendedor</option><option value="SYN-AGRICOLA-MORENO">Agrícola Moreno · logística</option><option value="SYN-FRAN">Fran · piezas</option><option value="SYN-GSM">GSM · transporte</option><option value="SYN-INFA">Infa · piezas</option></select></label>
 <button type="submit">Crear cuenta y solicitar acceso</button>
 </form>
-<small>Crear la cuenta no concede acceso operativo. La empresa y los permisos necesitan aprobación de FIA&CO.</small>
+<small>Usa una contraseña única y aleatoria de al menos 16 caracteres. Crear la cuenta no concede acceso operativo: la empresa y los permisos necesitan aprobación de FIA&CO.</small>
 </details>
 <p class="notice">La sesión se mantiene únicamente en memoria y se elimina al recargar o cerrar esta pestaña.</p>
 </section>
@@ -73,6 +73,6 @@
 </section>
 <p data-private-message role="status" aria-live="polite"></p>
 </main>
-<script type="module" src="js/operation-center-private.js?v=pilot-security-v2"></script>
+<script type="module" src="js/operation-center-private.js?v=pilot-security-v3"></script>
 </body>
 </html>
