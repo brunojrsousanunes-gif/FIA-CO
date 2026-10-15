@@ -70,4 +70,6 @@ El flujo puede implicar vendedor, transportista y comprador: acuerdo → prepara
 
 ## Estado de integración
 
-El archivo debe indexarse en el buscador solo cuando exista un pipeline de recuperación real. En la superficie pública actual, el asistente es un flujo determinista de primer contacto; el cambio de conversación de pagos se implementa como preguntas guiadas en el cliente. No se afirma que exista RAG ni que el contenido se consulte automáticamente. Una integración RAG posterior deberá recuperar fragmentos autorizados y aportar pruebas de permisos, vigencia, citas y resultados vacíos.
+La superficie pública incluye ahora `frontend/js/fia-skills-search.js`: un catálogo de diez áreas de competencia con recuperación léxica ponderada, selección de las habilidades más relevantes y respuestas guiadas por sus reglas. `frontend/js/fia-first-contact.js` consulta este motor antes de usar la respuesta genérica; el flujo específico de pagos mantiene sus preguntas guiadas. Se muestra qué áreas de skills se aplicaron y se conserva el límite de no ejecutar acciones externas.
+
+Este mecanismo es una biblioteca de reglas locales y búsqueda léxica, no un modelo generativo ni un RAG semántico, y no descarga automáticamente todos los documentos del repositorio ni skills externas. Solo puede aplicar las diez áreas incluidas en el catálogo runtime hasta que se añadan e indexen más skills verificadas. La integración de documentos adicionales deberá respetar procedencia/licencia, versión, permisos, citas, resultados vacíos y pruebas de seguridad.
