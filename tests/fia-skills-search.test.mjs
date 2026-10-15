@@ -20,7 +20,7 @@ assert.ok(homepage.indexOf('js/fia-skills-search.js')<homepage.indexOf('js/fia-f
 assert.ok(allowlist.includes('js/fia-skills-corpus.js'),'the public build allowlist must include the corpus');
 assert.ok(engine,'skill search engine is exposed');
 assert.ok(engine.getCatalog().skills.length>=10,'the runtime catalog contains the main project skills');
-assert.equal(engine.getCatalog().documents.length,8,'all eight versioned skill documents must be indexed');
+assert.equal(engine.getCatalog().documents.length,10,'all skill manifests, references, and the master guide must be indexed');
 assert.ok(engine.getCatalog().documents.every(d=>d.path&&d.sha),'every indexed document must retain source path and SHA');
 for(const [query,expected] of [
  ['¿Cómo reviso la seguridad OWASP y los permisos?', 'security-owasp'],
