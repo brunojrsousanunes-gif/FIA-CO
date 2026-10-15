@@ -10,6 +10,7 @@ node tests/v1-consolidation-scan.test.js
 node tests/fia-guide.test.mjs
 node tests/first-contact-ui.test.mjs
 node tests/first-contact-payment-automation.test.mjs
+node tests/fia-skills-search.test.mjs
 node tests/contracts-provider-onboarding.test.mjs
 node tests/fia-chat-layout.test.mjs
 node tests/fia-piggy-interaction.test.mjs
