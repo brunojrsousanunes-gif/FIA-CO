@@ -19,6 +19,8 @@ Treat the GitHub repository `brunojrsousanunes-gif/FIA-CO` as the versioned code
 - Public frontend code may contain only deliberately public client configuration. Administrative or service-role secrets must remain server-side.
 - Require row-level authorization for exposed multi-tenant database tables. Test both permitted access and denied cross-organization access.
 - Keep sessions short-lived and avoid persistent browser storage for sensitive operational state.
+- Treat legacy browser-only operation modules as synthetic demos only. Use `sessionStorage` rather than `localStorage` for their temporary state; never use either browser storage mechanism as authorization or as the system of record for real operations.
+- Configuration files that describe a demo/pre-pilot baseline must state their scope and must not be read as proof of the deployed runtime state.
 - Keep audit events append-only and server-generated for security-relevant transitions.
 - Treat payment, identity verification, biometrics, escrow, custody, and regulated financial claims as unavailable until implemented through qualified providers and legally reviewed.
 
