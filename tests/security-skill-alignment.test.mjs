@@ -9,6 +9,7 @@ const headers = fs.readFileSync('frontend/_headers', 'utf8');
 const envExample = fs.readFileSync('.env.example', 'utf8');
 const privateHtml = fs.readFileSync('frontend/operation-center-private.html', 'utf8');
 const rules = fs.readFileSync('skills/fia-co-project/references/operating-rules.md', 'utf8');
+const audit = fs.readFileSync('core/audit/audit-log.mjs', 'utf8');
 
 assert.match(demo, /sessionStorage\.getItem\(STORAGE_KEY\)/);
 assert.match(demo, /sessionStorage\.setItem\(STORAGE_KEY,JSON\.stringify\(next\)\)/);
@@ -28,4 +29,6 @@ assert.equal(config.authentication.deployedRuntimeIndependentlyVerified, false);
 assert.equal(config.gates.realMoney, false);
 assert.equal(config.gates.realPii, false);
 assert.match(rules, /never use either browser storage mechanism as authorization/);
+assert.match(audit, /not durable and is not the production audit system/);
+assert.match(audit, /kind: 'memory'/);
 console.log('security skill alignment contract: OK');
