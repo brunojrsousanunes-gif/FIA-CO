@@ -22,6 +22,7 @@ css/operation-center.css
 # Public scripts
 js/fia-public-guide.js
 js/fia-human-presence.js
+js/fia-skills-corpus.js
 js/fia-first-contact.js
 js/fia-resource-actions.js
 js/provider-connection-demo.js
