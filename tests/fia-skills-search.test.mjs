@@ -13,6 +13,8 @@ const homepage=fs.readFileSync('frontend/index.html','utf8');
 const allowlist=fs.readFileSync('config/pages-public-allowlist.txt','utf8');
 assert.match(firstContact,/window\.FIASkillsSearch\?\.search\(raw\)/,'first-contact answers must query the skill library');
 assert.match(firstContact,/renderSkillResponse\(root,raw,skillResult\)/,'retrieved skill results must shape the answer');
+assert.match(firstContact,/_skillResult:skillResult/,'the guided payment workflow must receive the retrieved skills');
+assert.match(firstContact,/source\.path\.split/,'the assistant must expose traceable source links');
 assert.match(homepage,/js\/fia-skills-corpus\.js\?v=skills-corpus-v1/,'the indexed corpus must load on the public homepage');
 assert.match(homepage,/js\/fia-skills-search\.js\?v=skills-index-v2/,'the skill engine must load on the public homepage');
 assert.ok(homepage.indexOf('js/fia-skills-corpus.js')<homepage.indexOf('js/fia-skills-search.js'),'corpus must load before the search engine');
