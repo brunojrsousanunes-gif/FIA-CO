@@ -10,6 +10,7 @@ assert.match(assistant,/Enviar recordatorios/);
 assert.match(assistant,/Vendedor, transportista y comprador/);
 assert.match(assistant,/Con tus respuestas, esta sería una primera propuesta/);
 assert.match(assistant,/No se ejecutan pagos ni se envían avisos externos/);
-assert.match(assistant,/if\(isPaymentAutomationRequest\(raw\)\)\{updateProfile\(raw,false\);renderPaymentAutomation\(root,raw\);return;\}/);
+assert.match(assistant,/const skillResult=window\.FIASkillsSearch\?\.search\(raw\)/);
+assert.match(assistant,/if\(isPaymentAutomationRequest\(raw\)\)\{updateProfile\(raw,false\);renderPaymentAutomation\(root,raw,0,\{_skillResult:skillResult\}\);return;\}/);
 assert.match(assistant,/solicitar aprobación antes de cualquier envío externo/i);
 console.log('first-contact payment automation intake: ok');
