@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const demo = fs.readFileSync('frontend/js/unified-app.js', 'utf8');
+const appTest = fs.readFileSync('tests/unified-app.test.js', 'utf8');
+const config = JSON.parse(fs.readFileSync('config/security-prepilot.json', 'utf8'));
+const allowlist = fs.readFileSync('config/pages-public-allowlist.txt', 'utf8');
+const headers = fs.readFileSync('frontend/_headers', 'utf8');
+const envExample = fs.readFileSync('.env.example', 'utf8');
+const privateHtml = fs.readFileSync('frontend/operation-center-private.html', 'utf8');
+const rules = fs.readFileSync('skills/fia-co-project/references/operating-rules.md', 'utf8');
+
+assert.match(demo, /sessionStorage\.getItem\(STORAGE_KEY\)/);
+assert.match(demo, /sessionStorage\.setItem\(STORAGE_KEY,JSON\.stringify\(next\)\)/);
+assert.doesNotMatch(demo, /localStorage\.(?:getItem|setItem)\(STORAGE_KEY/);
+assert.match(appTest, /session-scoped key/);
+assert.equal(allowlist.includes('operation-center-private.html'), false);
+assert.equal(allowlist.includes('js/operation-center-private.js'), false);
+assert.match(headers, /Content-Security-Policy:/);
+assert.match(headers, /X-Frame-Options: DENY/);
+assert.match(envExample, /Never place SUPABASE_SECRET_KEY or service_role/);
+assert.match(privateHtml, /ENTORNO PRIVADO DE PRUEBAS/);
+assert.match(privateHtml, /No introduzcas DNI, IBAN, documentos, fotografías ni datos reales/);
+assert.equal(config.mode, 'DEMO_ONLY');
+assert.equal(config.scope, 'DEFAULT_DEMO_PREPILOT_POLICY_NOT_RUNTIME_ATTESTATION');
+assert.equal(config.authentication.realAuthEnabled, false);
+assert.equal(config.authentication.deployedRuntimeIndependentlyVerified, false);
+assert.equal(config.gates.realMoney, false);
+assert.equal(config.gates.realPii, false);
+assert.match(rules, /never use either browser storage mechanism as authorization/);
+console.log('security skill alignment contract: OK');
