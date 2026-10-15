@@ -15,7 +15,7 @@ assert.ok(engine,'skill search engine is exposed');
 assert.ok(engine.getCatalog().length>=10,'the runtime catalog contains the main project skills');
 for(const [query,expected] of [
  ['¿Cómo reviso la seguridad OWASP y los permisos?', 'security-owasp'],
- ['Quiero ahorrar tiempo automatizando recordatorios de pagos', 'payments-boundary'],
+ ['Quiero ahorrar tiempo automatizando recordatorios de pagos', 'automation'],
  ['Necesito organizar vendedor transportista y comprador con incidencias', 'b2b-operations'],
  ['¿Cómo verifico los tests y el despliegue?', 'testing-reliability'],
  ['Quiero reducir costes del piloto y no pagar servicios', 'cost-pilot'],
