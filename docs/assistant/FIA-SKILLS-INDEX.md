@@ -23,7 +23,7 @@ Fecha de inventario: 15-10-2026.
 | [`skills/fia-co-security-review/references/code-security-review.md`](https://github.com/brunojrsousanunes-gif/FIA-CO/blob/main/skills/fia-co-security-review/references/code-security-review.md) | `d82397fee8eedf6f1808f85acd882733c78d3503` | Revisión de código, OWASP, autorización, RLS, CI/CD y despliegue. |
 | [`skills/fia-co-security-review/references/secrets-permissions.md`](https://github.com/brunojrsousanunes-gif/FIA-CO/blob/main/skills/fia-co-security-review/references/secrets-permissions.md) | `afc4c0921ba63e72f7f6407ea3fbaf9f4791d539` | Inventario de secretos, mínimo privilegio y permisos. |
 | [`skills/fia-co-security-review/references/skill-vetting.md`](https://github.com/brunojrsousanunes-gif/FIA-CO/blob/main/skills/fia-co-security-review/references/skill-vetting.md) | `f6da759994dfeebbc2f0e6eb428963fb4131d2ab` | Procedencia, cuarentena, licencia y evaluación de skills externas. |
-| [`docs/assistant/FIA-CO-MASTER-SKILLS.md`](https://github.com/brunojrsousanunes-gif/FIA-CO/blob/main/docs/assistant/FIA-CO-MASTER-SKILLS.md) | `bad45c4cb12e968c97666064682e67918c5f732d` | Reglas maestras de intención, búsqueda, seguridad, automatización y pruebas. |
+| [`docs/assistant/FIA-CO-MASTER-SKILLS.md`](https://github.com/brunojrsousanunes-gif/FIA-CO/blob/main/docs/assistant/FIA-CO-MASTER-SKILLS.md) | `4d8d53d5cb97b8fbf61623655ad3b4c7ea2190ea` | Reglas maestras de intención, búsqueda, seguridad, automatización y pruebas. |
 
 ## Reglas de actualización
 
