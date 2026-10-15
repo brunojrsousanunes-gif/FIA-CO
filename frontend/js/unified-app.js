@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
 
-const STORAGE_KEY='fia_unified_beta_v2';
+// Legacy internal-only demo module. This file is excluded from the public Pages allowlist.
+const STORAGE_KEY='fia_unified_demo_session_v3';
 const now=()=>new Date().toISOString();
 const uid=(prefix)=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
 const safeNumber=(value)=>Number.isFinite(Number(value))?Number(value):0;
@@ -16,7 +17,7 @@ function emptyState(){
 
 function load(){
   try{
-    const raw=localStorage.getItem(STORAGE_KEY);
+    const raw=sessionStorage.getItem(STORAGE_KEY);
     if(!raw)return emptyState();
     const parsed=JSON.parse(raw);
     if(parsed&&parsed.version===2&&Array.isArray(parsed.operations)&&Array.isArray(parsed.evidence)&&Array.isArray(parsed.participants)&&Array.isArray(parsed.ledger)&&Array.isArray(parsed.activity))return parsed;
@@ -25,7 +26,7 @@ function load(){
 }
 
 function save(next){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(next));}catch(_e){}
+  try{sessionStorage.setItem(STORAGE_KEY,JSON.stringify(next));}catch(_e){}
   return next;
 }
 
