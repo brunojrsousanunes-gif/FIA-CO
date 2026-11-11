@@ -5,6 +5,7 @@ legal-center.html
 provider-connection-demo.html
 form-models.html
 operation-center.html
+manifest.json
 robots.txt
 sitemap.xml
 
@@ -33,6 +34,7 @@ js/operation-center.js
 
 # Public assets
 assets/fia-co-trust-compute.svg
+assets/fia-app-icon.svg
 assets/fia-piggy-assistant-gold.webp
 assets/fia-barcelona-office-hero-focus.webp
 assets/fia-role-seller.webp
