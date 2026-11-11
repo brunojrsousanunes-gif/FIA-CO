@@ -1,4 +1,5 @@
 # Public routes
+sw.js
 _headers
 index.html
 legal-center.html
@@ -21,6 +22,7 @@ css/form-models.css
 css/operation-center.css
 
 # Public scripts
+js/pwa-register.js
 js/fia-public-guide.js
 js/fia-human-presence.js
 js/fia-skills-corpus.js
