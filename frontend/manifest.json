@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "FIA&CO — Operaciones empresariales bajo control",
+  "short_name": "FIA&CO",
+  "description": "Acuerdos, documentación, seguimiento e incidencias entre empresas.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0a12",
+  "theme_color": "#0b0a12",
+  "icons": [
+    {
+      "src": "assets/fia-app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
