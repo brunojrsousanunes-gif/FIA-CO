@@ -25,3 +25,6 @@ assert.doesNotMatch(migration, /grant (?:insert|update|delete).*inventory_reserv
 console.log('company inventory MVP security contract: ok');
 
 assert.match(migration, /Salida por cumplimiento de reserva/i);
+
+assert.match(migration, /and request_key=p_request_key/i);
+assert.match(migration, /or amount is null/i);
