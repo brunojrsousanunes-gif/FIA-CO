@@ -227,3 +227,78 @@ begin
 end $incident_guard$;
 reset role;
 select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result;
+
+
+-- Three-party confirmation gate: invited users cannot confirm; buyer closure
+-- cannot bypass a persisted buyer receipt confirmation.
+reset role;
+insert into public.organizations(id,name,status)
+values ('20000000-0000-0000-0000-000000000003','Empresa Transportista','active');
+insert into public.organization_members(organization_id,user_id,member_role,status)
+values ('20000000-0000-0000-0000-000000000003',
+        '10000000-0000-0000-0000-000000000001','manager','active');
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by)
+values
+ ('30000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000002','buyer','invited',
+  '10000000-0000-0000-0000-000000000001'),
+ ('30000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000003','carrier','accepted',
+  '10000000-0000-0000-0000-000000000001');
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $confirmation_gate$
+begin
+  begin
+    insert into public.operation_confirmations
+      (operation_id,participant_role,confirmation_type,confirmed_by)
+    values
+      ('30000000-0000-0000-0000-000000000001','buyer','receipt',
+       '10000000-0000-0000-0000-000000000002');
+    raise exception 'INVITED_BUYER_CONFIRMATION_WAS_ACCEPTED';
+  exception when insufficient_privilege then
+    null;
+  end;
+end $confirmation_gate$;
+reset role;
+
+-- Accept the buyer invitation through the authorized server function.
+select public.accept_operation_invitation(
+ '30000000-0000-0000-0000-000000000001','buyer',
+ '50000000-0000-0000-0000-000000000009');
+
+-- Put the operation at delivered for the closure-specific test.
+update public.operations set status='delivered',version=version+1
+where id='30000000-0000-0000-0000-000000000001';
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $completion_gate$
+begin
+  begin
+    perform public.transition_operation(
+      '30000000-0000-0000-0000-000000000001','completed',2,
+      '50000000-0000-0000-0000-000000000010');
+    raise exception 'BUYER_CLOSED_WITHOUT_RECEIPT_CONFIRMATION';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'TRANSITION_NOT_ALLOWED' then raise; end if;
+  end;
+end $completion_gate$;
+
+insert into public.operation_confirmations
+ (operation_id,participant_role,confirmation_type,confirmed_by)
+values
+ ('30000000-0000-0000-0000-000000000001','buyer','receipt',
+  '10000000-0000-0000-0000-000000000002');
+
+do $completion_result$
+begin
+  if (select status from public.operations
+      where id='30000000-0000-0000-0000-000000000001') <> 'completed' then
+    raise exception 'BUYER_RECEIPT_DID_NOT_COMPLETE_OPERATION';
+  end if;
+end $completion_result$;
+reset role;
+select 'FULL MIGRATION CHAIN + INCIDENT + THREE-PARTY CONFIRMATION TESTS: PASS' as result;
