@@ -177,14 +177,29 @@ declare
   calculated text;
   accepted_count integer;
   allowed boolean := false;
+  existing_event record;
 begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
   if target_status not in ('invited','accepted','in_transit','delivered','completed','disputed','cancelled')
     then raise exception 'INVALID_TARGET_STATUS' using errcode='22023'; end if;
+  if request_key is null then raise exception 'IDEMPOTENCY_KEY_REQUIRED' using errcode='22023'; end if;
   select * into current_row from public.operations where id=target_operation for update;
   if not found then raise exception 'OPERATION_NOT_FOUND' using errcode='P0002'; end if;
-  if current_row.version<>expected_version then raise exception 'VERSION_CONFLICT' using errcode='40001'; end if;
   if not private.can_access_operation(target_operation) then raise exception 'OPERATION_NOT_ACCESSIBLE' using errcode='42501'; end if;
+
+  select event_type,actor_id,event_data into existing_event
+  from public.operation_audit_events
+  where operation_id=target_operation and request_id=request_key;
+  if found then
+    if existing_event.event_type='operation.transition'
+       and existing_event.actor_id=caller
+       and existing_event.event_data->>'to'=target_status then
+      return current_row;
+    end if;
+    raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
+  end if;
+
+  if current_row.version<>expected_version then raise exception 'VERSION_CONFLICT' using errcode='40001'; end if;
   if current_row.status='draft' and target_status='invited' then
     if not private.operation_participants_have_shared_trust(target_operation) then
       raise exception 'TRUST_LEVEL_REQUIRED:L3_SHARED' using errcode='42501';
