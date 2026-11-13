@@ -234,6 +234,15 @@ select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result
 reset role;
 insert into public.organizations(id,name,status)
 values ('20000000-0000-0000-0000-000000000003','Empresa Transportista','active');
+insert into public.organization_security_profiles
+ (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
+select id,'L3_SHARED','verified',
+ jsonb_build_object(
+ 'organizationIdentified',true,'termsAccepted',true,'tenantBoundaryReady',true,'auditReady',true,'incidentContactDefined',true,
+ 'identityVerified',true,'strongAuthenticationReady',true,'secretsManaged',true,'dataMinimizationReady',true,'retentionPolicyReady',true,'securityTestsPassed',true,
+ 'dataPermitsReady',true,'grantExpiryReady',true,'grantRevocationReady',true,'partnerIdentityVerified',true,'purposeLimitationReady',true,'crossOrgIsolationTestsPassed',true
+ ),now(),now()+interval '30 days','10000000-0000-0000-0000-000000000001'
+from public.organizations where id in ('20000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000003');
 insert into public.organization_members(organization_id,user_id,member_role,status)
 values ('20000000-0000-0000-0000-000000000003',
         '10000000-0000-0000-0000-000000000001','manager','active');
@@ -264,6 +273,24 @@ begin
 end $confirmation_gate$;
 reset role;
 
+-- L2 is insufficient for cross-company confirmations.
+reset role;
+update public.organization_security_profiles set trust_level='L2_VERIFIED'
+where organization_id='20000000-0000-0000-0000-000000000002';
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $trust_gate$
+begin
+ begin
+  insert into public.operation_confirmations(operation_id,participant_role,confirmation_type,confirmed_by)
+  values ('30000000-0000-0000-0000-000000000001','buyer','receipt','10000000-0000-0000-0000-000000000002');
+  raise exception 'L2_COMPANY_CONFIRMED_SHARED_OPERATION';
+ exception when insufficient_privilege then null;
+ end;
+end $trust_gate$;
+reset role;
+update public.organization_security_profiles set trust_level='L3_SHARED'
+where organization_id='20000000-0000-0000-0000-000000000002';
 -- Accept the buyer invitation through the authorized server function.
 select public.accept_operation_invitation(
  '30000000-0000-0000-0000-000000000001','buyer',
