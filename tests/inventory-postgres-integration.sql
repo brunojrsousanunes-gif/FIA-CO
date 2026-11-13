@@ -391,6 +391,31 @@ begin
    raise exception 'ACCEPTED_CARRIER_ACCOUNT_COULD_NOT_ADVANCE';
  end if;
 end $accepted_carrier_can_advance$;
+
+-- Replaying the same request returns without advancing the operation twice.
+select public.transition_operation(
+ '30000000-0000-0000-0000-000000000001','in_transit',
+ (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
+ '50000000-0000-0000-0000-000000000014');
+do $transition_idempotency_replay$
+begin
+ if (select version from public.operations where id='30000000-0000-0000-0000-000000000001') <> 2 then
+   raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_ADVANCED_VERSION';
+ end if;
+end $transition_idempotency_replay$;
+
+do $transition_idempotency_reuse$
+begin
+  begin
+    perform public.transition_operation(
+      '30000000-0000-0000-0000-000000000001','delivered',
+      (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
+      '50000000-0000-0000-0000-000000000014');
+    raise exception 'TRANSITION_IDEMPOTENCY_KEY_REUSE_ACCEPTED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end $transition_idempotency_reuse$;
 reset role;
 
 -- Put the operation at delivered for the closure-specific test.
