@@ -1,16 +1,37 @@
 \set ON_ERROR_STOP on
--- User 1 creates an item, receives stock and reserves part of it.
+-- Seed two real organizations and one accepted operation participant after
+-- applying the complete repository migration chain.
+insert into auth.users(id) values
+ ('10000000-0000-0000-0000-000000000001'),
+ ('10000000-0000-0000-0000-000000000002');
+
+insert into public.organizations(id,name,status) values
+ ('20000000-0000-0000-0000-000000000001','Empresa Uno','active'),
+ ('20000000-0000-0000-0000-000000000002','Empresa Dos','active');
+
+insert into public.organization_members(organization_id,user_id,member_role,status) values
+ ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','manager','active'),
+ ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active');
+
+insert into public.operations(id,reference,title,status,created_by) values
+ ('30000000-0000-0000-0000-000000000001','FIA-INV-0001','Operación inventario','accepted','10000000-0000-0000-0000-000000000001');
+
+insert into public.operation_participants(operation_id,organization_id,participant_role,status,invited_by,accepted_by,accepted_at)
+values ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','seller','accepted',
+ '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now());
+
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
 values ('40000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','SKU-1','Material de prueba','10000000-0000-0000-0000-000000000001');
+
 select public.record_inventory_movement(
  '40000000-0000-0000-0000-000000000001','in',10,'Entrada inicial',
  '50000000-0000-0000-0000-000000000001',null);
 select public.reserve_inventory_item(
  '40000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000001',4,
  '50000000-0000-0000-0000-000000000002');
--- Another organization must not see this company's item.
+
 do $$
 begin
  if (select count(*) from public.inventory_items) <> 1 then
@@ -18,6 +39,7 @@ begin
  end if;
 end $$;
 reset role;
+
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
 set role authenticated;
 do $$
@@ -28,14 +50,18 @@ begin
  if (select count(*) from public.inventory_movements) <> 0 then
    raise exception 'CROSS_ORG_MOVEMENT_LEAK';
  end if;
+ if (select count(*) from public.inventory_reservations) <> 0 then
+   raise exception 'CROSS_ORG_RESERVATION_LEAK';
+ end if;
 end $$;
 reset role;
--- Owner fulfills reservation: this must create an outgoing movement atomically.
+
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
 select public.release_inventory_reservation(
  (select id from public.inventory_reservations where request_key='50000000-0000-0000-0000-000000000002'),
  'fulfilled');
+
 do $$
 declare s record;
 begin
@@ -47,7 +73,7 @@ begin
    raise exception 'FULFILLMENT_MOVEMENT_MISSING';
  end if;
 end $$;
--- Reusing an idempotency key with a different payload must fail.
+
 do $$
 begin
  begin
@@ -60,4 +86,4 @@ begin
  end;
 end $$;
 reset role;
-select 'PostgreSQL inventory integration tests: PASS' as result;
+select 'FULL MIGRATION CHAIN + INVENTORY POSTGRESQL TESTS: PASS' as result;
