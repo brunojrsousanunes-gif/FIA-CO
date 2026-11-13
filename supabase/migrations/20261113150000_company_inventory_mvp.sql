@@ -96,12 +96,12 @@ for each row execute function private.prevent_inventory_item_owner_change();
 
 create or replace function private.touch_inventory_item_updated_at()
 returns trigger language plpgsql security invoker
-set search_path = '' as $
+set search_path = '' as $function$
 begin
   new.updated_at := now();
   return new;
 end;
-$;
+$function$;
 revoke all on function private.touch_inventory_item_updated_at() from public, anon, authenticated;
 create trigger inventory_items_touch_updated_at
 before update on public.inventory_items
