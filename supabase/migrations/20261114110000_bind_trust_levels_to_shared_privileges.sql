@@ -1,7 +1,7 @@
 begin;
 
 -- Trust levels are server-verified facts, never user-editable profile fields.
-create table public.organization_security_profiles (
+create table private.organization_security_profiles (
   organization_id uuid primary key references public.organizations(id) on delete cascade,
   trust_level text not null default 'L0_DEMO'
     check (trust_level in ('L0_DEMO','L1_ISOLATED','L2_VERIFIED','L3_SHARED','L4_ADVANCED')),
@@ -17,27 +17,21 @@ create table public.organization_security_profiles (
     and valid_until is not null and verified_by is not null) or verification_status <> 'verified'),
   check (valid_until is null or verified_at is null or valid_until > verified_at)
 );
-alter table public.organization_security_profiles enable row level security;
-revoke all on public.organization_security_profiles from public, anon, authenticated;
-grant select on public.organization_security_profiles to authenticated;
+alter table private.organization_security_profiles enable row level security;
+revoke all on private.organization_security_profiles from public, anon, authenticated;
 do $grant_service_role$
 begin
   if exists (select 1 from pg_roles where rolname = 'service_role') then
-    grant select, insert, update on public.organization_security_profiles to service_role;
+    grant usage on schema private to service_role;
+    grant select, insert, update on private.organization_security_profiles to service_role;
   end if;
 end
 $grant_service_role$;
-create policy organization_security_profile_member_read
- on public.organization_security_profiles for select to authenticated
- using (exists (select 1 from public.organization_members om
-  where om.organization_id=organization_security_profiles.organization_id
-   and om.user_id=(select auth.uid()) and om.status='active'));
-
 create or replace function private.organization_has_trust_level(target_organization uuid, required_level text)
 returns boolean language sql stable security definer
 set search_path = pg_catalog, public as $$
  select exists (
-  select 1 from public.organization_security_profiles p
+  select 1 from private.organization_security_profiles p
   where p.organization_id=target_organization and p.verification_status='verified'
    and p.verified_at<=statement_timestamp() and p.valid_until>statement_timestamp()
    and case required_level
@@ -99,6 +93,42 @@ set search_path = pg_catalog, public, private as $$
 $$;
 revoke all on function private.organization_has_trust_level(uuid,text) from public,anon,authenticated;
 revoke all on function private.operation_has_shared_trust(uuid) from public,anon,authenticated;
+
+-- Confirmation writes must enforce the shared trust gate as well as the
+-- accepted role/account binding. The helper prevents a trust-profile oracle.
+create or replace function private.can_submit_operation_confirmation(
+  target_operation uuid,
+  target_role text
+) returns boolean
+language sql stable security definer
+set search_path = pg_catalog, public, private
+as $
+  select (select auth.uid()) is not null
+    and exists (
+      select 1
+      from public.operation_participants op
+      join public.organization_members om
+        on om.organization_id = op.organization_id
+       and om.user_id = (select auth.uid())
+       and om.status = 'active'
+      where op.operation_id = target_operation
+        and op.participant_role = target_role
+        and op.status = 'accepted'
+        and op.accepted_by = (select auth.uid())
+        and private.organization_has_trust_level(op.organization_id, 'L3_SHARED')
+    )
+    and private.operation_has_shared_trust(target_operation);
+$;
+revoke all on function private.can_submit_operation_confirmation(uuid,text) from public, anon;
+grant execute on function private.can_submit_operation_confirmation(uuid,text) to authenticated;
+
+drop policy if exists confirmations_bound_account_insert on public.operation_confirmations;
+create policy confirmations_bound_account_insert
+  on public.operation_confirmations for insert to authenticated
+  with check (
+    confirmed_by = (select auth.uid())
+    and private.can_submit_operation_confirmation(operation_id, participant_role)
+  );
 
 -- A pending invitation is not an accepted operational role.
 create or replace function private.has_operation_role(target_operation uuid, target_role text) returns boolean language sql stable security definer
