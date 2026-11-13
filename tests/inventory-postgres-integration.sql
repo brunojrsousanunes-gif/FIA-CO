@@ -3,7 +3,8 @@
 -- applying the complete repository migration chain.
 insert into auth.users(id) values
  ('10000000-0000-0000-0000-000000000001'),
- ('10000000-0000-0000-0000-000000000002');
+ ('10000000-0000-0000-0000-000000000002'),
+ ('10000000-0000-0000-0000-000000000003');
 
 insert into public.organizations(id,name,status) values
  ('20000000-0000-0000-0000-000000000001','Empresa Uno','active'),
@@ -243,9 +244,9 @@ select id,'L3_SHARED','verified',
  'dataPermitsReady',true,'grantExpiryReady',true,'grantRevocationReady',true,'partnerIdentityVerified',true,'purposeLimitationReady',true,'crossOrgIsolationTestsPassed',true
  ),now(),now()+interval '30 days','10000000-0000-0000-0000-000000000001'
 from public.organizations where id in ('20000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000003');
-insert into public.organization_members(organization_id,user_id,member_role,status)
-values ('20000000-0000-0000-0000-000000000003',
-        '10000000-0000-0000-0000-000000000001','manager','active');
+insert into public.organization_members(organization_id,user_id,member_role,status) values
+ ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','manager','active'),
+ ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
 insert into public.operation_participants
  (operation_id,organization_id,participant_role,status,invited_by)
 values
@@ -295,6 +296,26 @@ end $trust_gate$;
 reset role;
 update private.organization_security_profiles set trust_level='L3_SHARED'
 where organization_id='20000000-0000-0000-0000-000000000002';
+
+-- A second active member of the carrier company must not act on the
+-- role accepted by a different account.
+update public.operations set status='in_transit',version=version+1
+where id='30000000-0000-0000-0000-000000000001';
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+do $accepted_account_gate$
+begin
+  begin
+    perform public.transition_operation(
+      '30000000-0000-0000-0000-000000000001','delivered',
+      (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
+      '50000000-0000-0000-0000-000000000011');
+    raise exception 'NON_ACCEPTING_CARRIER_MEMBER_TRANSITION_WAS_ACCEPTED';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'TRANSITION_NOT_ALLOWED' then raise; end if;
+  end;
+end $accepted_account_gate$;
+reset role;
 
 -- Put the operation at delivered for the closure-specific test.
 update public.operations set status='delivered',version=version+1
