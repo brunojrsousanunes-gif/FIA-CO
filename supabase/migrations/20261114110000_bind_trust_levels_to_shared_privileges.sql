@@ -102,7 +102,7 @@ revoke all on function private.operation_has_shared_trust(uuid) from public,anon
 
 -- A pending invitation is not an accepted operational role.
 create or replace function private.has_operation_role(target_operation uuid, target_role text) returns boolean language sql stable security definer
-set search_path = pg_catalog, public as $$$
+set search_path = pg_catalog, public as $
   select (select auth.uid()) is not null and exists (
     select 1 from public.operation_participants op
     join public.organization_members om on om.organization_id = op.organization_id
