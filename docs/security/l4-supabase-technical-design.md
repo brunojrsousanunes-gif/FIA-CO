@@ -48,6 +48,18 @@ Las aprobaciones se guardan como eventos/filas del ciclo de vida del grant; no c
 
 ## 3. Modelo lógico propuesto
 
+### Separación de titularidad de plataforma y autoridad de empresas
+
+La titularidad de FIA&CO (gobierno del producto/plataforma) y la autoridad de cada organización cliente son ámbitos distintos.
+
+- No se debe reutilizar el usuario propietario de FIA&CO como OWNER de las empresas clientes.
+- La autoridad de una empresa cliente debe acreditarse con su propia evidencia de representación o delegación.
+- Los datos personales del propietario de FIA&CO no se guardarán en tablas públicas ni en campos visibles de perfiles de empresa.
+- Si la operación exige conservar evidencia de titularidad/representación, se almacenará en un repositorio privado con acceso mínimo, referencia interna, finalidad, fecha de verificación, vencimiento y auditoría de consulta. La evidencia documental no se copiará a logs ni a prompts de IA.
+- No se debe crear una tabla con DNI, domicilio o documentos personales solo por conveniencia técnica. Antes se determinarán la obligación, la base jurídica, el canal seguro y el plazo de conservación.
+- La interfaz pública y los expedientes compartidos mostrarán, como máximo, un estado de autoridad verificada y los datos de contacto empresariales que la organización haya autorizado divulgar.
+
+
 ### A. `private.organization_trust_profiles`
 
 Una fila vigente por empresa, versionada mediante historial append-only o snapshots inmutables.
