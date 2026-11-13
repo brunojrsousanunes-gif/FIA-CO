@@ -17,6 +17,18 @@
 
 ## 2. Separación de conceptos
 
+### Titularidad de FIA&CO y privacidad
+
+- La titularidad del proyecto/plataforma FIA&CO corresponde a su propietario, cuya identidad y autoridad se gestionarán de forma privada cuando exista una necesidad legal u operativa justificada.
+- El nombre, DNI/NIE, domicilio, firma y documentos del propietario no se publicarán en la web, interfaz pública, perfiles visibles para otras empresas, repositorio ni documentación técnica abierta.
+- No se incluirán datos identificativos personales en código, commits, issues, logs generales, prompts de IA ni metadatos públicos.
+- Si una obligación legal exige identificar al titular o representante, los datos se recogerán por un canal privado y seguro, solo en la medida necesaria, con finalidad, acceso y conservación limitados.
+- La titularidad de FIA&CO es distinta del rol OWNER de cada empresa cliente. El propietario de la plataforma no se convierte por ello en propietario ni administrador de las organizaciones usuarias.
+- Para cada empresa cliente, la autoridad que puede aprobar divulgaciones de sus datos deberá acreditarse separadamente; no se presume por ser administrador técnico ni por ser propietario de FIA&CO.
+- El propietario de FIA&CO conserva el control de gobierno de la plataforma. Puede delegar tareas administrativas concretas, con alcance, duración y revocación definidos, pero la delegación no transfiere titularidad ni permite al delegado ampliar sus propios privilegios.
+- La identidad del titular no se expondrá a otras empresas por defecto. Cuando una contraparte necesite verificar la autoridad de una empresa, se mostrará únicamente el estado de verificación y la información mínima legalmente exigible.
+
+
 - **Nivel de confianza de empresa:** L0–L4; refleja controles verificados.
 - **Rol de usuario:** OWNER, ADMIN, OPERATOR o VIEWER dentro de una empresa.
 - **Rol en operación compartida:** SELLER, CARRIER o BUYER; define responsabilidades dentro de un expediente concreto.
