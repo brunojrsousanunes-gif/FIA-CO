@@ -350,6 +350,43 @@ Consulta realizada sobre el proyecto Supabase existente. No se ejecutaron escrit
 - Reconciliar el comportamiento de `can_access_operation` con las reglas de aceptación de participantes de PR #174.
 - Crear un entorno aislado de pruebas. Actualmente no hay rama de desarrollo; crear una puede generar costes y requiere comprobar el precio antes.
 
-## 14. Estado y límites de esta entrega
+
+## 15. Auditoría de políticas RLS y privilegios de tablas (lectura, 14-11-2026)
+
+### Resultados comprobados
+
+- Las 18 tablas existentes observadas en `public` tienen RLS activado. Ninguna de las tablas observadas tiene `FORCE ROW LEVEL SECURITY`; el propietario de la tabla y roles con bypass RLS requieren tratamiento separado.
+- No se encontraron tablas en el esquema `private` en la consulta de tablas base. Por tanto, las nuevas tablas de gobierno aún no existen.
+- Las políticas existentes de operaciones, incidencias, evidencias, confirmaciones, auditoría, participantes y notificaciones se apoyan en `private.can_access_operation`.
+- La política de lectura de esas tablas hereda el alcance de esa función. Como la función permite participantes `invited` o `accepted`, las filas pueden ser visibles a un miembro activo de una organización invitada antes de aceptar la participación. Esto es un hallazgo real de diseño, no una prueba de que se haya accedido indebidamente a datos.
+- La inserción de confirmaciones sí exige participante `accepted`, `accepted_by=auth.uid()` y membresía activa.
+- La resolución de incidencias limita el registro inicial a incidencias abiertas y exige estado resuelto, usuario autenticado como resolved_by, fecha y nota; el trigger de PR #174 añade controles adicionales, pero esa PR todavía no está fusionada.
+- Las tablas `logistics_quotes`, `operation_cost_items`, `operation_incidents` y `operation_notifications` tienen ACL que incluye `anon` además de `authenticated`; RLS está activado y las políticas consultadas se dirigen a `authenticated`. Debe revisarse si el grant a anon es necesario. No se revocó porque sería un cambio de producción y requiere pruebas de compatibilidad.
+- Las 18 tablas consultadas conceden ACL a `service_role`; ese rol debe mantenerse exclusivamente en entornos servidor y nunca en frontend.
+- La consulta de tablas no mostró objetos privados ni políticas privadas existentes. Las futuras tablas de gobierno deben tener ACL cerrada y políticas diseñadas expresamente, sin heredar las políticas operativas.
+
+### Interpretación y riesgos
+
+1. RLS activado no equivale a aislamiento correcto por sí solo: la seguridad depende de las expresiones de cada política y de las funciones llamadas por ellas.
+2. La diferencia entre invitación y aceptación debe resolverse de forma coordinada en la función central y en las políticas que la consumen. No basta con cambiar una sola política, ya que varias tablas comparten el mismo helper.
+3. No se debe modificar ahora `private.can_access_operation`: cambiarla podría ocultar datos necesarios para que una empresa invitada vea y acepte su invitación. Hay que diseñar un acceso de invitación mínimo (solo datos de invitación) y un acceso operativo completo tras aceptación.
+4. No se debe activar `FORCE ROW LEVEL SECURITY` de forma general sin revisar propietarios, funciones SECURITY DEFINER, tareas de servicio, triggers y migraciones.
+5. La presencia de ACL `anon` en cuatro tablas es una oportunidad de endurecimiento, pero no se debe retirar sin verificar dependencias de la aplicación y pruebas anónimas.
+
+### Próximas pruebas de diseño (sin datos reales)
+
+- Usuario anónimo: SELECT/INSERT/UPDATE/DELETE denegados en las cuatro tablas con grant `anon`, salvo que exista un caso de uso público documentado.
+- Usuario autenticado de una organización invitada: puede consultar únicamente los datos mínimos de su invitación; no puede leer evidencias, costes, auditoría ni incidencias completas hasta aceptar.
+- Usuario autenticado de una organización aceptada: conserva el acceso que corresponde a su rol y operación.
+- Usuario de otra organización: no puede enumerar ni inferir filas, identificadores o contenido.
+- Usuario con `platform_role='admin'` pero sin participación no obtiene acceso a operaciones.
+- `service_role` solo se usa desde backend y no aparece en bundle web, repositorio ni almacenamiento del dispositivo.
+- Los cambios de política no rompen el flujo de aceptación, notificaciones ni los tests existentes de PR #174.
+
+### Configuración Data API
+
+La configuración de esquemas expuestos no pudo confirmarse mediante `current_setting('pgrst.db_schemas')`, que devolvió NULL en la sesión SQL. El detalle de proyecto confirma que FIA-CO está activo en `eu-west-1`, PostgreSQL 17.6.1; no expone por sí mismo la lista de esquemas PostgREST. Este punto queda pendiente de verificación en la configuración del proyecto antes de crear las tablas privadas.
+
+## 16. Estado y límites de esta entrega
 
 Este documento es diseño, no migración. No crea tablas, no modifica RLS, funciones, Auth, Storage ni datos. No concede privilegios, no modifica producción y no sustituye la revisión jurídica. La PR #175 permanece en borrador hasta resolver las decisiones pendientes.
