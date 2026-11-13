@@ -86,25 +86,27 @@ $$;
 -- but does not require the invited users to have accepted yet.
 create or replace function private.operation_participants_have_shared_trust(target_operation uuid)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public, private as $
+set search_path = pg_catalog, public, private
+as $operation_participants_have_shared_trust$
  select count(*)=3
   and count(*) filter (where private.organization_has_trust_level(op.organization_id,'L3_SHARED'))=3
  from public.operation_participants op
  where op.operation_id=target_operation
   and op.status in ('invited','accepted')
   and op.participant_role in ('seller','buyer','carrier');
-$;
+$operation_participants_have_shared_trust$;
 revoke all on function private.operation_participants_have_shared_trust(uuid) from public,anon,authenticated;
 
 create or replace function private.operation_has_shared_trust(target_operation uuid)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public, private as $
+set search_path = pg_catalog, public, private
+as $operation_has_shared_trust$
  select count(*)=3
   and count(*) filter (where private.organization_has_trust_level(op.organization_id,'L3_SHARED'))=3
  from public.operation_participants op
  where op.operation_id=target_operation and op.status='accepted'
   and op.participant_role in ('seller','buyer','carrier');
-$$;
+$operation_has_shared_trust$;
 revoke all on function private.organization_has_trust_level(uuid,text) from public,anon,authenticated;
 revoke all on function private.operation_has_shared_trust(uuid) from public,anon,authenticated;
 
