@@ -89,6 +89,7 @@ begin
   return new;
 end;
 $;
+revoke all on function private.prevent_inventory_item_owner_change() from public, anon, authenticated;
 create trigger inventory_items_owner_immutable
 before update on public.inventory_items
 for each row execute function private.prevent_inventory_item_owner_change();
@@ -227,6 +228,7 @@ as $$
 declare
   caller uuid := (select auth.uid());
   reservation_row public.inventory_reservations;
+  item_row public.inventory_items;
 begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
   if final_status not in ('released','fulfilled') then
@@ -240,6 +242,19 @@ begin
   end if;
   if reservation_row.status <> 'reserved' then
     raise exception 'RESERVATION_ALREADY_CLOSED' using errcode='23514';
+  end if;
+  select * into item_row from public.inventory_items where id=reservation_row.item_id for update;
+  if not found then raise exception 'INVENTORY_ITEM_NOT_FOUND' using errcode='P0002'; end if;
+  if final_status = 'fulfilled' then
+    insert into public.inventory_movements (
+      item_id, organization_id, movement_type, quantity, note,
+      operation_id, created_by, request_key
+    ) values (
+      reservation_row.item_id, reservation_row.organization_id, 'out',
+      reservation_row.quantity,
+      'Salida por cumplimiento de reserva ' || reservation_row.id::text,
+      reservation_row.operation_id, caller, gen_random_uuid()
+    );
   end if;
   update public.inventory_reservations set status=final_status,updated_at=now()
     where id=target_reservation returning * into reservation_row;
