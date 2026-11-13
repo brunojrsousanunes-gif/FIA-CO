@@ -150,7 +150,7 @@ reset role;
 -- the resolver identity. The authenticated role's RLS policy may hide resolved
 -- rows from UPDATE, which would otherwise make a zero-row UPDATE look like a
 -- trigger rejection.
-do $
+do $incident_guard$
 begin
   begin
     update public.operation_incidents
@@ -174,6 +174,6 @@ begin
         and description='Incidencia de prueba') <> 1 then
     raise exception 'INCIDENT_RESOLUTION_STATE_INVALID';
   end if;
-end $;
+end $incident_guard$;
 reset role;
 select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result;
