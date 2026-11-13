@@ -119,7 +119,7 @@ declare
   result_row public.inventory_movements;
 begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
-  if movement not in ('in','out','adjustment') or amount <= 0 or amount <> round(amount,3)
+  if movement is null or movement not in ('in','out','adjustment') or amount is null or amount <= 0 or amount <> round(amount,3)
      or explanation is null or char_length(trim(explanation)) not between 3 and 500
      or p_request_key is null then
     raise exception 'INVALID_MOVEMENT' using errcode='22023';
@@ -181,7 +181,7 @@ declare
   result_row public.inventory_reservations;
 begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
-  if amount is null or amount <= 0 or amount <> round(amount,3) or request_key is null then
+  if amount is null or amount <= 0 or amount <> round(amount,3) or p_request_key is null then
     raise exception 'INVALID_RESERVATION' using errcode='22023';
   end if;
   select * into item_row from public.inventory_items where id=target_item and active for update;
@@ -197,7 +197,7 @@ begin
     raise exception 'OPERATION_ORGANIZATION_MISMATCH' using errcode='42501';
   end if;
   select * into result_row from public.inventory_reservations
-    where organization_id=item_row.organization_id and request_key=request_key;
+    where organization_id=item_row.organization_id and request_key=p_request_key;
   if found then
     if result_row.item_id <> target_item or result_row.operation_id <> target_operation
       or result_row.quantity <> amount or result_row.created_by <> caller then
@@ -213,7 +213,7 @@ begin
     raise exception 'INSUFFICIENT_AVAILABLE_STOCK' using errcode='23514';
   end if;
   insert into public.inventory_reservations(item_id,organization_id,operation_id,quantity,created_by,request_key)
-  values(target_item,item_row.organization_id,target_operation,amount,caller,request_key)
+  values(target_item,item_row.organization_id,target_operation,amount,caller,p_request_key)
   returning * into result_row;
   return result_row;
 end;
