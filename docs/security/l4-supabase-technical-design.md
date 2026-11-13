@@ -232,6 +232,92 @@ No conceder EXECUTE directamente a authenticated a una función genérica que pe
 - La revocación bloquea nuevos accesos aunque el usuario mantenga sesión abierta.
 - La auditoría no permite UPDATE/DELETE desde roles de aplicación.
 
-## 10. Estado y límites de esta entrega
+
+## 11. Especificación previa a migración: titularidad y delegaciones
+
+Esta sección es un plano de diseño. **No es SQL ejecutable ni autoriza cambios en Supabase.**
+
+### 11.1 Registro privado de titularidad
+
+Entidad propuesta: `private.platform_governance`, con una única fila activa (restricción de singleton).
+
+Campos mínimos:
+- `id`: clave fija/singleton.
+- `owner_user_id`: referencia a `auth.users.id`; es dato personal seudonimizado y debe permanecer en esquema privado, sin lectura directa desde clientes.
+- `owner_reference`: identificador interno opaco para vincular la evidencia externa; no contiene DNI, nombre, domicilio ni documento.
+- `verification_status`: `pending | verified | suspended`.
+- `verified_at`, `verified_by`: fecha y actor de verificación.
+- `policy_version`, `created_at`, `updated_at`.
+
+Reglas:
+- No insertar automáticamente al primer usuario ni inferir titularidad de `profiles.platform_role='admin'`.
+- El alta inicial requiere un procedimiento de bootstrap controlado, documentado y verificado por una persona autorizada; no debe existir una RPC pública para reclamar la propiedad.
+- No almacenar copias de documentos personales en esta tabla ni en Storage por defecto.
+- Si la identidad deja de estar verificada o existe disputa, bloquear las acciones reservadas; mantener solo el proceso de recuperación/revisión.
+- No permitir UPDATE/DELETE directo desde `anon` o `authenticated`.
+
+### 11.2 Delegaciones
+
+Entidad propuesta: `private.platform_delegations`.
+
+Campos mínimos:
+- `id`, `delegate_user_id`, `capability`, `scope`, `environment`.
+- `granted_by`, `granted_at`, `starts_at`, `expires_at`, `revoked_at`, `revoked_by`.
+- `reason`, `status`, `created_at`.
+
+Capacidades cerradas iniciales (no comodines):
+- `support_metadata`: soporte con metadatos mínimos.
+- `technical_maintenance_nonprod`: mantenimiento técnico solo en entorno no productivo.
+- `security_review_readonly`: lectura de evidencias técnicas de seguridad sin datos de clientes.
+- `user_support_limited`: soporte de cuentas sin cambiar titularidad ni privilegios.
+
+No incluir inicialmente capacidades para producción, secretos, exportación de datos, lectura de documentos de clientes, aprobación de divulgación, gestión de fondos ni transferencia de titularidad. Si en el futuro fueran necesarias, requerirán un diseño y aprobación separados.
+
+Restricciones:
+- `expires_at` obligatorio y posterior a `starts_at`; sin delegaciones perpetuas.
+- Una delegación no puede ser concedida, ampliada ni transferida por el delegado.
+- La autoridad que concede debe ser el titular verificado; la revocación invalida el acceso en la siguiente comprobación del servidor.
+- `scope` debe ser estructurado y validado contra una lista permitida; no aceptar SQL, expresiones libres ni comodines globales.
+- Cada cambio produce un evento de auditoría append-only, sin incluir datos personales ni secretos en el detalle.
+
+### 11.3 Auditoría de gobierno
+
+La auditoría debe registrar: creación, aprobación, rechazo, expiración, revocación, intento denegado, cambio de estado de verificación y uso de una delegación. Campos recomendados: actor, acción, objeto, resultado, fecha de servidor, identificador de solicitud y motivo codificado. No registrar documentos, tokens, secretos ni contenido de clientes.
+
+La inmutabilidad debe reforzarse con permisos SQL y trigger; no basta con ocultar botones en la interfaz. La retención y exportación de auditoría requieren política separada.
+
+### 11.4 Privilegios y exposición
+
+- Mantener las tablas en `private`, esquema no expuesto por Data API; confirmar configuración real de esquemas expuestos antes de la migración.
+- Activar RLS como defensa adicional aunque el esquema no esté expuesto.
+- Revocar privilegios de tabla y secuencia a `PUBLIC`, `anon` y `authenticated`; no conceder DML directo al cliente.
+- Evitar funciones `SECURITY DEFINER`. Preferir `SECURITY INVOKER`; si una operación interna demuestra que necesita elevación, justificarla individualmente, fijar `search_path`, cualificar objetos, comprobar `auth.uid()`, revocar EXECUTE por defecto y concederlo solo al rol estrictamente necesario.
+- No reutilizar ni ampliar las funciones actuales `private.is_org_member`, `private.can_access_operation`, `private.can_manage_operation` o `private.has_operation_role` sin revisar su código y ACL completos.
+- No devolver el `owner_user_id` a clientes ni incluirlo en respuestas de RPC; devolver solo el resultado mínimo necesario.
+- La autorización de plataforma nunca sustituye los controles de organización/operación y no da acceso a expedientes de clientes.
+
+### 11.5 Orden de migración y pruebas
+
+1. Confirmar la configuración de esquemas expuestos, ACL actuales y definición completa de las funciones relacionadas.
+2. Crear tablas privadas y restricciones sin grants a clientes; validar singleton, estados y vencimientos.
+3. Añadir auditoría append-only y probar que los roles de aplicación no pueden modificarla.
+4. Añadir RPCs específicas para consultar la propia capacidad y revocar delegaciones; el alta inicial de titularidad queda fuera de RPC pública.
+5. Probar primero en rama/base aislada con usuarios de prueba, nunca con datos reales.
+6. Ejecutar advisors y pruebas de regresión; revisar cualquier aviso nuevo antes de avanzar.
+7. Solo tras informe de pruebas y autorización explícita independiente, valorar producción.
+
+Pruebas negativas obligatorias:
+- usuario anónimo y usuario autenticado no pueden leer ni enumerar el registro de titularidad;
+- un administrador de empresa y un `profiles.platform_role='admin'` no adquieren titularidad por ese hecho;
+- el primer usuario registrado no puede autoasignarse como propietario;
+- delegado no puede conceder, ampliar, transferir ni reactivar una delegación;
+- delegación expirada/revocada/suspendida deniega en la siguiente petición;
+- capacidad de entorno de pruebas no funciona en producción;
+- alcance distinto o comodín no permitido produce DENY;
+- nadie obtiene acceso a operaciones, documentos o datos de organizaciones por ser titular de plataforma;
+- intentos de UPDATE/DELETE sobre auditoría son rechazados;
+- cambio de titularidad sin procedimiento de verificación queda bloqueado.
+
+## 12. Estado y límites de esta entrega
 
 Este documento es diseño, no migración. No crea tablas, no modifica RLS, funciones, Auth, Storage ni datos. No concede privilegios, no modifica producción y no sustituye la revisión jurídica. La PR #175 permanece en borrador hasta resolver las decisiones pendientes.
