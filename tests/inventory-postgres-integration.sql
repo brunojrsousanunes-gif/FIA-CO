@@ -121,6 +121,6 @@ begin
  exception when sqlstate '22023' then
   if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
  end;
-end $;
+end $$;
 reset role;
 select 'FULL MIGRATION CHAIN + INVENTORY POSTGRESQL TESTS: PASS' as result;
