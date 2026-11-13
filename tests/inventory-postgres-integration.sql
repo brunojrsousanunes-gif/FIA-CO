@@ -175,4 +175,5 @@ begin
     raise exception 'INCIDENT_RESOLUTION_STATE_INVALID';
   end if;
 end $;
+reset role;
 select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result;
