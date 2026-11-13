@@ -79,6 +79,20 @@ create policy inventory_items_manager_insert on public.inventory_items
   for insert to authenticated with check (
     created_by = (select auth.uid()) and (select private.is_inventory_manager(organization_id))
   );
+create or replace function private.prevent_inventory_item_owner_change()
+returns trigger language plpgsql security invoker
+set search_path = '' as $
+begin
+  if new.organization_id <> old.organization_id or new.created_by <> old.created_by then
+    raise exception 'INVENTORY_ITEM_OWNER_IMMUTABLE' using errcode='42501';
+  end if;
+  return new;
+end;
+$;
+create trigger inventory_items_owner_immutable
+before update on public.inventory_items
+for each row execute function private.prevent_inventory_item_owner_change();
+
 create policy inventory_items_manager_update on public.inventory_items
   for update to authenticated
   using ((select private.is_inventory_manager(organization_id)))
@@ -114,12 +128,24 @@ begin
   if not private.is_inventory_manager(item_row.organization_id) then
     raise exception 'INVENTORY_FORBIDDEN' using errcode='42501';
   end if;
-  if linked_operation is not null and not private.can_access_operation(linked_operation) then
-    raise exception 'OPERATION_FORBIDDEN' using errcode='42501';
+  if linked_operation is not null and (
+    not private.can_access_operation(linked_operation) or not exists (
+      select 1 from public.operation_participants op
+      where op.operation_id=linked_operation
+        and op.organization_id=item_row.organization_id and op.status='accepted'
+    )
+  ) then
+    raise exception 'OPERATION_ORGANIZATION_MISMATCH' using errcode='42501';
   end if;
-  if exists (select 1 from public.inventory_movements where organization_id=item_row.organization_id and request_key=request_key) then
-    select * into result_row from public.inventory_movements
-      where organization_id=item_row.organization_id and request_key=request_key;
+  select * into result_row from public.inventory_movements
+    where organization_id=item_row.organization_id and request_key=request_key;
+  if found then
+    if result_row.item_id <> target_item or result_row.movement_type <> movement
+      or result_row.quantity <> amount or result_row.note <> trim(explanation)
+      or result_row.operation_id is distinct from linked_operation
+      or result_row.created_by <> caller then
+      raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
+    end if;
     return result_row;
   end if;
   select coalesce(sum(case when movement_type='out' then -quantity else quantity end),0)
@@ -162,12 +188,20 @@ begin
   if not private.is_inventory_manager(item_row.organization_id) then
     raise exception 'INVENTORY_FORBIDDEN' using errcode='42501';
   end if;
-  if not private.can_access_operation(target_operation) then
-    raise exception 'OPERATION_FORBIDDEN' using errcode='42501';
+  if not private.can_access_operation(target_operation) or not exists (
+    select 1 from public.operation_participants op
+    where op.operation_id=target_operation
+      and op.organization_id=item_row.organization_id and op.status='accepted'
+  ) then
+    raise exception 'OPERATION_ORGANIZATION_MISMATCH' using errcode='42501';
   end if;
-  if exists (select 1 from public.inventory_reservations where organization_id=item_row.organization_id and request_key=request_key) then
-    select * into result_row from public.inventory_reservations
-      where organization_id=item_row.organization_id and request_key=request_key;
+  select * into result_row from public.inventory_reservations
+    where organization_id=item_row.organization_id and request_key=request_key;
+  if found then
+    if result_row.item_id <> target_item or result_row.operation_id <> target_operation
+      or result_row.quantity <> amount or result_row.created_by <> caller then
+      raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
+    end if;
     return result_row;
   end if;
   select coalesce(sum(case when movement_type='out' then -quantity else quantity end),0)
