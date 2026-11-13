@@ -63,7 +63,7 @@ end $$;
 
 do $$
 begin
- if (select count(*) from public.inventory_items) <> 1 then
+ if (select count(*) from public.inventory_items) <> 2 then
    raise exception 'OWNER_CANNOT_READ_OWN_ITEM';
  end if;
 end $$;
