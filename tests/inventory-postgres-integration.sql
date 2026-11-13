@@ -124,3 +124,51 @@ begin
 end $$;
 reset role;
 select 'FULL MIGRATION CHAIN + INVENTORY POSTGRESQL TESTS: PASS' as result;
+
+
+-- Incident resolution guard: authorized resolver may resolve once, but cannot
+-- rewrite the incident's identity/scope or reopen it afterwards.
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+insert into public.operation_incidents
+ (id,operation_id,incident_type,description,status,blocks_progress,opened_by)
+values
+ ('60000000-0000-0000-0000-000000000001',
+  '30000000-0000-0000-0000-000000000001',
+  'delivery_delay','Incidencia de prueba','open',true,
+  '10000000-0000-0000-0000-000000000001');
+
+update public.operation_incidents
+set status='resolved',
+    resolved_by='10000000-0000-0000-0000-000000000001',
+    resolved_at=now(),
+    resolution_note='Resuelta en prueba'
+where id='60000000-0000-0000-0000-000000000001';
+
+do $$
+begin
+  begin
+    update public.operation_incidents
+    set description='Texto manipulado'
+    where id='60000000-0000-0000-0000-000000000001';
+    raise exception 'RESOLVED_INCIDENT_WAS_MUTABLE';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'INCIDENT_IDENTITY_IMMUTABLE' then raise; end if;
+  end;
+  begin
+    update public.operation_incidents
+    set status='open'
+    where id='60000000-0000-0000-0000-000000000001';
+    raise exception 'RESOLVED_INCIDENT_WAS_REOPENED';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'INCIDENT_TRANSITION_NOT_ALLOWED' then raise; end if;
+  end;
+  if (select count(*) from public.operation_incidents
+      where id='60000000-0000-0000-0000-000000000001'
+        and status='resolved'
+        and description='Incidencia de prueba') <> 1 then
+    raise exception 'INCIDENT_RESOLUTION_STATE_INVALID';
+  end if;
+end $$;
+reset role;
+select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result;
