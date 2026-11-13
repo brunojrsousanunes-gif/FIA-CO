@@ -247,6 +247,48 @@ from public.organizations where id in ('20000000-0000-0000-0000-000000000001','2
 insert into public.organization_members(organization_id,user_id,member_role,status) values
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','manager','active'),
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
+
+-- The creator can invite three L3 organizations before their users accept,
+-- and can still cancel an invitation if a trust check later expires.
+insert into public.operations(id,reference,title,status,created_by)
+values ('30000000-0000-0000-0000-000000000002','FIA-INV-0002','Operación de invitación','draft',
+        '10000000-0000-0000-0000-000000000001');
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by)
+values
+ ('30000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000001','seller','invited','10000000-0000-0000-0000-000000000001'),
+ ('30000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000002','buyer','invited','10000000-0000-0000-0000-000000000001'),
+ ('30000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000003','carrier','invited','10000000-0000-0000-0000-000000000001');
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+select public.transition_operation(
+ '30000000-0000-0000-0000-000000000002','invited',1,
+ '50000000-0000-0000-0000-000000000012');
+do $invitation_transition$
+begin
+ if (select status from public.operations where id='30000000-0000-0000-0000-000000000002') <> 'invited' then
+   raise exception 'L3_INVITATION_TRANSITION_FAILED';
+ end if;
+end $invitation_transition$;
+reset role;
+
+update private.organization_security_profiles set trust_level='L2_VERIFIED'
+where organization_id='20000000-0000-0000-0000-000000000003';
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+select public.transition_operation(
+ '30000000-0000-0000-0000-000000000002','cancelled',2,
+ '50000000-0000-0000-0000-000000000013');
+do $invitation_cancellation$
+begin
+ if (select status from public.operations where id='30000000-0000-0000-0000-000000000002') <> 'cancelled' then
+   raise exception 'INVITATION_CANCELLATION_BLOCKED_BY_TRUST_GATE';
+ end if;
+end $invitation_cancellation$;
+reset role;
+update private.organization_security_profiles set trust_level='L3_SHARED'
+where organization_id='20000000-0000-0000-0000-000000000003';
+
 insert into public.operation_participants
  (operation_id,organization_id,participant_role,status,invited_by)
 values
