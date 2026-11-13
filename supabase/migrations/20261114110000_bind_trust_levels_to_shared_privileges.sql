@@ -35,7 +35,7 @@ create policy organization_security_profile_member_read
 
 create or replace function private.organization_has_trust_level(target_organization uuid, required_level text)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public as $
+set search_path = pg_catalog, public as $$
  select exists (
   select 1 from public.organization_security_profiles p
   where p.organization_id=target_organization and p.verification_status='verified'
@@ -90,7 +90,7 @@ $;
 
 create or replace function private.operation_has_shared_trust(target_operation uuid)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public, private as $
+set search_path = pg_catalog, public, private as $$
  select count(*)=3
   and count(*) filter (where private.organization_has_trust_level(op.organization_id,'L3_SHARED'))=3
  from public.operation_participants op
@@ -102,7 +102,7 @@ revoke all on function private.operation_has_shared_trust(uuid) from public,anon
 
 -- A pending invitation is not an accepted operational role.
 create or replace function private.has_operation_role(target_operation uuid, target_role text) returns boolean language sql stable security definer
-set search_path = pg_catalog, public as $$
+set search_path = pg_catalog, public as $$$
   select (select auth.uid()) is not null and exists (
     select 1 from public.operation_participants op
     join public.organization_members om on om.organization_id = op.organization_id
