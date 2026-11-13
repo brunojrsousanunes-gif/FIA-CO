@@ -290,14 +290,15 @@ update private.organization_security_profiles set trust_level='L3_SHARED'
 where organization_id='20000000-0000-0000-0000-000000000003';
 
 insert into public.operation_participants
- (operation_id,organization_id,participant_role,status,invited_by)
+ (operation_id,organization_id,participant_role,status,invited_by,accepted_by,accepted_at)
 values
  ('30000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000002','buyer','invited',
-  '10000000-0000-0000-0000-000000000001'),
+  '10000000-0000-0000-0000-000000000001',null,null),
  ('30000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000003','carrier','accepted',
-  '10000000-0000-0000-0000-000000000001');
+  '10000000-0000-0000-0000-000000000001',
+  '10000000-0000-0000-0000-000000000001',now());
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
 set role authenticated;
@@ -375,6 +376,21 @@ begin
     if sqlerrm <> 'TRANSITION_NOT_ALLOWED' then raise; end if;
   end;
 end $accepted_account_gate$;
+reset role;
+
+-- The exact account that accepted the carrier role remains authorized.
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+select public.transition_operation(
+ '30000000-0000-0000-0000-000000000001','in_transit',
+ (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
+ '50000000-0000-0000-0000-000000000014');
+do $accepted_carrier_can_advance$
+begin
+ if (select status from public.operations where id='30000000-0000-0000-0000-000000000001') <> 'in_transit' then
+   raise exception 'ACCEPTED_CARRIER_ACCOUNT_COULD_NOT_ADVANCE';
+ end if;
+end $accepted_carrier_can_advance$;
 reset role;
 
 -- Put the operation at delivered for the closure-specific test.
