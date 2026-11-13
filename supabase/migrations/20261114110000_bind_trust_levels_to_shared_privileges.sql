@@ -82,9 +82,23 @@ set search_path = pg_catalog, public as $$
  );
 $$;
 
+-- Invitation requires all three organizations to have verified shared trust,
+-- but does not require the invited users to have accepted yet.
+create or replace function private.operation_participants_have_shared_trust(target_operation uuid)
+returns boolean language sql stable security definer
+set search_path = pg_catalog, public, private as $
+ select count(*)=3
+  and count(*) filter (where private.organization_has_trust_level(op.organization_id,'L3_SHARED'))=3
+ from public.operation_participants op
+ where op.operation_id=target_operation
+  and op.status in ('invited','accepted')
+  and op.participant_role in ('seller','buyer','carrier');
+$;
+revoke all on function private.operation_participants_have_shared_trust(uuid) from public,anon,authenticated;
+
 create or replace function private.operation_has_shared_trust(target_operation uuid)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public, private as $$
+set search_path = pg_catalog, public, private as $
  select count(*)=3
   and count(*) filter (where private.organization_has_trust_level(op.organization_id,'L3_SHARED'))=3
  from public.operation_participants op
@@ -169,7 +183,11 @@ begin
   if not found then raise exception 'OPERATION_NOT_FOUND' using errcode='P0002'; end if;
   if current_row.version<>expected_version then raise exception 'VERSION_CONFLICT' using errcode='40001'; end if;
   if not private.can_access_operation(target_operation) then raise exception 'OPERATION_NOT_ACCESSIBLE' using errcode='42501'; end if;
-  if not private.operation_has_shared_trust(target_operation) then
+  if current_row.status='draft' and target_status='invited' then
+    if not private.operation_participants_have_shared_trust(target_operation) then
+      raise exception 'TRUST_LEVEL_REQUIRED:L3_SHARED' using errcode='42501';
+    end if;
+  elsif target_status <> 'cancelled' and not private.operation_has_shared_trust(target_operation) then
     raise exception 'TRUST_LEVEL_REQUIRED:L3_SHARED' using errcode='42501';
   end if;
 
