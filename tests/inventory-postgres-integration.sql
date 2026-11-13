@@ -165,12 +165,24 @@ begin
   end;
 end $incident_rejection$;
 
-update public.operation_incidents
-set status='resolved',
-    resolved_by='10000000-0000-0000-0000-000000000001',
-    resolved_at=now(),
-    resolution_note='Resuelta en prueba'
-where id='60000000-0000-0000-0000-000000000001';
+do $incident_timestamp$
+declare recorded_at timestamptz;
+begin
+  update public.operation_incidents
+  set status='resolved',
+      resolved_by='10000000-0000-0000-0000-000000000001',
+      resolved_at='2099-01-01 00:00:00+00',
+      resolution_note='Resuelta en prueba'
+  where id='60000000-0000-0000-0000-000000000001';
+
+  select resolved_at into recorded_at
+  from public.operation_incidents
+  where id='60000000-0000-0000-0000-000000000001';
+
+  if recorded_at is distinct from statement_timestamp() then
+    raise exception 'INCIDENT_RESOLUTION_TIMESTAMP_NOT_DATABASE_CONTROLLED';
+  end if;
+end $incident_timestamp$;
 
 reset role;
 -- Exercise the trigger itself as table owner while retaining auth.uid() for

@@ -30,11 +30,13 @@ begin
     raise exception 'INCIDENT_RESOLVER_MUST_BE_CALLER' using errcode = '42501';
   end if;
 
-  if new.resolved_at is null
-     or new.resolution_note is null
+  if new.resolution_note is null
      or char_length(trim(new.resolution_note)) < 3 then
     raise exception 'INCIDENT_RESOLUTION_DETAILS_REQUIRED' using errcode = '22023';
   end if;
+
+  -- The database, not the client, records the authoritative resolution time.
+  new.resolved_at := statement_timestamp();
 
   return new;
 end;
