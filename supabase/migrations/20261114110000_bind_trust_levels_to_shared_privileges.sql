@@ -20,7 +20,13 @@ create table public.organization_security_profiles (
 alter table public.organization_security_profiles enable row level security;
 revoke all on public.organization_security_profiles from public, anon, authenticated;
 grant select on public.organization_security_profiles to authenticated;
-grant select, insert, update on public.organization_security_profiles to service_role;
+do $grant_service_role$
+begin
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    grant select, insert, update on public.organization_security_profiles to service_role;
+  end if;
+end
+$grant_service_role$;
 create policy organization_security_profile_member_read
  on public.organization_security_profiles for select to authenticated
  using (exists (select 1 from public.organization_members om
