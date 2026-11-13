@@ -220,4 +220,17 @@ grant execute on function public.record_inventory_movement(uuid,text,numeric,tex
 grant execute on function public.reserve_inventory_item(uuid,uuid,numeric,uuid) to authenticated;
 grant execute on function public.release_inventory_reservation(uuid,text) to authenticated;
 
+create or replace view public.inventory_stock with (security_invoker = true) as
+select i.id as item_id, i.organization_id, i.sku, i.description, i.unit, i.active,
+  coalesce(sum(case when m.movement_type='out' then -m.quantity else m.quantity end),0)::numeric(14,3) as on_hand,
+  coalesce((select sum(r.quantity) from public.inventory_reservations r
+    where r.item_id=i.id and r.status='reserved'),0)::numeric(14,3) as reserved,
+  (coalesce(sum(case when m.movement_type='out' then -m.quantity else m.quantity end),0)
+    - coalesce((select sum(r.quantity) from public.inventory_reservations r
+      where r.item_id=i.id and r.status='reserved'),0))::numeric(14,3) as available
+from public.inventory_items i
+left join public.inventory_movements m on m.item_id=i.id
+group by i.id;
+grant select on public.inventory_stock to authenticated;
+
 commit;
