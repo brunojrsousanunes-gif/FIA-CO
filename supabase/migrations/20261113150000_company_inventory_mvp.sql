@@ -142,6 +142,8 @@ begin
   if not private.is_inventory_manager(item_row.organization_id) then
     raise exception 'INVENTORY_FORBIDDEN' using errcode='42501';
   end if;
+  -- Serialize reuse of the same idempotency key across different items in one organization.
+  perform pg_advisory_xact_lock(hashtextextended(item_row.organization_id::text || ':' || p_request_key::text, 0));
   if linked_operation is not null and (
     not private.can_access_operation(linked_operation) or not exists (
       select 1 from public.operation_participants op
@@ -202,6 +204,8 @@ begin
   if not private.is_inventory_manager(item_row.organization_id) then
     raise exception 'INVENTORY_FORBIDDEN' using errcode='42501';
   end if;
+  -- Match movement idempotency: a key is unique across the whole organization.
+  perform pg_advisory_xact_lock(hashtextextended(item_row.organization_id::text || ':' || p_request_key::text, 0));
   if not private.can_access_operation(target_operation) or not exists (
     select 1 from public.operation_participants op
     where op.operation_id=target_operation
