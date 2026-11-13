@@ -195,6 +195,17 @@ begin
   exception when insufficient_privilege then
     if sqlerrm <> 'INCIDENT_TRANSITION_NOT_ALLOWED' then raise; end if;
   end;
+
+  begin
+    update public.operation_incidents
+    set resolved_by='10000000-0000-0000-0000-000000000002',
+        resolved_at=now() + interval '1 day',
+        resolution_note='Nota sustituida'
+    where id='60000000-0000-0000-0000-000000000001';
+    raise exception 'RESOLVED_INCIDENT_DETAILS_WERE_MUTABLE';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'INCIDENT_TRANSITION_NOT_ALLOWED' then raise; end if;
+  end;
   if (select count(*) from public.operation_incidents
       where id='60000000-0000-0000-0000-000000000001'
         and status='resolved'
