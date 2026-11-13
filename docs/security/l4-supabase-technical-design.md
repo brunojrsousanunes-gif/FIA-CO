@@ -318,6 +318,38 @@ Pruebas negativas obligatorias:
 - intentos de UPDATE/DELETE sobre auditoría son rechazados;
 - cambio de titularidad sin procedimiento de verificación queda bloqueado.
 
-## 12. Estado y límites de esta entrega
+
+## 13. Auditoría de permisos reales (lectura, 14-11-2026)
+
+Consulta realizada sobre el proyecto Supabase existente. No se ejecutaron escrituras ni cambios de configuración.
+
+### Hallazgos comprobados
+
+1. El esquema `private` existe y su ACL concede `USAGE` a `authenticated`; esto permite resolver objetos del esquema, pero no concede por sí solo lectura de tablas ni ejecución de todas las funciones.
+2. Las funciones internas `private.is_org_member(uuid)`, `private.can_access_operation(uuid)`, `private.can_manage_operation(uuid)`, `private.has_operation_role(uuid,text)` y `private.is_inventory_manager(uuid)` conceden EXECUTE a `authenticated`. Las cuatro primeras usan `SECURITY DEFINER`; sus definiciones deben revisarse antes de reutilizarlas en el gobierno de plataforma.
+3. `private.can_access_operation` permite actualmente el acceso cuando existe un participante con estado `invited` o `accepted`, siempre que la membresía de organización esté activa. Esto es más amplio que el principio de participante aceptado del modelo L4. No se modifica aquí; requiere análisis coordinado con RLS y con PR #174 para evitar regresiones.
+4. El Security Advisor detecta seis funciones `SECURITY DEFINER` del esquema `public` ejecutables por `authenticated`: `accept_operation_invitation`, `create_synthetic_part_recovery`, `record_inventory_movement`, `release_inventory_reservation`, `reserve_inventory_item` y `transition_operation`. Son RPCs de operaciones existentes; no revocar sus permisos sin pruebas de compatibilidad y autorización separada.
+5. El mismo Advisor mantiene el aviso de protección contra contraseñas filtradas desactivada. No se ha cambiado Auth ni el plan.
+6. El esquema `public` concede uso a `anon`, `authenticated` y `service_role`; las tablas públicas observadas tienen RLS activado.
+7. La consulta de configuración `pgrst.db_schemas` y `pgrst.db_extra_search_path` devolvió NULL en el contexto SQL consultado. Por tanto, la lista de esquemas expuestos por Data API queda **pendiente de confirmación** desde el ajuste de proyecto; no inferir que `private` está o no expuesto solo por este resultado.
+8. No existen ramas de desarrollo Supabase en el proyecto en el momento de la consulta.
+
+### Consecuencias para el diseño de titularidad
+
+- No reutilizar `profiles.platform_role='admin'` ni las funciones de membresía como prueba de propiedad de la plataforma.
+- Mantener las futuras tablas de gobierno en `private`, con RLS de defensa adicional y sin DML/SELECT directo para clientes.
+- La concesión de `USAGE` a `authenticated` en `private` debe tratarse como superficie de exposición a revisar: para el futuro registro de gobierno, las ACL de tablas y funciones deben ser explícitas y cerradas.
+- No ampliar las funciones SECURITY DEFINER actuales para resolver el nuevo caso de uso.
+- Antes de cualquier migración, revisar políticas RLS de tablas relacionadas, ACL completas, configuración real de esquemas Data API y los seis RPCs públicos con pruebas de regresión.
+
+### Pendientes de verificación
+
+- Confirmar en la configuración del proyecto los esquemas expuestos por Data API.
+- Obtener y revisar definiciones y ACL completas de todas las funciones SECURITY DEFINER relevantes, no solo las funciones principales.
+- Comprobar si las políticas RLS actuales dependen de permitir participantes invitados.
+- Reconciliar el comportamiento de `can_access_operation` con las reglas de aceptación de participantes de PR #174.
+- Crear un entorno aislado de pruebas. Actualmente no hay rama de desarrollo; crear una puede generar costes y requiere comprobar el precio antes.
+
+## 14. Estado y límites de esta entrega
 
 Este documento es diseño, no migración. No crea tablas, no modifica RLS, funciones, Auth, Storage ni datos. No concede privilegios, no modifica producción y no sustituye la revisión jurídica. La PR #175 permanece en borrador hasta resolver las decisiones pendientes.
