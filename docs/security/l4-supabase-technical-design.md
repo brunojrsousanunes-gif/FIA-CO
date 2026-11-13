@@ -46,6 +46,21 @@ Se necesita persistir tres piezas nuevas:
 
 Las aprobaciones se guardan como eventos/filas del ciclo de vida del grant; no como permisos independientes que puedan sobrevivir al grant.
 
+## Gobierno técnico de la titularidad de FIA&CO
+
+La titularidad de la plataforma debe estar separada de los permisos de las organizaciones clientes. Diseño mínimo antes de implementar:
+
+- Mantener un registro privado de autoridad de plataforma, separado de `profiles.platform_role` y de `organization_members`. No convertir el rol global `admin` en prueba de propiedad.
+- Guardar referencias internas a la identidad verificada, método/fecha/estado de verificación y evidencia protegida; no guardar DNI, domicilio, firma ni copias documentales en tablas públicas, perfiles, repositorios, logs ni prompts.
+- No crear almacenamiento de documentos personales hasta definir necesidad legal, base jurídica, canal de recepción, responsables, acceso, retención y borrado.
+- Modelar delegaciones como registros explícitos con capacidad permitida, destinatario, alcance, entorno, vencimiento, revocación y actor que las concede. Denegar delegaciones abiertas o transferibles.
+- Las funciones de plataforma no implican permisos sobre datos de clientes. El soporte técnico debe operar con metadatos o datos sintéticos; cualquier acceso excepcional a contenido exige autorización separada, necesidad documentada y auditoría.
+- Reservar los cambios de titularidad, privilegios de gobierno, controles globales y acceso excepcional al propietario, con doble control para acciones críticas cuando sea viable.
+- Diseñar recuperación con revalidación privada y notificación por canal independiente; nunca permitir que una sesión o administrador delegado cambie por sí solo al titular.
+- No exponer endpoints genéricos para consultar o modificar el registro de titularidad. Usar RPCs específicas, validación de servidor, mínimo privilegio y auditoría sin datos personales.
+
+Este modelo no determina por sí solo qué datos identificativos exige la ley ni sustituye asesoramiento jurídico. La recogida de datos se aplaza hasta que exista una necesidad concreta y un canal seguro.
+
 ## 3. Modelo lógico propuesto
 
 ### Separación de titularidad de plataforma y autoridad de empresas
