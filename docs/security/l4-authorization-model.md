@@ -170,6 +170,45 @@ La función de autorización debe ejecutarse en el servidor/base de datos. La in
 - **Etapa E — Verificación:** pruebas negativas/positivas, revisión de privilegios y asesores de seguridad.
 - **Etapa F — Activación:** solo tras revisión y autorización expresa; despliegue y migraciones de producción separados.
 
-## 13. Fuera de alcance
+## Gobierno de la plataforma y delegación del propietario
+
+### Autoridad principal
+- Existe una única autoridad principal de titularidad de FIA&CO en cada momento, identificada mediante un registro privado y un procedimiento documentado de verificación.
+- La titularidad no se deduce del primer usuario registrado, de un correo, de un rol ADMIN ni de la posesión de una clave.
+- El propietario conserva la capacidad de nombrar y revocar administradores de plataforma, aprobar cambios de gobierno y recuperar el control mediante un procedimiento seguro.
+- Los cambios de titularidad requieren un proceso separado, evidencia verificable y confirmación expresa; nunca se ejecutan por una acción automática de IA o por una simple delegación.
+
+### Delegación administrativa
+- El propietario puede delegar tareas concretas a administradores de plataforma: mantenimiento técnico, soporte, revisión operativa o gestión de usuarios internos, según una lista cerrada de capacidades.
+- Cada delegación identifica a la persona, capacidad exacta, recursos/entorno, fecha de inicio, caducidad, motivo y autoridad que la concede.
+- La delegación será revocable y no podrá ser transferida ni ampliada por quien la recibe.
+- Por defecto, los administradores técnicos no pueden cambiar titularidad, conceder privilegios de propietario, modificar controles de auditoría, desactivar medidas de seguridad, acceder al contenido privado de empresas ni aprobar divulgaciones de datos de clientes.
+- Las tareas de soporte deben usar metadatos mínimos y, cuando sea posible, datos sintéticos. El acceso excepcional a contenido de cliente requiere autorización específica, justificación, alcance temporal y registro auditable; nunca se presume por el rol técnico.
+
+### Acciones reservadas
+Requieren aprobación expresa del propietario (y, cuando corresponda, un segundo control independiente):
+1. Transferir o cambiar la titularidad.
+2. Nombrar o revocar administradores con privilegios de gobierno.
+3. Modificar el modelo de roles, límites de seguridad o política de acceso global.
+4. Activar accesos excepcionales a contenido de cliente.
+5. Desactivar, reducir o alterar la auditoría o los mecanismos de recuperación.
+6. Autorizar una operación de producción que afecte a datos, permisos, autenticación o aislamiento entre empresas.
+
+Las migraciones, despliegues o cambios de producción siguen requiriendo autorización específica; este documento no la concede por anticipado.
+
+### Recuperación y emergencia
+- Debe existir un procedimiento de recuperación de titularidad que no dependa exclusivamente de una sesión abierta ni de una única persona administradora.
+- La recuperación exige revalidación de identidad por canal privado, comprobaciones contra cambios recientes de credenciales y notificación al propietario por un canal independiente.
+- El acceso de emergencia será temporal, limitado, registrado y revisado posteriormente. No puede utilizarse para leer datos de empresas sin autorización aplicable.
+- Si hay duda sobre la identidad o la legitimidad de una solicitud, se bloquea el cambio y se escala a revisión humana.
+
+### Transparencia y privacidad
+- La interfaz pública no revela la identidad personal del propietario.
+- A usuarios internos se les muestra solo la información necesaria para ejercer su función.
+- A empresas clientes se les muestra la identidad empresarial y el estado de verificación que legalmente corresponda, no los datos privados del propietario de la plataforma.
+- La identidad y evidencias del propietario no se incluyen en analítica, telemetría, prompts ni logs ordinarios.
+- La condición de propietario de FIA&CO no concede acceso general a expedientes, documentos o datos personales de clientes.
+
+## 14. Fuera de alcance
 
 Este documento no constituye una evaluación jurídica ni acredita cumplimiento normativo. No activa permisos, no crea tablas, no modifica RLS, no cambia configuración de Auth y no se aplica a la base de datos de producción.
