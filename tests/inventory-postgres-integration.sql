@@ -138,6 +138,33 @@ values
   'logistics','Incidencia de prueba','open',true,
   '10000000-0000-0000-0000-000000000001');
 
+do $incident_rejection$
+begin
+  begin
+    update public.operation_incidents
+    set status='resolved',
+        resolved_by='10000000-0000-0000-0000-000000000002',
+        resolved_at=now(),
+        resolution_note='Resuelta por otro usuario'
+    where id='60000000-0000-0000-0000-000000000001';
+    raise exception 'INCIDENT_WRONG_RESOLVER_WAS_ACCEPTED';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'INCIDENT_RESOLVER_MUST_BE_CALLER' then raise; end if;
+  end;
+
+  begin
+    update public.operation_incidents
+    set status='resolved',
+        resolved_by='10000000-0000-0000-0000-000000000001',
+        resolved_at=now(),
+        resolution_note='  '
+    where id='60000000-0000-0000-0000-000000000001';
+    raise exception 'INCIDENT_EMPTY_RESOLUTION_NOTE_WAS_ACCEPTED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'INCIDENT_RESOLUTION_DETAILS_REQUIRED' then raise; end if;
+  end;
+end $incident_rejection$;
+
 update public.operation_incidents
 set status='resolved',
     resolved_by='10000000-0000-0000-0000-000000000001',
