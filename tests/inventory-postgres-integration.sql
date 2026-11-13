@@ -234,7 +234,7 @@ select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result
 reset role;
 insert into public.organizations(id,name,status)
 values ('20000000-0000-0000-0000-000000000003','Empresa Transportista','active');
-insert into public.organization_security_profiles
+insert into private.organization_security_profiles
  (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
 select id,'L3_SHARED','verified',
  jsonb_build_object(
@@ -279,7 +279,7 @@ select public.accept_operation_invitation(
  '50000000-0000-0000-0000-000000000009');
 -- L2 is insufficient for cross-company confirmations.
 reset role;
-update public.organization_security_profiles set trust_level='L2_VERIFIED'
+update private.organization_security_profiles set trust_level='L2_VERIFIED'
 where organization_id='20000000-0000-0000-0000-000000000002';
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
 set role authenticated;
@@ -293,7 +293,7 @@ begin
  end;
 end $trust_gate$;
 reset role;
-update public.organization_security_profiles set trust_level='L3_SHARED'
+update private.organization_security_profiles set trust_level='L3_SHARED'
 where organization_id='20000000-0000-0000-0000-000000000002';
 
 -- Put the operation at delivered for the closure-specific test.
@@ -329,4 +329,26 @@ begin
   end if;
 end $completion_result$;
 reset role;
-select 'FULL MIGRATION CHAIN + INCIDENT + THREE-PARTY CONFIRMATION TESTS: PASS' as result;
+
+-- Trust profiles are internal security state, not part of the public API.
+do $trust_profile_boundary$
+begin
+  if to_regclass('public.organization_security_profiles') is not null then
+    raise exception 'TRUST_PROFILE_EXPOSED_IN_PUBLIC_SCHEMA';
+  end if;
+end $trust_profile_boundary$;
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $trust_profile_read$
+begin
+  begin
+    perform count(*) from private.organization_security_profiles;
+    raise exception 'AUTHENTICATED_USER_READ_PRIVATE_TRUST_PROFILE';
+  exception when insufficient_privilege then
+    null;
+  end;
+end $trust_profile_read$;
+reset role;
+
+select 'FULL MIGRATION CHAIN + INCIDENT + TRUST + PRIVATE PROFILE TESTS: PASS' as result;
