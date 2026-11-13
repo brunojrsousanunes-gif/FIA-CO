@@ -24,6 +24,8 @@ set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
 values ('40000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','SKU-1','Material de prueba','10000000-0000-0000-0000-000000000001');
+insert into public.inventory_items(id,organization_id,sku,description,created_by)
+values ('40000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000001','SKU-2','Segundo material','10000000-0000-0000-0000-000000000001');
 
 select public.record_inventory_movement(
  '40000000-0000-0000-0000-000000000001','in',10,'Entrada inicial',
@@ -111,6 +113,14 @@ begin
  exception when sqlstate '22023' then
   if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
  end;
-end $$;
+ begin
+  perform public.record_inventory_movement(
+   '40000000-0000-0000-0000-000000000002','in',10,'Entrada inicial',
+   '50000000-0000-0000-0000-000000000001',null);
+  raise exception 'CROSS_ITEM_IDEMPOTENCY_CHECK_FAILED';
+ exception when sqlstate '22023' then
+  if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+ end;
+end $;
 reset role;
 select 'FULL MIGRATION CHAIN + INVENTORY POSTGRESQL TESTS: PASS' as result;
