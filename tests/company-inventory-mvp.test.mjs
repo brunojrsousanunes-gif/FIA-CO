@@ -28,3 +28,6 @@ assert.match(migration, /Salida por cumplimiento de reserva/i);
 
 assert.match(migration, /and request_key=p_request_key/i);
 assert.match(migration, /or amount is null/i);
+
+assert.match(migration, /inventory_items_touch_updated_at/i);
+assert.match(migration, /new\.updated_at := now\(\)/i);
