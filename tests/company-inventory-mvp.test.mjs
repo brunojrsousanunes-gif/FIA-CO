@@ -32,7 +32,7 @@ assert.match(migration, /or amount is null/i);
 assert.match(migration, /inventory_items_touch_updated_at/i);
 assert.match(migration, /new\.updated_at := now\(\)/i);
 
-assert.match(migration, /create or replace function private\\.touch_inventory_item_updated_at\\(\\)[\\s\\S]*?as \\$function\\$[\\s\\S]*?end;[\\s\\S]*?\\$function\\$;/i,
+assert.match(migration, /create or replace function private\.touch_inventory_item_updated_at\(\)[\s\S]*?as \$function\$[\s\S]*?end;[\s\S]*?\$function\$;/i,
   'updated_at trigger function must use a valid dollar-quoted PL/pgSQL body');
-assert.doesNotMatch(migration, /touch_inventory_item_updated_at\\(\\)[\\s\\S]*?as \\$\\s*begin/i,
+assert.doesNotMatch(migration, /touch_inventory_item_updated_at\(\)[\s\S]*?as \$\s*begin/i,
   'updated_at trigger must not use a bare dollar delimiter');
