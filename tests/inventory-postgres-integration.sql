@@ -297,6 +297,24 @@ reset role;
 update private.organization_security_profiles set trust_level='L3_SHARED'
 where organization_id='20000000-0000-0000-0000-000000000002';
 
+-- A buyer with L3 cannot confirm when another participant company is only L2.
+update private.organization_security_profiles set trust_level='L2_VERIFIED'
+where organization_id='20000000-0000-0000-0000-000000000003';
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $all_participant_trust_gate$
+begin
+  begin
+    insert into public.operation_confirmations(operation_id,participant_role,confirmation_type,confirmed_by)
+    values ('30000000-0000-0000-0000-000000000001','buyer','receipt','10000000-0000-0000-0000-000000000002');
+    raise exception 'L2_PARTICIPANT_COMPANY_ALLOWED_SHARED_CONFIRMATION';
+  exception when insufficient_privilege then null;
+  end;
+end $all_participant_trust_gate$;
+reset role;
+update private.organization_security_profiles set trust_level='L3_SHARED'
+where organization_id='20000000-0000-0000-0000-000000000003';
+
 -- A second active member of the carrier company must not act on the
 -- role accepted by a different account.
 update public.operations set status='in_transit',version=version+1
