@@ -135,7 +135,7 @@ insert into public.operation_incidents
 values
  ('60000000-0000-0000-0000-000000000001',
   '30000000-0000-0000-0000-000000000001',
-  'delivery_delay','Incidencia de prueba','open',true,
+  'logistics','Incidencia de prueba','open',true,
   '10000000-0000-0000-0000-000000000001');
 
 update public.operation_incidents
