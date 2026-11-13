@@ -138,6 +138,7 @@ set search_path = pg_catalog, public as $$
     join public.organization_members om on om.organization_id = op.organization_id
       and om.user_id = (select auth.uid()) and om.status = 'active'
     where op.operation_id = target_operation and op.participant_role = target_role and op.status = 'accepted'
+      and op.accepted_by = (select auth.uid())
       and private.organization_has_trust_level(op.organization_id,'L3_SHARED')
   );
 $$;
