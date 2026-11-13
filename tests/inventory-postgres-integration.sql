@@ -273,6 +273,10 @@ begin
 end $confirmation_gate$;
 reset role;
 
+-- Accept the buyer invitation through the authorized server function.
+select public.accept_operation_invitation(
+ '30000000-0000-0000-0000-000000000001','buyer',
+ '50000000-0000-0000-0000-000000000009');
 -- L2 is insufficient for cross-company confirmations.
 reset role;
 update public.organization_security_profiles set trust_level='L2_VERIFIED'
@@ -291,10 +295,6 @@ end $trust_gate$;
 reset role;
 update public.organization_security_profiles set trust_level='L3_SHARED'
 where organization_id='20000000-0000-0000-0000-000000000002';
--- Accept the buyer invitation through the authorized server function.
-select public.accept_operation_invitation(
- '30000000-0000-0000-0000-000000000001','buyer',
- '50000000-0000-0000-0000-000000000009');
 
 -- Put the operation at delivered for the closure-specific test.
 update public.operations set status='delivered',version=version+1
