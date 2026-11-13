@@ -94,6 +94,19 @@ create trigger inventory_items_owner_immutable
 before update on public.inventory_items
 for each row execute function private.prevent_inventory_item_owner_change();
 
+create or replace function private.touch_inventory_item_updated_at()
+returns trigger language plpgsql security invoker
+set search_path = '' as $
+begin
+  new.updated_at := now();
+  return new;
+end;
+$;
+revoke all on function private.touch_inventory_item_updated_at() from public, anon, authenticated;
+create trigger inventory_items_touch_updated_at
+before update on public.inventory_items
+for each row execute function private.touch_inventory_item_updated_at();
+
 create policy inventory_items_manager_update on public.inventory_items
   for update to authenticated
   using ((select private.is_inventory_manager(organization_id)))
