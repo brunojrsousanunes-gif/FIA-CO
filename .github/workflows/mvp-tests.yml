@@ -46,10 +46,13 @@ jobs:
         run: bash scripts/run-mvp-tests.sh
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
-      - name: Run inventory migration against PostgreSQL 16
+      - name: Apply complete Supabase migration chain and test inventory
         env:
           PGPASSWORD: postgres
         run: |
           psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f tests/inventory-postgres-bootstrap.sql
-          psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f supabase/migrations/20261113150000_company_inventory_mvp.sql
+          for migration in supabase/migrations/*.sql; do
+            echo "Applying $migration"
+            psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f "$migration"
+          done
           psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f tests/inventory-postgres-integration.sql
