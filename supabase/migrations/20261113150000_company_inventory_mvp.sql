@@ -81,14 +81,14 @@ create policy inventory_items_manager_insert on public.inventory_items
   );
 create or replace function private.prevent_inventory_item_owner_change()
 returns trigger language plpgsql security invoker
-set search_path = '' as $
+set search_path = '' as $$
 begin
   if new.organization_id <> old.organization_id or new.created_by <> old.created_by then
     raise exception 'INVENTORY_ITEM_OWNER_IMMUTABLE' using errcode='42501';
   end if;
   return new;
 end;
-$;
+$$;
 revoke all on function private.prevent_inventory_item_owner_change() from public, anon, authenticated;
 create trigger inventory_items_owner_immutable
 before update on public.inventory_items
