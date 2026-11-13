@@ -36,7 +36,7 @@ select public.reserve_inventory_item(
 select public.record_inventory_movement(
  '40000000-0000-0000-0000-000000000001','in',10,'Entrada inicial',
  '50000000-0000-0000-0000-000000000001',null);
-do $
+do $$
 begin
  if (select count(*) from public.inventory_movements where request_key='50000000-0000-0000-0000-000000000001') <> 1 then
    raise exception 'IDEMPOTENT_RETRY_DUPLICATED_MOVEMENT';
@@ -57,9 +57,9 @@ begin
  exception when check_violation then
   if sqlerrm <> 'INSUFFICIENT_AVAILABLE_STOCK' then raise; end if;
  end;
-end $;
+end $$;
 
-do $
+do $$
 begin
  if (select count(*) from public.inventory_items) <> 1 then
    raise exception 'OWNER_CANNOT_READ_OWN_ITEM';
