@@ -145,7 +145,12 @@ set status='resolved',
     resolution_note='Resuelta en prueba'
 where id='60000000-0000-0000-0000-000000000001';
 
-do $$
+reset role;
+-- Exercise the trigger itself as table owner while retaining auth.uid() for
+-- the resolver identity. The authenticated role's RLS policy may hide resolved
+-- rows from UPDATE, which would otherwise make a zero-row UPDATE look like a
+-- trigger rejection.
+do $
 begin
   begin
     update public.operation_incidents
@@ -169,6 +174,5 @@ begin
         and description='Incidencia de prueba') <> 1 then
     raise exception 'INCIDENT_RESOLUTION_STATE_INVALID';
   end if;
-end $$;
-reset role;
+end $;
 select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result;
