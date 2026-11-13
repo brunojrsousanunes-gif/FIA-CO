@@ -279,7 +279,8 @@ do $completion_gate$
 begin
   begin
     perform public.transition_operation(
-      '30000000-0000-0000-0000-000000000001','completed',2,
+      '30000000-0000-0000-0000-000000000001','completed',
+      (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
       '50000000-0000-0000-0000-000000000010');
     raise exception 'BUYER_CLOSED_WITHOUT_RECEIPT_CONFIRMATION';
   exception when insufficient_privilege then
