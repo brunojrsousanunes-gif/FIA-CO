@@ -55,6 +55,14 @@
 <button type="submit">Enviar solicitud</button>
 </form>
 </section>
+<section class="inventory-panel" data-inventory hidden>
+<h2>Inventario de empresa</h2>
+<p>Solo para responsables autorizados. Las existencias se actualizan con movimientos confirmados; una reserva no descuenta stock hasta su cumplimiento.</p>
+<div class="inventory-grid">
+<form data-inventory-item-form><h3>Nuevo artículo</h3><label>Empresa<select data-inventory-org name="organization" required></select></label><label>Referencia / SKU<input data-inventory-sku name="sku" required maxlength="80"></label><label>Descripción<input data-inventory-description name="description" required minlength="2" maxlength="240"></label><label>Unidad<input data-inventory-unit name="unit" value="ud" maxlength="16" required></label><button type="submit">Crear artículo</button></form>
+<form data-inventory-movement-form><h3>Registrar movimiento</h3><label>Artículo<select data-inventory-item name="item" required></select></label><label>Tipo<select data-inventory-movement name="movement"><option value="in">Entrada</option><option value="out">Salida</option></select></label><label>Cantidad<input data-inventory-quantity name="quantity" type="number" min="0.001" step="0.001" required></label><label>Motivo<input data-inventory-note name="note" required minlength="3" maxlength="500"></label><button type="submit">Registrar movimiento</button></form>
+<form data-inventory-reservation-form><h3>Reservar para operación</h3><label>Artículo<select data-reservation-item name="item" required></select></label><label>Operación autorizada<select data-reservation-operation name="operation" required></select></label><label>Cantidad<input data-reservation-quantity name="quantity" type="number" min="0.001" step="0.001" required></label><button type="submit">Crear reserva</button></form>
+</div><h3>Existencias disponibles</h3><div data-inventory-stock></div><h3>Reservas activas</h3><div data-inventory-reservations></div></section>
 <h1>Operaciones autorizadas</h1>
 <p>Solo aparecen operaciones permitidas por las políticas RLS de tu empresa y rol.</p>
 <ul data-operation-list></ul>

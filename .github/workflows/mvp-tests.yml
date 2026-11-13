@@ -1,6 +1,7 @@
 name: MVP tests
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main]
   push:
@@ -12,7 +13,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fia_inventory_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d fia_inventory_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,3 +45,15 @@ jobs:
           rm -rf .pages-public-test
       - name: Run automated battery
         run: bash scripts/run-mvp-tests.sh
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Apply complete Supabase migration chain and test inventory
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f tests/inventory-postgres-bootstrap.sql
+          for migration in supabase/migrations/*.sql; do
+            echo "Applying $migration"
+            psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f "$migration"
+          done
+          psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f tests/inventory-postgres-integration.sql
