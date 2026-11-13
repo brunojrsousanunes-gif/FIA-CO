@@ -102,7 +102,7 @@ create or replace function private.can_submit_operation_confirmation(
 ) returns boolean
 language sql stable security definer
 set search_path = pg_catalog, public, private
-as $
+as $can_submit_operation_confirmation$
   select (select auth.uid()) is not null
     and exists (
       select 1
@@ -118,7 +118,7 @@ as $
         and private.organization_has_trust_level(op.organization_id, 'L3_SHARED')
     )
     and private.operation_has_shared_trust(target_operation);
-$;
+$can_submit_operation_confirmation$;
 revoke all on function private.can_submit_operation_confirmation(uuid,text) from public, anon;
 grant execute on function private.can_submit_operation_confirmation(uuid,text) to authenticated;
 
