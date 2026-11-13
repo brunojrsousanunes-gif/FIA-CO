@@ -86,7 +86,7 @@ set search_path = pg_catalog, public as $$
      and coalesce((p.verified_controls->>'regulatedProviderGateReady')::boolean,false)
     else false end
  );
-$;
+$$;
 
 create or replace function private.operation_has_shared_trust(target_operation uuid)
 returns boolean language sql stable security definer
@@ -96,7 +96,7 @@ set search_path = pg_catalog, public, private as $$
  from public.operation_participants op
  where op.operation_id=target_operation and op.status='accepted'
   and op.participant_role in ('seller','buyer','carrier');
-$;
+$$;
 revoke all on function private.organization_has_trust_level(uuid,text) from public,anon,authenticated;
 revoke all on function private.operation_has_shared_trust(uuid) from public,anon,authenticated;
 
