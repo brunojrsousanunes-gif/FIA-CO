@@ -105,7 +105,7 @@ create policy inventory_reservations_member_read on public.inventory_reservation
 
 create or replace function public.record_inventory_movement(
   target_item uuid, movement text, amount numeric, explanation text,
-  request_key uuid, linked_operation uuid default null
+  p_request_key uuid, linked_operation uuid default null
 ) returns public.inventory_movements
 language plpgsql security definer
 set search_path = ''
@@ -120,7 +120,7 @@ begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
   if movement not in ('in','out','adjustment') or amount <= 0 or amount <> round(amount,3)
      or explanation is null or char_length(trim(explanation)) not between 3 and 500
-     or request_key is null then
+     or p_request_key is null then
     raise exception 'INVALID_MOVEMENT' using errcode='22023';
   end if;
   select * into item_row from public.inventory_items where id=target_item for update;
@@ -138,7 +138,7 @@ begin
     raise exception 'OPERATION_ORGANIZATION_MISMATCH' using errcode='42501';
   end if;
   select * into result_row from public.inventory_movements
-    where organization_id=item_row.organization_id and request_key=request_key;
+    where organization_id=item_row.organization_id and request_key=p_request_key;
   if found then
     if result_row.item_id <> target_item or result_row.movement_type <> movement
       or result_row.quantity <> amount or result_row.note <> trim(explanation)
@@ -159,7 +159,7 @@ begin
     raise exception 'INVALID_ADJUSTMENT' using errcode='22023';
   end if;
   insert into public.inventory_movements(item_id,organization_id,movement_type,quantity,note,operation_id,created_by,request_key)
-  values(target_item,item_row.organization_id,movement,amount,trim(explanation),linked_operation,caller,request_key)
+  values(target_item,item_row.organization_id,movement,amount,trim(explanation),linked_operation,caller,p_request_key)
   returning * into result_row;
   return result_row;
 end;
@@ -167,7 +167,7 @@ $$;
 
 create or replace function public.reserve_inventory_item(
   target_item uuid, target_operation uuid, amount numeric,
-  request_key uuid
+  p_request_key uuid
 ) returns public.inventory_reservations
 language plpgsql security definer
 set search_path = ''
