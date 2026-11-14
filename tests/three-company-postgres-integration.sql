@@ -79,6 +79,21 @@ end
 $authorization_cannot_outlive_authority$;
 reset role;
 
+do $l3_rpc_parameter_names_preserved$
+begin
+  if pg_get_function_arguments(
+    'public.authorize_organization_l3(uuid,uuid,timestamptz)'::regprocedure
+  ) not like '%request_key uuid%' then
+    raise exception 'L3_AUTHORIZE_RPC_PARAMETER_NAME_CHANGED';
+  end if;
+  if pg_get_function_arguments(
+    'public.revoke_organization_l3_authorization(uuid,uuid)'::regprocedure
+  ) not like '%request_key uuid%' then
+    raise exception 'L3_REVOKE_RPC_PARAMETER_NAME_CHANGED';
+  end if;
+end
+$l3_rpc_parameter_names_preserved$;
+
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
 select public.authorize_organization_l3(
