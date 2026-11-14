@@ -1,3 +1,7 @@
+# Enlaces de continuidad
+
+Para navegar el proyecto, utiliza [el mapa maestro](PROJECT-MAP.md). Para elegir fuentes, consulta el [catálogo documental](DOCUMENTATION-CATALOG.md). El [registro de trabajo](WORK-REGISTER.md) contiene la cola operativa. El [registro de decisiones](DECISION-LOG.md) es una referencia interna opcional del asistente, no una tarea para el usuario.
+
 # FIA&CO — estado de trabajo y traspaso entre IAs
 
 **Última verificación:** 14-11-2026  
