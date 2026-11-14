@@ -239,6 +239,7 @@ select pg_sleep(0.01);
 select public.authorize_organization_l3(
  '72000000-0000-0000-0000-000000000001',
  '74000000-0000-0000-0000-000000000108',null);
+reset role;
 do $l3_default_expiry_retry_is_idempotent$
 begin
   if (select count(*) from private.organization_l3_authorization_events
