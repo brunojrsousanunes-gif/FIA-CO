@@ -6,7 +6,7 @@ create table private.organization_l3_authority_verifications (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete restrict,
   user_id uuid not null references auth.users(id) on delete restrict,
-  authority_type text not null check (authority_type in ('company_head','zone_manager')),
+  authority_type text not null check (authority_type in ('ceo','zone_manager')),
   verification_status text not null default 'pending'
     check (verification_status in ('pending','verified','suspended','revoked')),
   evidence_ref text not null check (char_length(btrim(evidence_ref)) between 3 and 240),
@@ -33,7 +33,7 @@ create table private.organization_l3_authorization_events (
   actor_id uuid not null references auth.users(id) on delete restrict,
   authority_verification_id uuid not null
     references private.organization_l3_authority_verifications(id) on delete restrict,
-  authority_type text not null check (authority_type in ('company_head','zone_manager')),
+  authority_type text not null check (authority_type in ('ceo','zone_manager')),
   action text not null check (action in ('authorized','revoked')),
   request_key uuid not null unique,
   created_at timestamptz not null default clock_timestamp(),
