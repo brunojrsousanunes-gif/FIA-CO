@@ -1,5 +1,10 @@
 begin;
 
+-- Explicit company owner for every operation; historical ambiguity stays null.
+alter table public.operations
+  add column if not exists owner_organization_id uuid
+  references public.organizations(id) on delete restrict;
+
 create or replace function private.is_org_finance_manager(target_org uuid)
 returns boolean language sql stable security definer set search_path=pg_catalog,public as $$
 select (select auth.uid()) is not null and exists(select 1 from public.organization_members om
