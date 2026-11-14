@@ -85,22 +85,22 @@ reset role;
 
 -- Creator access is also tenant-scoped: creator status alone is not a permanent grant.
 insert into public.operations(id,reference,title,status,created_by,owner_organization_id)
-values ('73000000-0000-0000-0000-000000000002','FIA-PILOT-OWNER-REVOKE-001',
+values ('73000000-0000-0000-0000-000000000003','FIA-PILOT-OWNER-REVOKE-001',
         'Revocación de pertenencia del creador — ensayo','draft',
         '71000000-0000-0000-0000-000000000007','72000000-0000-0000-0000-000000000001');
 insert into public.operation_participants
  (operation_id,organization_id,participant_role,status,invited_by)
 values
- ('73000000-0000-0000-0000-000000000002','72000000-0000-0000-0000-000000000001','seller','invited','71000000-0000-0000-0000-000000000007'),
- ('73000000-0000-0000-0000-000000000002','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000007'),
- ('73000000-0000-0000-0000-000000000002','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000007');
+ ('73000000-0000-0000-0000-000000000003','72000000-0000-0000-0000-000000000001','seller','invited','71000000-0000-0000-0000-000000000007'),
+ ('73000000-0000-0000-0000-000000000003','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000007'),
+ ('73000000-0000-0000-0000-000000000003','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000007');
 
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000007';
 set role authenticated;
 do $creator_access_requires_active_owner_membership$
 begin
-  if not private.can_access_operation('73000000-0000-0000-0000-000000000002')
-     or not private.can_manage_operation('73000000-0000-0000-0000-000000000002') then
+  if not private.can_access_operation('73000000-0000-0000-0000-000000000003')
+     or not private.can_manage_operation('73000000-0000-0000-0000-000000000003') then
     raise exception 'ACTIVE_OWNER_CREATOR_ACCESS_NOT_GRANTED';
   end if;
 end
