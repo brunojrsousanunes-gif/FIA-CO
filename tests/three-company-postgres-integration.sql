@@ -115,6 +115,8 @@ select private.operation_has_shared_trust('73000000-0000-0000-0000-000000000001'
 -- This behavior is implemented by operation_participant_auto_accept and
 -- audited as operation.accepted; do not issue a duplicate transition RPC.
 -- Seller and buyer cannot perform the carrier's dispatch transition.
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
+set role authenticated;
 do $seller_cannot_dispatch$
 begin
   begin
