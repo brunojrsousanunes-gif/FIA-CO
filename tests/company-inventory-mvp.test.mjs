@@ -62,9 +62,9 @@ for (const signature of [
   'private.is_org_member(uuid)',
   'private.validate_evidence_role()'
 ]) {
-  assert.match(
-    helperSearchPathHardening,
-    new RegExp('alter function ' + signature.replaceAll('.', '\\\\.') + ' set search_path =', 'i')
+  assert.ok(
+    helperSearchPathHardening.includes('alter function ' + signature + " set search_path = '';"),
+    'SECURITY DEFINER helper must use an empty search_path: ' + signature
   );
 }
 const expectedBaselineFiles = [
