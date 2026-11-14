@@ -43,6 +43,29 @@ Capacidades transversales: notificaciones esenciales, costes/márgenes, integrac
 
 Esta tabla es una propuesta de gobierno técnico, no una declaración de que todos los flujos ya estén integrados o validados.
 
+### 3.1 Contrato observado en el Centro privado
+
+La entrada `frontend/js/operation-center-private.js` importa la configuración publicable y el cliente HTTP propio de Supabase; no importa los módulos `core/operations` ni `core/recover`.
+
+En ese cliente se han identificado llamadas REST a:
+- `operations`, `organization_members` y `pilot_access_requests`;
+- `operation_participants`, `operation_confirmations`, `logistics_quotes`, `operation_cost_items`, `operation_incidents` y `operation_audit_events`;
+- `inventory_items`, `inventory_movements`, `inventory_reservations` e `inventory_stock`.
+
+Y llamadas RPC a:
+- `accept_operation_invitation`, `select_logistics_quote`, `create_synthetic_part_recovery` y `request_pilot_access`;
+- `record_inventory_movement`, `reserve_inventory_item` y `release_inventory_reservation`.
+
+La máquina de estados SQL observada (`draft`, `invited`, `accepted`, `in_transit`, `delivered`, `completed`, `disputed`, `cancelled`) no es una traducción uno a uno de la máquina JS (`DRAFT`, `AWAITING_ACCEPTANCE`, `CONDITIONED`, `IN_PROGRESS`, `DELIVERED`, `ACCEPTED`, `READY_FOR_RELEASE`, `RELEASE_REQUESTED`, `DISPUTED`, `CLOSED`, `CANCELLED`). No deben mezclarse ni conectarse por suposición.
+
+La recuperación de pieza de la interfaz invoca la RPC SQL `create_synthetic_part_recovery`; eso no demuestra que el motor comercial `core/recover/recover-engine.mjs` esté integrado.
+
+Otros límites del código de referencia:
+- `createHierarchyScopedOperationService` declara expresamente `productionAuthorization: false`; no debe considerarse autorización productiva.
+- `createAuditedOperationService` registra después de ejecutar la mutación y depende de un `auditLog` inyectado. Con `createMemoryAuditLog`, la evidencia es solo memoria. Si se reutiliza, hará falta persistencia transaccional o un patrón outbox para no dejar una mutación sin su evento de auditoría cuando falle el registro.
+
+Estas observaciones describen los archivos revisados; no certifican todas las políticas RLS ni el comportamiento real de usuarios en producción.
+
 ## 4. Módulos que se mantienen congelados, no borrados
 
 Hasta que exista un caso real, responsable y prueba de necesidad, no ampliar:
