@@ -124,6 +124,7 @@ declare
   existing_event public.operation_audit_events;
   existing_operation public.operations;
   active_org_count integer;
+  existing_event_count integer;
 begin
   if caller is null then
     raise exception 'AUTH_REQUIRED' using errcode='42501';
@@ -165,6 +166,13 @@ begin
   end if;
 
   perform pg_advisory_xact_lock(hashtextextended(caller::text || ':' || request_key::text,0));
+
+  select count(*) into existing_event_count
+  from public.operation_audit_events e
+  where e.actor_id=caller and e.request_id=request_key;
+  if existing_event_count > 1 then
+    raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
+  end if;
 
   select e.* into existing_event
   from public.operation_audit_events e
