@@ -432,8 +432,10 @@ declare
   initial_version integer;
   first_result public.operations;
   replay_result public.operations;
-  audit_count integer;
+  audit_count_before integer;
+  audit_count_after integer;
 begin
+  select count(*) into audit_count_before from public.operation_audit_timeline where operation_id=v_operation_id;
   select version into initial_version
   from public.operations where id=v_operation_id;
 
@@ -463,10 +465,10 @@ begin
     raise exception 'TRANSITION_REPLAY_CHANGED_CURRENT_OPERATION_STATE';
   end if;
 
-  select count(id) into audit_count from public.operation_audit_timeline
-  where operation_id=v_operation_id and request_id=v_request_key;
+  select count(*) into audit_count_after from public.operation_audit_timeline
+  where operation_id=v_operation_id;
 
-  if audit_count <> 1 then
+  if audit_count_after <> audit_count_before + 2 then
     raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_DUPLICATED_AUDIT_EVENT';
   end if;
 end $transition_idempotency_replay$;

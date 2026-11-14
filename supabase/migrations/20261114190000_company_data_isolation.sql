@@ -3,7 +3,7 @@ create or replace function private.is_org_finance_manager(target_org uuid)
 returns boolean language sql stable security definer set search_path=pg_catalog,public as $$
 select (select auth.uid()) is not null and exists(select 1 from public.organization_members om
 where om.organization_id=target_org and om.user_id=(select auth.uid()) and om.status='active'
-and om.member_role in ('manager','admin','ceo')); $$;
+and om.member_role in ('admin','ceo')); $$;
 revoke all on function private.is_org_finance_manager(uuid) from public,anon;
 grant execute on function private.is_org_finance_manager(uuid) to authenticated;
 

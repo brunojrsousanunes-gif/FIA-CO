@@ -66,6 +66,13 @@ values
  ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006',
   'ceo','verified','ci://authority/ceo-role-mismatch','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
 
+insert into private.organization_l3_authority_verifications
+ (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
+values
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006',
+  'zone_manager','verified','ci://authority/zone-manager-finance-boundary',
+  '71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
+
 -- Consent cannot outlive the verified authority that grants it.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
@@ -537,6 +544,22 @@ and organization_id='72000000-0000-0000-0000-000000000001';
 select count(*) into own_costs from public.operation_cost_items where operation_id='73000000-0000-0000-0000-000000000001';
 if visible_rows<>1 or own_costs<>1 or own_margin<>123000 then raise exception 'CEO_CANNOT_READ_OWN_COMPANY_FINANCE'; end if;
 end $company_ceo_can_read_own_finance$;
+
+set request.jwt.claim.sub='71000000-0000-0000-0000-000000000006';
+set role authenticated;
+do $zone_manager_cannot_read_company_finance$
+declare finance_rows integer; cost_rows integer;
+begin
+  select count(*) into finance_rows from public.operation_financials
+  where operation_id='73000000-0000-0000-0000-000000000001';
+  select count(*) into cost_rows from public.operation_cost_items
+  where operation_id='73000000-0000-0000-0000-000000000001';
+  if finance_rows<>0 or cost_rows<>0 then
+    raise exception 'ZONE_MANAGER_AUTHORITY_GRANTED_INTERNAL_FINANCE';
+  end if;
+end
+$zone_manager_cannot_read_company_finance$;
+reset role;
 
 do $shared_operation_hides_private_columns$
 begin
