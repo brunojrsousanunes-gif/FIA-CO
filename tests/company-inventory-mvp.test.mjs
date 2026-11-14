@@ -49,9 +49,9 @@ const migration = fs.readFileSync(
   'supabase/migrations/20261113212739_company_inventory_mvp.sql', 'utf8'
 );
 for (const table of ['inventory_items','inventory_movements','inventory_reservations']) {
-  assert.match(migration, new RegExp('create table public\\.' + table, 'i'));
-  assert.match(migration, new RegExp('alter table public\\.' + table + ' enable row level security', 'i'));
-  assert.match(migration, new RegExp('revoke all on public\\.inventory_items, public\\.inventory_movements, public\\.inventory_reservations from anon, authenticated', 'i'));
+  assert.match(migration, new RegExp('create table public\.' + table, 'i'));
+  assert.match(migration, new RegExp('alter table public\.' + table + ' enable row level security', 'i'));
+  assert.match(migration, new RegExp('revoke all on public\.inventory_items, public\.inventory_movements, public\.inventory_reservations from anon, authenticated', 'i'));
 }
 assert.match(migration, /private\.is_org_member\(organization_id\)/);
 assert.match(migration, /private\.is_inventory_manager\(organization_id\)/);
@@ -114,9 +114,9 @@ assert.doesNotMatch(threePartyCreation, /grant execute[^;]+ to anon/i);
 const ownerMembershipHardening = fs.readFileSync(
   'supabase/migrations/20261115000000_owner_membership_access_hardening.sql', 'utf8'
 );
-assert.match(ownerMembershipHardening, /create or replace function private\\.can_access_operation[\\s\\S]*?join public\\.organization_members om[\\s\\S]*?om\\.organization_id = o\\.owner_organization_id[\\s\\S]*?om\\.status = 'active'/i,
+assert.match(ownerMembershipHardening, /create or replace function private\.can_access_operation[\\s\\S]*?join public\.organization_members om[\\s\\S]*?om\.organization_id = o\.owner_organization_id[\\s\\S]*?om\.status = 'active'/i,
   'creator access must require active membership in the owning organization');
-assert.match(ownerMembershipHardening, /create or replace function private\\.can_manage_operation[\\s\\S]*?join public\\.organization_members om[\\s\\S]*?om\\.organization_id = o\\.owner_organization_id[\\s\\S]*?om\\.status = 'active'/i,
+assert.match(ownerMembershipHardening, /create or replace function private\.can_manage_operation[\\s\\S]*?join public\.organization_members om[\\s\\S]*?om\.organization_id = o\.owner_organization_id[\\s\\S]*?om\.status = 'active'/i,
   'creator management must require active membership in the owning organization');
 for (const signature of [
   'private.after_confirmation_insert()',
@@ -130,8 +130,8 @@ for (const signature of [
   assert.ok(ownerMembershipHardening.includes(`alter function ${signature} set search_path = ''`),
     `SECURITY DEFINER search_path must be hardened for ${signature}`);
 }
-assert.match(ownerMembershipHardening, /revoke all on function private\\.can_access_operation\\(uuid\\) from public, anon/i);
-assert.match(ownerMembershipHardening, /revoke all on function private\\.can_manage_operation\\(uuid\\) from public, anon/i);
+assert.match(ownerMembershipHardening, /revoke all on function private\.can_access_operation\\(uuid\\) from public, anon/i);
+assert.match(ownerMembershipHardening, /revoke all on function private\.can_manage_operation\\(uuid\\) from public, anon/i);
 
 const operationCenterHtml = fs.readFileSync('frontend/operation-center.html', 'utf8');
 const operationCenterJs = fs.readFileSync('frontend/js/operation-center.js', 'utf8');
