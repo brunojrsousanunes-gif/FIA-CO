@@ -137,6 +137,8 @@ assert.match(ownerMembershipHardening, /revoke all on function private\.can_acce
 assert.match(ownerMembershipHardening, /revoke all on function private\.can_manage_operation\(uuid\) from public, anon/i);
 
 const privateOperationCenterJs = fs.readFileSync('frontend/js/operation-center-private.js', 'utf8');
+assert.ok(privateOperationCenterJs.includes("ui.password.value='';saveSession(payload)"));
+assert.ok(privateOperationCenterJs.includes("ui.registerPassword.value='';sessionStorage.removeItem('fia_pending_pilot_access')"));
 assert.ok(privateOperationCenterJs.includes('async function refreshSession()'));
 assert.ok(privateOperationCenterJs.includes('Promise.allSettled(['));
 assert.ok(privateOperationCenterJs.includes("if(error.status===401&&state.refreshToken)"));
