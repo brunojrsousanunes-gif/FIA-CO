@@ -7,7 +7,7 @@ Para navegar el proyecto, utiliza [el mapa maestro](PROJECT-MAP.md). Para elegir
 **Última verificación:** 14-11-2026  
 **Repositorio:** `brunojrsousanunes-gif/FIA-CO`  
 **Rama activa autorizada para integración:** `integration/fia-co-verified-snapshot-2026-11-14`  
-**HEAD verificado:** `71c96ec952c6f6b947a9ae005fb1ea6a9b3855b4`  
+**Último commit funcional con CI correcto:** `fcad013f76f470c1351e1a8c915ca93ce25f3c61` (run [43601556662](https://github.com/brunojrsousanunes-gif/FIA-CO/actions/runs/43601556662)); los commits posteriores de este bloque son documentación. Verificar el HEAD actual de la rama en GitHub antes de continuar.  
 **PR de integración:** [#185](https://github.com/brunojrsousanunes-gif/FIA-CO/pull/185) — abierta, borrador, base `main`.  
 **SHA de `main` verificado:** `63ec6df05fb5a24fa12a83de5989b617bae3a22d`.
 
@@ -24,14 +24,14 @@ El producto gestiona operaciones y sus confirmaciones, evidencias, responsabilid
 ### Repositorio y cambios
 - La rama de trabajo es `integration/fia-co-verified-snapshot-2026-11-14`.
 - La PR #185 permanece abierta como borrador; no se ha fusionado con `main`.
-- En este corte, #185 tiene HEAD `cbe7a174360e72608286dab0ebaac849af67369b`.
+- La rama #185 incorpora después de ese corte los cambios funcionales probados en `fcad013f76f470c1351e1a8c915ca93ce25f3c61` y los documentos de navegación descritos en la sección 8.
 - La PR #171 se cerró sin fusionar después de integrar selectivamente su trabajo útil en #185. Su rama `fix/security-skill-alignment-2026-10-15` se comprobó todavía existente; no eliminarla.
 - #171 no debe confundirse con #185: la primera está cerrada sin merge; la segunda es la rama consolidada de integración.
 
 ### CI
-- Workflow run [43601293253](https://github.com/brunojrsousanunes-gif/FIA-CO/actions/runs/43601293253): **success**.
+- Workflow run [43601556662](https://github.com/brunojrsousanunes-gif/FIA-CO/actions/runs/43601556662): **success**, para el commit `fcad013f76f470c1351e1a8c915ca93ce25f3c61`.
 - Jobs PostgreSQL 16 y PostgreSQL 17.6 completados con éxito.
-- Pasaron sintaxis JavaScript, contrato de publicación Pages, batería automatizada MVP y cadena completa de migraciones/prueba de inventario en bases de CI.
+- Pasaron los jobs PostgreSQL 16 y 17.6, sintaxis JavaScript, contrato de publicación Pages, batería automatizada MVP y cadena de migraciones/prueba de inventario en CI.
 - Esto valida el código y las migraciones en los entornos de CI; no prueba el runtime desplegado ni el comportamiento con tres empresas reales.
 
 ### Alcance de los últimos cambios de seguridad
@@ -54,6 +54,7 @@ El producto gestiona operaciones y sus confirmaciones, evidencias, responsabilid
 
 ## 4. Arquitectura documental y fuentes de referencia
 
+- Mapa maestro y relaciones entre áreas: `docs/assistant/PROJECT-MAP.md`.
 - Catálogo y jerarquía: `docs/assistant/DOCUMENTATION-CATALOG.md`.
 - Notas técnicas mínimas para continuidad de la IA (no es un acta ni un registro para el propietario): `docs/assistant/DECISION-LOG.md`.
 - Cola de tareas y condiciones de cierre: `docs/assistant/WORK-REGISTER.md`.
@@ -124,4 +125,4 @@ La ausencia de implementación no significa falta de valor. En particular, no el
 
 ## 9. Registro de cambios de este documento
 
-- **14-11-2026:** creado como punto único de traspaso para asistentes. Resume el estado verificado de #185, CI run 43601293253 y la integración selectiva de seguridad procedente de #171. No modifica ni sustituye los documentos históricos o jurídicos.
+- **14-11-2026:** creado como punto único de traspaso para asistentes. Resume el estado verificado de #185, CI run 43601556662 y la integración selectiva de seguridad procedente de #171. Se amplió con el mapa maestro y la estructura documental; no modifica ni sustituye documentos históricos o jurídicos.
