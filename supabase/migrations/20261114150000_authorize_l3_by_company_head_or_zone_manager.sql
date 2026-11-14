@@ -75,11 +75,9 @@ as $$
 $$;
 revoke all on function private.organization_has_l3_authorization(uuid) from public,anon,authenticated;
 
--- Keep the existing control checks intact and add the company-authority
--- consent as an additional mandatory condition for L3 and L4.
-alter function private.organization_has_trust_level(uuid,text)
-  rename to organization_has_trust_level_without_l3_authorization;
-
+-- Preserve the existing function identity so any database dependencies
+-- continue to resolve to this updated implementation. L3/L4 additionally
+-- require the latest unexpired company authorization event.
 create or replace function private.organization_has_trust_level(
   target_organization uuid,
   required_level text
@@ -87,14 +85,70 @@ create or replace function private.organization_has_trust_level(
 language sql stable security definer
 set search_path = ''
 as $$
-  select private.organization_has_trust_level_without_l3_authorization(
-    target_organization,required_level
-  )
-  and case
-    when required_level in ('L3_SHARED','L4_ADVANCED')
-      then private.organization_has_l3_authorization(target_organization)
-    else true
-  end;
+ select exists (
+  select 1 from private.organization_security_profiles p
+  where p.organization_id=target_organization and p.verification_status='verified'
+   and p.verified_at<=statement_timestamp() and p.valid_until>statement_timestamp()
+   and case required_level
+    when 'L1_ISOLATED' then p.trust_level in ('L1_ISOLATED','L2_VERIFIED','L3_SHARED','L4_ADVANCED')
+     and coalesce((p.verified_controls->>'organizationIdentified')::boolean,false)
+     and coalesce((p.verified_controls->>'termsAccepted')::boolean,false)
+     and coalesce((p.verified_controls->>'tenantBoundaryReady')::boolean,false)
+     and coalesce((p.verified_controls->>'auditReady')::boolean,false)
+     and coalesce((p.verified_controls->>'incidentContactDefined')::boolean,false)
+    when 'L2_VERIFIED' then p.trust_level in ('L2_VERIFIED','L3_SHARED','L4_ADVANCED')
+     and coalesce((p.verified_controls->>'organizationIdentified')::boolean,false)
+     and coalesce((p.verified_controls->>'termsAccepted')::boolean,false)
+     and coalesce((p.verified_controls->>'tenantBoundaryReady')::boolean,false)
+     and coalesce((p.verified_controls->>'auditReady')::boolean,false)
+     and coalesce((p.verified_controls->>'incidentContactDefined')::boolean,false)
+     and coalesce((p.verified_controls->>'identityVerified')::boolean,false)
+     and coalesce((p.verified_controls->>'strongAuthenticationReady')::boolean,false)
+     and coalesce((p.verified_controls->>'secretsManaged')::boolean,false)
+     and coalesce((p.verified_controls->>'dataMinimizationReady')::boolean,false)
+     and coalesce((p.verified_controls->>'retentionPolicyReady')::boolean,false)
+     and coalesce((p.verified_controls->>'securityTestsPassed')::boolean,false)
+    when 'L3_SHARED' then p.trust_level in ('L3_SHARED','L4_ADVANCED')
+     and coalesce((p.verified_controls->>'organizationIdentified')::boolean,false)
+     and coalesce((p.verified_controls->>'termsAccepted')::boolean,false)
+     and coalesce((p.verified_controls->>'tenantBoundaryReady')::boolean,false)
+     and coalesce((p.verified_controls->>'auditReady')::boolean,false)
+     and coalesce((p.verified_controls->>'incidentContactDefined')::boolean,false)
+     and coalesce((p.verified_controls->>'identityVerified')::boolean,false)
+     and coalesce((p.verified_controls->>'strongAuthenticationReady')::boolean,false)
+     and coalesce((p.verified_controls->>'secretsManaged')::boolean,false)
+     and coalesce((p.verified_controls->>'dataMinimizationReady')::boolean,false)
+     and coalesce((p.verified_controls->>'retentionPolicyReady')::boolean,false)
+     and coalesce((p.verified_controls->>'securityTestsPassed')::boolean,false)
+     and coalesce((p.verified_controls->>'dataPermitsReady')::boolean,false)
+     and coalesce((p.verified_controls->>'grantExpiryReady')::boolean,false)
+     and coalesce((p.verified_controls->>'grantRevocationReady')::boolean,false)
+     and coalesce((p.verified_controls->>'partnerIdentityVerified')::boolean,false)
+     and coalesce((p.verified_controls->>'purposeLimitationReady')::boolean,false)
+     and coalesce((p.verified_controls->>'crossOrgIsolationTestsPassed')::boolean,false)
+    when 'L4_ADVANCED' then p.trust_level='L4_ADVANCED'
+     and coalesce((p.verified_controls->>'legalRoleValidated')::boolean,false)
+     and coalesce((p.verified_controls->>'processorTermsReady')::boolean,false)
+     and coalesce((p.verified_controls->>'subprocessorsDocumented')::boolean,false)
+     and coalesce((p.verified_controls->>'personalDataWorkflowReviewed')::boolean,false)
+     and coalesce((p.verified_controls->>'enhancedSecurityReviewPassed')::boolean,false)
+     and coalesce((p.verified_controls->>'regulatedProviderGateReady')::boolean,false)
+    else false end
+   and (
+     required_level not in ('L3_SHARED','L4_ADVANCED')
+     or exists (
+       select 1 from private.organization_l3_authorization_events latest
+       where latest.organization_id=target_organization
+         and latest.action='authorized'
+         and latest.valid_until>statement_timestamp()
+         and not exists (
+           select 1 from private.organization_l3_authorization_events newer
+           where newer.organization_id=latest.organization_id
+             and (newer.created_at,newer.id)>(latest.created_at,latest.id)
+         )
+     )
+   )
+ );
 $$;
 revoke all on function private.organization_has_trust_level(uuid,text) from public,anon,authenticated;
 
