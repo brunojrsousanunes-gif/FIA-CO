@@ -230,7 +230,7 @@ begin
   exception when insufficient_privilege then
     if sqlerrm <> 'INCIDENT_TRANSITION_NOT_ALLOWED' then raise; end if;
   end;
-  if (select count(*) from public.operation_incidents
+  if (select count(id) from public.operation_incidents
       where id='60000000-0000-0000-0000-000000000001'
         and status='resolved'
         and description='Incidencia de prueba') <> 1 then
@@ -463,8 +463,7 @@ begin
     raise exception 'TRANSITION_REPLAY_CHANGED_CURRENT_OPERATION_STATE';
   end if;
 
-  select count(*) into audit_count
-  from public.operation_audit_events
+  select count(id) into audit_count from public.operation_audit_events
   where operation_id=v_operation_id and request_id=v_request_key;
 
   if audit_count <> 1 then
