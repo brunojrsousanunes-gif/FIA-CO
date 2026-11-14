@@ -20,13 +20,14 @@ No marcar como VERIFICADO por haber editado un archivo o creado un commit.
 | ID | Prioridad | Trabajo | Estado al corte | Condición para cerrar |
 |---|---|---|---|---|
 | W-001 | Alta | Comparar PR #184 con #185 y detectar contenido exclusivo útil | PENDIENTE | Comparación de commits y archivos; clasificación y decisión presentada antes de cerrar/retirar nada |
-| W-002 | Alta | Verificar CI de los documentos de organización añadidos a #185 | EN CURSO | Run del HEAD actual completado con éxito en PostgreSQL 16 y 17.6 |
+| W-002 | Alta | Verificar CI de los cambios de seguridad y aislamiento multiempresa integrados en #185 | VERIFICADO | Run 43601556662 completado con éxito en PostgreSQL 16 y 17.6 para el commit fcad013f76f470c1351e1a8c915ca93ce25f3c61; los commits posteriores de este bloque son solo documentación |
 | W-003 | Alta | Probar el flujo con tres identidades y organizaciones separadas | PENDIENTE | Evidencia de pruebas aisladas, datos sintéticos, permisos permitidos y denegaciones |
 | W-004 | Media | Revisar PR #127 y protección de búsquedas/memoria sensibles | PENDIENTE | Inspección de diff, dependencias, pruebas y valor exclusivo; conservar lo útil |
 | W-005 | Media | Auditar documentos legales, contratos y activos comerciales para catalogarlos | PENDIENTE | Inventario con estado y referencias; ninguna eliminación por defecto |
 | W-006 | Media | Reconciliar la matriz de consolidación histórica con #185 | PENDIENTE | Actualización trazable que preserve el historial de #184 y refleje el estado actual |
 | W-007 | Alta antes de piloto real | Revisar Supabase remoto en modo lectura y planificar cualquier migración por separado | PENDIENTE | Comparación de esquema y migraciones; plan reversible; autorización específica antes de escribir |
 | W-008 | Media | Verificar la arquitectura de recuperación y distinguir módulos demo de capacidades integradas | PENDIENTE | Mapa de imports, llamadas reales, pruebas y límites de producto documentados |
+| W-009 | Media | Crear navegación maestra y comprobar enlaces de continuidad documental | VERIFICADO | README, mapa maestro, catálogo, traspaso y registros revisados; seis archivos enlazados comprobados contra el árbol; cero enlaces rotos tras corregir cuatro rutas de configuración |
 
 ## Reglas de ejecución
 
