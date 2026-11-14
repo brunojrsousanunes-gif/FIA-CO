@@ -561,6 +561,10 @@ end
 $zone_manager_cannot_read_company_finance$;
 reset role;
 
+-- Execute the negative column-access assertions as a real participant,
+-- not as the migration owner (which bypasses ordinary grants).
+set request.jwt.claim.sub='71000000-0000-0000-0000-000000000002';
+set role authenticated;
 do $shared_operation_hides_private_columns$
 begin
 begin perform margin_floor_cents from public.operations where id='73000000-0000-0000-0000-000000000001';
