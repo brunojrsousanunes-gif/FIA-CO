@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const expectedMigrationFiles = [
+  '20260917074223_synthetic_prepilot_operations.sql',
+  '20260917074350_optimize_prepilot_rls.sql',
   '20261113212739_company_inventory_mvp.sql',
   '20261113212950_inventory_stock_view_privileges_hardening.sql',
   '20261113213334_inventory_reservation_lock_order_and_view_hardening.sql',
@@ -13,6 +15,8 @@ for (const file of expectedMigrationFiles) {
   assert.ok(availableMigrationFiles.includes(file), `Missing migration matching applied Supabase history: ${file}`);
 }
 assert.deepEqual([...expectedMigrationFiles].sort(), expectedMigrationFiles, 'Applied migrations must remain in chronological order');
+assert.ok(!availableMigrationFiles.includes('20260917110000_synthetic_prepilot_operations.sql'));
+assert.ok(!availableMigrationFiles.includes('20260917113000_optimize_prepilot_rls.sql'));
 assert.ok(!availableMigrationFiles.includes('20261113150000_company_inventory_mvp.sql'));
 assert.ok(!availableMigrationFiles.includes('20261113230000_inventory_reservation_lock_order_and_view_hardening.sql'));
 assert.ok(!availableMigrationFiles.includes('20261114090000_guard_operation_incident_resolution.sql'));
