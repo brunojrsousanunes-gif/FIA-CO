@@ -48,6 +48,93 @@ values
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000001'),
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000001');
 
+-- L3 requires an explicit, traceable company authorization from a
+-- verified company head OR a verified zone manager. A normal member cannot
+-- authorize, and cannot create or read the trusted role-verification record.
+insert into private.organization_l3_authority_verifications
+ (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
+values
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000001',
+  'company_head','verified','ci://authority/company-head-1','71000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+ ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000002',
+  'zone_manager','verified','ci://authority/zone-manager-2','71000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+ ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003',
+  'company_head','verified','ci://authority/company-head-3','71000000-0000-0000-0000-000000000004',now(),now()+interval '90 days');
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
+set role authenticated;
+select public.authorize_organization_l3(
+ '72000000-0000-0000-0000-000000000001',
+ '74000000-0000-0000-0000-000000000101',now()+interval '30 days');
+reset role;
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000002';
+set role authenticated;
+select public.authorize_organization_l3(
+ '72000000-0000-0000-0000-000000000002',
+ '74000000-0000-0000-0000-000000000102',now()+interval '30 days');
+select public.revoke_organization_l3_authorization(
+ '72000000-0000-0000-0000-000000000002',
+ '74000000-0000-0000-0000-000000000103');
+reset role;
+
+do $l3_revocation_closes_shared_access$
+begin
+  if private.organization_has_trust_level(
+    '72000000-0000-0000-0000-000000000002','L3_SHARED') then
+    raise exception 'REVOKED_COMPANY_AUTHORIZATION_STILL_ALLOWS_L3';
+  end if;
+end
+$l3_revocation_closes_shared_access$;
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000002';
+set role authenticated;
+select public.authorize_organization_l3(
+ '72000000-0000-0000-0000-000000000002',
+ '74000000-0000-0000-0000-000000000104',now()+interval '30 days');
+reset role;
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000003';
+set role authenticated;
+select public.authorize_organization_l3(
+ '72000000-0000-0000-0000-000000000003',
+ '74000000-0000-0000-0000-000000000105',now()+interval '30 days');
+reset role;
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000004';
+set role authenticated;
+do $ordinary_member_cannot_authorize_l3$
+begin
+  begin
+    perform public.authorize_organization_l3(
+      '72000000-0000-0000-0000-000000000003',
+      '74000000-0000-0000-0000-000000000106',now()+interval '30 days');
+    raise exception 'ORDINARY_MEMBER_AUTHORIZED_L3';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'L3_AUTHORITY_NOT_VERIFIED' then raise; end if;
+  end;
+  begin
+    perform count(*) from private.organization_l3_authority_verifications;
+    raise exception 'ORDINARY_MEMBER_READ_AUTHORITY_VERIFICATIONS';
+  exception when insufficient_privilege then null;
+  end;
+end
+$ordinary_member_cannot_authorize_l3$;
+reset role;
+
+do $l3_authority_approval_gate$
+begin
+  if not private.organization_has_trust_level(
+    '72000000-0000-0000-0000-000000000001','L3_SHARED')
+     or not private.organization_has_trust_level(
+    '72000000-0000-0000-0000-000000000002','L3_SHARED')
+     or not private.organization_has_trust_level(
+    '72000000-0000-0000-0000-000000000003','L3_SHARED') then
+    raise exception 'VERIFIED_HEAD_OR_ZONE_MANAGER_APPROVAL_NOT_ACCEPTED';
+  end if;
+end
+$l3_authority_approval_gate$;
+
 -- Seller creates the invitation only when all three organizations are L3.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
