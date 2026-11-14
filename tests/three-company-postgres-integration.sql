@@ -84,6 +84,18 @@ set role authenticated;
 select public.authorize_organization_l3(
  '72000000-0000-0000-0000-000000000001',
  '74000000-0000-0000-0000-000000000101',now()+interval '30 days');
+do $l3_request_key_cannot_change_payload$
+begin
+  begin
+    perform public.authorize_organization_l3(
+      '72000000-0000-0000-0000-000000000001',
+      '74000000-0000-0000-0000-000000000101',now()+interval '31 days');
+    raise exception 'L3_REQUEST_KEY_REUSED_WITH_DIFFERENT_EXPIRY';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$l3_request_key_cannot_change_payload$;
 reset role;
 
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000002';
@@ -134,6 +146,16 @@ begin
   begin
     perform count(*) from private.organization_l3_authority_verifications;
     raise exception 'ORDINARY_MEMBER_READ_AUTHORITY_VERIFICATIONS';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into private.organization_l3_authority_verifications
+      (organization_id,user_id,authority_type,verification_status,evidence_ref)
+    values
+      ('72000000-0000-0000-0000-000000000003',
+       '71000000-0000-0000-0000-000000000004',
+       'company_head','pending','ci://unauthorized-write');
+    raise exception 'ORDINARY_MEMBER_CREATED_AUTHORITY_VERIFICATION';
   exception when insufficient_privilege then null;
   end;
 end
