@@ -29,7 +29,8 @@ const expectedNewMigrations = [
   '20261114210000_harden_finance_definer_search_paths.sql',
   '20261114220000_harden_financial_trigger_search_path.sql',
   '20261114230000_index_l3_authority_foreign_keys.sql',
-  '20261114240000_create_three_party_operation_draft.sql'
+  '20261114240000_create_three_party_operation_draft.sql',
+  '20261115000000_owner_membership_access_hardening.sql'
 ];
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
@@ -40,7 +41,7 @@ const availableBaselineFiles = fs.readdirSync('supabase/baseline').filter(file =
 assert.deepEqual(availableBaselineFiles, expectedBaselineFiles,
   'Historical bootstrap SQL must remain outside the executable Supabase migration directory');
 assert.deepEqual(availableMigrationFiles, [...expectedAppliedMigrations, ...expectedNewMigrations].sort(),
-  'Tracked migrations must match the remote history plus the seven new additive migrations');
+  'Tracked migrations must match the remote history plus the additive migrations');
 assert.deepEqual([...expectedAppliedMigrations].sort(), expectedAppliedMigrations,
   'Applied migration versions must remain chronological');
 
@@ -108,6 +109,29 @@ assert.match(threePartyCreation, /grant execute on function public\.create_opera
 assert.match(threePartyCreation, /revoke all on function public\.create_operation_draft[^;]+ from public, anon/i);
 assert.match(threePartyCreation, /private\.append_operation_audit/i);
 assert.doesNotMatch(threePartyCreation, /grant execute[^;]+ to anon/i);
+
+
+const ownerMembershipHardening = fs.readFileSync(
+  'supabase/migrations/20261115000000_owner_membership_access_hardening.sql', 'utf8'
+);
+assert.match(ownerMembershipHardening, /create or replace function private\\.can_access_operation[\\s\\S]*?join public\\.organization_members om[\\s\\S]*?om\\.organization_id = o\\.owner_organization_id[\\s\\S]*?om\\.status = 'active'/i,
+  'creator access must require active membership in the owning organization');
+assert.match(ownerMembershipHardening, /create or replace function private\\.can_manage_operation[\\s\\S]*?join public\\.organization_members om[\\s\\S]*?om\\.organization_id = o\\.owner_organization_id[\\s\\S]*?om\\.status = 'active'/i,
+  'creator management must require active membership in the owning organization');
+for (const signature of [
+  'private.after_confirmation_insert()',
+  'private.after_incident_change()',
+  'private.after_participant_acceptance()',
+  'private.append_operation_audit(uuid,text,uuid,jsonb,uuid)',
+  'private.enqueue_operation_notice(uuid,text,text)',
+  'private.is_org_member(uuid)',
+  'private.validate_evidence_role()'
+]) {
+  assert.ok(ownerMembershipHardening.includes(`alter function ${signature} set search_path = ''`),
+    `SECURITY DEFINER search_path must be hardened for ${signature}`);
+}
+assert.match(ownerMembershipHardening, /revoke all on function private\\.can_access_operation\\(uuid\\) from public, anon/i);
+assert.match(ownerMembershipHardening, /revoke all on function private\\.can_manage_operation\\(uuid\\) from public, anon/i);
 
 const operationCenterHtml = fs.readFileSync('frontend/operation-center.html', 'utf8');
 const operationCenterJs = fs.readFileSync('frontend/js/operation-center.js', 'utf8');
