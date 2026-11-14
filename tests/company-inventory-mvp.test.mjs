@@ -136,6 +136,18 @@ assert.ok((ownerMembershipHardening.match(/and om\.status = 'active'/g) || []).l
 assert.match(ownerMembershipHardening, /revoke all on function private\.can_access_operation\(uuid\) from public, anon/i);
 assert.match(ownerMembershipHardening, /revoke all on function private\.can_manage_operation\(uuid\) from public, anon/i);
 
+const privateOperationCenterJs = fs.readFileSync('frontend/js/operation-center-private.js', 'utf8');
+assert.ok(privateOperationCenterJs.includes('async function refreshSession()'));
+assert.ok(privateOperationCenterJs.includes('Promise.allSettled(['));
+assert.ok(privateOperationCenterJs.includes("if(error.status===401&&state.refreshToken)"));
+assert.ok(privateOperationCenterJs.includes("if(token)fetch(\u0060\u0024{SUPABASE_URL}/auth/v1/logout\u0060"));
+assert.ok(privateOperationCenterJs.includes("finance?money(finance.amount_cents):'Solo visible para la empresa titular'"));
+assert.match(privateOperationCenterJs, /operations\?select=id,reference,title,status,version,operation_type/);
+assert.doesNotMatch(privateOperationCenterJs, /operations\?select=[^'\u0060]*amount_cents/,
+  'the general operations listing must not expose transaction amounts');
+
+assert.ok(ownerMembershipHardening.includes('revoke select (amount_cents, currency) on public.operations from anon, authenticated;'));
+assert.ok(ownerMembershipHardening.includes('drop policy if exists organizations_visible_select on public.organizations;'));
 const operationCenterHtml = fs.readFileSync('frontend/operation-center.html', 'utf8');
 const operationCenterJs = fs.readFileSync('frontend/js/operation-center.js', 'utf8');
 assert.match(operationCenterHtml, /connect-src 'self' https:\/\/etttredbkbcgqwciipls\.supabase\.co/i);
