@@ -34,6 +34,23 @@ const expectedNewMigrations = [
   '20261115010000_make_l3_authorization_retry_idempotent.sql',
   '20261115020000_harden_operation_rpc_idempotency.sql'
 ];
+const operationRpcHardening = fs.readFileSync(
+  'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
+);
+for (const rpc of [
+  'public.accept_operation_invitation',
+  'public.create_operation_draft',
+  'public.create_synthetic_part_recovery'
+]) {
+  assert.match(operationRpcHardening, new RegExp('create or replace function ' + rpc.replaceAll('.', '\\\\.') + '[\\\\s\\\\S]*?security definer[\\\\s\\\\S]*?set search_path to', 'i'));
+}
+assert.match(operationRpcHardening, /request_key is null/i);
+assert.match(operationRpcHardening, /IDEMPOTENCY_KEY_REUSED/i);
+assert.match(operationRpcHardening, /pg_advisory_xact_lock/i);
+assert.match(operationRpcHardening, /recovery\.created/i);
+assert.match(operationRpcHardening, /recovery\.linked/i);
+assert.match(operationRpcHardening, /three_distinct_synthetic_organizations_required/i);
+
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
   '20260916113200_server_validated_transitions.sql'
