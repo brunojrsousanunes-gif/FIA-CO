@@ -26,6 +26,20 @@
   <button class="primary" type="submit">Entrar de forma segura</button>
  </form>
  <div class="backend-actions" data-backend-actions hidden><span data-backend-user></span><button type="button" data-backend-refresh>Actualizar operaciones</button><button type="button" data-backend-logout>Cerrar sesión</button></div>
+ <form class="backend-create" data-backend-create hidden>
+  <h3>Preparar un borrador de tres empresas</h3>
+  <p>Necesitas el identificador de cada organización. El propietario debe ser una de tus empresas activas. Se crea un borrador con participantes invitados; no se envían correos ni se activa el avance compartido. Los controles L3 siguen siendo obligatorios.</p>
+  <label>Título de la operación<input name="title" maxlength="180" minlength="3" required></label>
+  <label>Tipo de operación<select name="operationType"><option value="goods_delivery">Entrega de mercancía</option><option value="machinery_purchase">Compra de maquinaria</option><option value="repair_part_delivery">Entrega de pieza de reparación</option><option value="standard">Operación estándar</option></select></label>
+  <label>Empresa propietaria<select name="ownerOrg" data-backend-owner required><option value="">Selecciona una empresa tuya</option></select></label>
+  <div class="backend-org-grid">
+   <label>Identificador del vendedor<input name="sellerOrg" maxlength="36" minlength="36" placeholder="UUID de la empresa" required></label>
+   <label>Identificador del transportista<input name="carrierOrg" maxlength="36" minlength="36" placeholder="UUID de la empresa" required></label>
+   <label>Identificador del comprador<input name="buyerOrg" maxlength="36" minlength="36" placeholder="UUID de la empresa" required></label>
+  </div>
+  <button class="primary" type="submit">Crear borrador de tres empresas</button>
+  <p class="backend-note">Esta acción sí crea un registro persistente. Comprueba los tres identificadores antes de confirmar.</p>
+ </form>
  <p class="backend-message" data-backend-message role="status" aria-live="polite">Inicia sesión con una cuenta FIA&CO ya habilitada. No hay registro público desde esta pantalla.</p>
  <div class="backend-results" data-backend-results hidden><div><strong data-backend-memberships>Empresas: —</strong><strong data-backend-count>Operaciones: —</strong></div><ol data-backend-list></ol></div>
  <p class="backend-note">La contraseña no se guarda. La sesión permanece solo en memoria de esta pestaña y se cierra al salir o recargar. Los importes y márgenes no se solicitan ni se muestran aquí.</p>
