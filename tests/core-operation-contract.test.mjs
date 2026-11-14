@@ -59,6 +59,27 @@ const copy = snapshotOperation(disputed);
 copy.state = 'MUTATED';
 assert.equal(disputed.state, 'DISPUTED');
 
+const releaseCandidate = {
+  state: 'ACCEPTED',
+  conditions: { sellerAccepted: true, courierVerified: true, delivered: true, buyerAccepted: true, noOpenDispute: true },
+  releaseRequested: false,
+  version: 4,
+  evidence: []
+};
+const releaseCandidateBefore = JSON.stringify(releaseCandidate);
+let releaseEvidenceCalls = 0;
+const failingReleaseDeps = {
+  idFactory: prefix => {
+    releaseEvidenceCalls += 1;
+    if (releaseEvidenceCalls === 2) throw new Error('ID_FACTORY_FAILURE');
+    return `${prefix}_FAIL_TEST`;
+  },
+  clock
+};
+assert.throws(() => requestRelease(releaseCandidate, 'system', failingReleaseDeps), /ID_FACTORY_FAILURE/);
+assert.equal(JSON.stringify(releaseCandidate), releaseCandidateBefore,
+  'a failed two-step release must leave the original operation untouched');
+
 assert.throws(() => createOperation({ amount: 0 }, deps), /INVALID_AMOUNT/);
 assert.throws(() => moveOperation(createOperation({ amount: 10 }, deps), 'CLOSED', 'system', {}, deps), /INVALID_TRANSITION/);
 assert.throws(() => setOperationCondition(createOperation({ amount: 10 }, deps), 'unknown', true, 'system', deps), /UNKNOWN_CONDITION/);
