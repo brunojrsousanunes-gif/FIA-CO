@@ -242,3 +242,43 @@ end
 $three_company_pilot_result$;
 
 select 'THREE INDEPENDENT IDENTITIES / THREE COMPANIES / FULL POSTGRES FLOW: PASS' as result;
+
+
+-- Legacy accepted rows without an accepting identity must not be claimed by
+-- another active member of the same organization.
+insert into public.operations(id,reference,title,status,amount_cents,currency,created_by)
+values ('73000000-0000-0000-0000-000000000002','FIA-PILOT-LEGACY-001',
+        'Aceptación heredada sin identidad — control de seguridad','accepted',100,'EUR',
+        '71000000-0000-0000-0000-000000000001');
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by,accepted_at,accepted_by)
+values
+ ('73000000-0000-0000-0000-000000000002',
+  '72000000-0000-0000-0000-000000000003','carrier','accepted',
+  '71000000-0000-0000-0000-000000000001',now(),null);
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000004';
+set role authenticated;
+do $legacy_acceptance_cannot_be_claimed$
+begin
+  begin
+    perform public.accept_operation_invitation(
+      '73000000-0000-0000-0000-000000000002','carrier',
+      '74000000-0000-0000-0000-000000000012');
+    raise exception 'LEGACY_ACCEPTED_ROLE_CLAIMED_BY_UNVERIFIED_MEMBER';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'LEGACY_ACCEPTANCE_REQUIRES_REVALIDATION' then raise; end if;
+  end;
+end
+$legacy_acceptance_cannot_be_claimed$;
+reset role;
+
+do $legacy_acceptance_remains_unbound$
+begin
+  if (select accepted_by from public.operation_participants
+      where operation_id='73000000-0000-0000-0000-000000000002'
+        and participant_role='carrier') is not null then
+    raise exception 'LEGACY_ACCEPTANCE_IDENTITY_WAS_CHANGED';
+  end if;
+end
+$legacy_acceptance_remains_unbound$;
