@@ -1,72 +1,107 @@
-# FIA&CO — matriz de consolidación técnica
+# FIA&CO — matriz de consolidación técnica y seguridad
 
 **Corte de auditoría:** 2026-11-14  
 **Repositorio:** `brunojrsousanunes-gif/FIA-CO`  
-**Rama de referencia para el trabajo actual:** `test/ceo-organization-data-boundaries-ci3`  
-**PR de trabajo:** #184  
-**Alcance:** inventario y clasificación de ramas/PR. Esta matriz no autoriza fusionar, desplegar, borrar ramas ni modificar Supabase alojado.
+**Rama de trabajo:** `test/ceo-organization-data-boundaries-ci3`  
+**PR principal:** #184 (abierta, borrador)  
+**HEAD de código revisado antes de esta actualización:** `527e40f6874cb41fcd410735c030fd9138cbd1c2`
 
-## 1. Referencias comprobadas
+Esta matriz registra cambios y comprobaciones. No autoriza fusionar, desplegar en producción, borrar ramas ni modificar la base Supabase alojada.
 
-- `main` es la rama predeterminada del repositorio.
-- PR #184 permanece abierta, en borrador y no fusionada. Su HEAD auditado es `5636256f0cae87d2145d0ae51e0839b1795b7b6f (commit validado por CI #520)`.
-- En el HEAD actual de esta matriz, PR #184 está 58 commits por delante de `main` y 0 por detrás.
-- CI #520 figura como SUCCESS para ese HEAD, con pruebas JavaScript, contrato Pages, batería MVP, cadena PostgreSQL 16, inventario e integración de tres empresas.
-- PR #184 está 20 commits por delante de `test/three-independent-company-pilot`; la rama de tres empresas es una base anterior de ese trabajo, no una línea que deba fusionarse de nuevo sin necesidad.
-- El repositorio contiene numerosas ramas históricas. La búsqueda paginada devolvió 184 referencias de rama en dos páginas; esto no significa que todas estén activas ni que deban integrarse.
+## 1. Estado de ramas y PR
 
-## 2. Clasificación de líneas relevantes
-
-| Rama / PR | Estado observado frente a main | Clasificación | Tratamiento |
-|---|---:|---|---|
-| `main` | Referencia predeterminada | Base estable actual | No alterar durante esta consolidación |
-| `test/ceo-organization-data-boundaries-ci3` / #184 | +57 / -0 | Integración de trabajo más reciente | Mantener como línea principal de integración hasta cerrar revisión |
-| `test/three-independent-company-pilot` / #180 | +37 / -0 | Antecedente funcional de #184 | Conservar como evidencia histórica; no duplicar su integración |
-| `fix/supabase-migration-history-sync` / #177 | +28 / -0 | Cambio pendiente de historial y nombres de migración | Portar/reconciliar con #184; no aplicar sus migraciones sobre Supabase alojado sin plan y verificación |
-| `fia/architecture-public-private-boundary` / #178 | +9 / -0 | Endurecimiento de publicación Pages y documentación | Portar/reconciliar con #184; comprobar solapamiento de workflow y pruebas |
-| `feat/supabase-operations-backend` / #157 | +9 / -63, divergente | Backend anterior | No fusionar directamente; recuperar solo piezas justificadas tras comparación |
-| `release/v1-stable-baseline` | 0 / -279 | Snapshot histórico de recuperación | Conservar como referencia histórica; no usar como base actual ni borrar sin verificar política de retención |
-| `chore/v1-stable-baseline-record` / #96 | PR abierta, draft; mergeable false | Registro histórico de baseline | Revisar por separado; no mezclar con la línea de permisos actual |
-
-Los valores +/− indican commits por delante/por detrás de `main`, no un juicio automático de calidad. Las ramas divergentes requieren comparación de contenido, no fusión ciega.
-
-## 3. Matriz funcional y de seguridad
-
-| Dominio | Evidencia en CI / código | Estado de consolidación |
+| Referencia | Estado comprobado | Decisión |
 |---|---|---|
-| CEO y gerente de zona como vías alternativas de autoridad L3 | Migraciones y pruebas en #184; CI #520 SUCCESS | Implementado en rama de trabajo; despliegue real pendiente |
-| Revocación de autoridad CEO por baja, suspensión o cambio de cargo | Migración y prueba de integración en #184 | Probado en PostgreSQL aislado |
-| Flujo de tres empresas | Prueba con identidades separadas en #184 | Probado en CI; cuentas piloto reales pendientes |
-| Propiedad explícita de la operación | `operations.owner_organization_id`; backfill heredado solo si identifica una única empresa; propiedad inmutable una vez asignada | Implementado en rama #184; CI PostgreSQL en ejecución |
-| Aislamiento de información financiera | CEO/admin de la empresa titular consultan sus costes y margen; los participantes ajenos no reciben esos datos | Prueba sintética previa PASS; nueva prueba de pertenencia múltiple en CI pendiente |
-| Inventario | Integración y pruebas de inventario | Probado en CI |
-| Historial de migraciones Supabase | PR #177 alinea nombres y separa baseline histórica | Pendiente de reconciliar con #184 |
-| Frontera pública/privada de Pages | PR #178 incorpora allowlist, test de artefacto y validación de ruta de salida | Pendiente de reconciliar con #184 |
-| Fuente de verdad entre motor JS y backend SQL | PR #178 documenta diferencias entre máquina de estados JS y SQL | Decisión de arquitectura y verificación de integración pendientes |
-| Storage, evidencias y permisos de archivos | No queda acreditada aquí una prueba completa del entorno real | Pendiente |
-| Autenticación real y comprobación documental de cargos | CI utiliza identidades/fixtures sintéticos | Pendiente antes de piloto con empresas |
-| Matriz exhaustiva de todos los roles y privilegios | Solo se han validado los límites concretos descritos arriba | Pendiente de cierre |
+| `main` | Base estable; sin cambios realizados durante esta auditoría | Mantener intacta |
+| PR #184 — `test/ceo-organization-data-boundaries-ci3` | Abierta, borrador; 76 commits por delante y 0 por detrás de `main` en la última comparación | Mantener como línea de integración y completar CI/revisión |
+| PR #177 — `fix/supabase-migration-history-sync` | Abierta, no fusionada | Sus cambios de historial y baseline se han reconciliado selectivamente en #184; no fusionar ambas líneas a ciegas |
+| PR #178 — `fia/architecture-public-private-boundary` | Abierta, borrador | Se han incorporado a #184 el control seguro de ruta de salida y su prueba; la documentación de arquitectura de #178 queda como referencia pendiente de revisión, no se ha copiado íntegra |
+| PR #180 — piloto de tres empresas | Antecedente funcional de #184 | Conservar como referencia, sin duplicar su integración |
 
-## 4. Límite financiero pendiente\n\nLa migración actual delimita las finanzas de la **empresa titular de la operación**. No constituye todavía un libro de costes independiente para cada una de las tres empresas participantes. Si se decide que vendedor, comprador y transportista deben registrar cada uno sus propios costes internos dentro del mismo expediente, hará falta un modelo por organización y reglas explícitas para ingresos, costes logísticos y márgenes; no se deben sumar importes de empresas distintas sin esa definición.\n\nLas operaciones históricas cuya empresa titular no pueda identificarse de forma inequívoca quedan sin titular financiero. Si existen partidas de coste históricas sin empresa verificable, la migración aborta en vez de asignarlas por aproximación.\n\n## 5. Riesgo importante de publicación
+No se han cerrado PR ni borrado ramas.
 
-El repositorio GitHub es público. La allowlist de GitHub Pages limita lo que se publica en el sitio Pages, pero **no vuelve privados los archivos versionados en GitHub**. La PR #178 documenta que el código del Centro privado está presente en el repositorio y que la clave publicable de Supabase no es un secreto. La confidencialidad debe descansar en Auth, RLS, privilegios y controles de servidor, no en ocultar rutas o usar `noindex`.
+## 2. Historial de migraciones: reconciliación #177 → #184
 
-Antes de incorporar la frontera Pages a la línea principal, revisar también si los archivos fuente privados deben permanecer en un repositorio público. No introducir secretos en el repositorio ni en el frontend.
+**COMPROBADO en Supabase remoto, solo lectura:** hay 12 versiones registradas en `supabase_migrations.schema_migrations`.
 
-## 6. Secuencia segura de consolidación
+**COMPROBADO en la rama #184:**
+- Los 12 archivos ejecutables iniciales ahora usan los nombres/versiones que constan en el historial remoto.
+- Los contenidos de las migraciones renombradas se contrastaron y coinciden con los originales por SHA/contenido.
+- Se recuperó la migración `20261113212950_inventory_stock_view_privileges_hardening.sql`, que faltaba en la cadena de #184.
+- Los dos scripts históricos `20260916112600` y `20260916113200` están en `supabase/baseline/`, fuera de la carpeta ejecutable de migraciones. Sus contenidos coinciden con los scripts históricos anteriores.
+- Hay 7 migraciones nuevas posteriores a las 12 versiones remotas: protección de reclamaciones antiguas, autorización L3, vinculación/revocación de autoridad CEO, aislamiento de datos financieros, índices de FK y endurecimiento de funciones/vista.
 
-1. Mantener `main` sin cambios y conservar las ramas históricas.
-2. Reconciliar primero PR #177 (historial de migraciones) con la cadena de migraciones que ejecuta #184.
-3. Reconciliar PR #178 (frontera Pages y documentación) con el workflow y los tests de #184.
-4. Ejecutar una sola batería completa tras resolver los solapamientos; añadir PostgreSQL 17.6 si se conserva la cobertura de #177.
-5. Revisar el diff final y la matriz de permisos positiva/negativa, incluyendo CEO, gerente de zona, operador, miembro y usuario con varias organizaciones.
-6. Verificar Auth, RLS, Storage y configuración real en un entorno de pruebas separado.
-7. Solo después de revisión y autorización expresa, decidir qué PR integrar en `main`. No borrar ramas antiguas hasta comprobar que existe una referencia de recuperación adecuada.
+La batería de contrato comprueba que los archivos de migración coinciden exactamente con las 12 versiones remotas más esas 7 migraciones nuevas, y que los dos scripts baseline no vuelven a entrar en la cadena ejecutable.
 
-## 7. Límites de esta auditoría
+**Importante:** no se deben aplicar los dos scripts baseline al proyecto Supabase existente. CI los aplica solo a una base vacía para reconstruir el esquema de pruebas.
 
-- Se consultaron metadatos de repositorio, ramas, PR y comparaciones de commits; no se descargó ni ejecutó localmente el repositorio completo.
-- Los resultados de CI son pruebas aisladas con datos sintéticos, no certificación de producción.
-- No se ha fusionado ni desplegado ninguna PR.
-- No se ha modificado Supabase alojado, secretos, cuentas, datos ni configuración de producción.
-- No se han eliminado ramas.
+## 3. Frontera pública / privada: reconciliación #178 → #184
+
+**COMPROBADO:**
+- La allowlist de Pages es idéntica en las ramas #178 y #184; no se ha duplicado ni ampliado.
+- El constructor de Pages de #184 incorporó `scripts/public-output-path.mjs`, que limita el destino de salida y bloquea rutas que podrían borrar el repositorio o directorios no autorizados.
+- Se añadió `tests/pages-public-private-boundary.test.mjs` y se integró en `scripts/run-mvp-tests.sh`.
+- La prueba verifica que las rutas privadas no entren en la allowlist ni en el artefacto público y que se rechacen destinos peligrosos.
+- El workflow de #184 conserva la prueba de construcción pública.
+
+**Riesgo que permanece:** el repositorio GitHub es público. La allowlist protege el artefacto de Pages, pero no hace privados los archivos versionados en GitHub. La visibilidad del repositorio requiere una decisión separada porque puede afectar Pages, CI y alojamiento. No se ha cambiado.
+
+## 4. Auditoría de permisos y RLS
+
+### 4.1 Base Supabase alojada — comprobaciones de solo lectura
+
+- Las tablas relevantes consultadas (`operations`, `operation_participants`, `organization_members`, `operation_cost_items`, `operation_audit_events` e inventario) tienen RLS habilitado y políticas de acceso por usuario/organización.
+- `inventory_stock` usa `security_invoker=true`.
+- `private.organization_security_profiles` tiene RLS habilitado, no tiene políticas y no concede acceso de cliente. Es un cierre deliberado, no una invitación a abrir la tabla.
+- Se inspeccionaron las 6 RPC públicas `SECURITY DEFINER` señaladas por el asesor: las seis tienen `search_path=''`, no son ejecutables por `anon` y sí por `authenticated`. Sus cuerpos obtienen la identidad mediante `auth.uid()` y aplican comprobaciones de pertenencia, rol, estado, idempotencia o límites de inventario. El aviso del asesor no justifica retirar esos permisos sin romper funciones legítimas.
+- El asesor sigue mostrando desactivada la protección de contraseñas filtradas de Supabase Auth. Es una mejora pendiente de configuración; no se ha activado ni alterado ningún ajuste remoto.
+
+### 4.2 Cambios de seguridad en la rama #184 — todavía no desplegados
+
+- La migración `20261114190000_company_data_isolation.sql` asigna titularidad financiera explícita a la organización creadora cuando puede determinarse sin ambigüedad; los casos dudosos no se asignan por aproximación.
+- Los costes quedan limitados al titular de la operación y a sus administradores/CEO; las finanzas no se exponen a las otras empresas participantes.
+- `operation_financials` tiene RLS y lectura condicionada al titular y a su rol financiero.
+- La migración `20261114210000_harden_finance_definer_search_paths.sql` fija `search_path=''` en tres funciones financieras `SECURITY DEFINER` y hace que `operation_audit_timeline` use `security_invoker=true`, para respetar la RLS de la tabla de auditoría subyacente.
+- La prueba SQL ampliada exige RLS en las tablas públicas, vistas expuestas con `security_invoker` y ausencia de ejecución anónima de funciones públicas.
+
+**Límite funcional:** el diseño actual protege las finanzas de una empresa titular por operación. Todavía no crea tres libros de costes independientes para vendedor, transportista y comprador. Esa ampliación requiere definir quién registra cada coste, ingresos, márgenes y reglas de conciliación.
+
+## 5. CI y validación
+
+El workflow de #184 se ha ampliado para ejecutar:
+- PostgreSQL 16 y 17.6.
+- Baseline histórico en base vacía.
+- Las 12 migraciones que corresponden al historial remoto.
+- Las 7 migraciones nuevas de la rama.
+- Pruebas de inventario, permisos y flujo de tres empresas.
+- Prueba de frontera pública/privada de Pages.
+
+**PENDIENTE:** la CI correspondiente al último cambio de código está en ejecución. No se declara superada hasta que ambas versiones de PostgreSQL finalicen correctamente.
+
+## 6. Estado real del entorno remoto
+
+**COMPROBADO por consulta de solo lectura:**
+- Supabase remoto conserva 12 migraciones aplicadas.
+- `public.operations.owner_organization_id` todavía no existe en remoto.
+- `public.operation_financials` todavía no existe en remoto.
+- No se ha aplicado ninguna de las migraciones nuevas de #184 a Supabase alojado.
+
+Por tanto, la separación financiera y los nuevos permisos están validados en el código y en CI aislada cuando esta finalice, pero todavía no están activos en el proyecto Supabase remoto.
+
+## 7. Secuencia segura restante
+
+1. Esperar y revisar CI PostgreSQL 16/17.6 tras los últimos cambios.
+2. Corregir cualquier fallo real y repetir solo las pruebas necesarias.
+3. Revisar el diff final y confirmar que el historial de migraciones coincide con el remoto.
+4. Validar Auth, Storage, permisos reales y el flujo con identidades empresariales de prueba en un entorno separado.
+5. Decidir por separado si se activa la protección de contraseñas filtradas y si se cambia la visibilidad del repositorio.
+6. Solo con autorización específica, preparar el plan de aplicación remota y la integración en `main`.
+
+## 8. Límites y garantías
+
+- No se ha fusionado ninguna PR.
+- `main` no se ha modificado.
+- No se ha ejecutado ninguna migración ni escritura en Supabase remoto.
+- No se han modificado secretos, usuarios, datos ni ajustes de Auth.
+- No se han borrado ramas ni PR.
+- Los resultados de CI usan una base aislada y datos sintéticos; no certifican producción ni sustituyen pruebas con usuarios reales.
