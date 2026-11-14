@@ -111,6 +111,51 @@ from public.operation_participants
 where operation_id='73000000-0000-0000-0000-000000000001' and status='accepted';
 select private.operation_has_shared_trust('73000000-0000-0000-0000-000000000001') as diagnostic_shared_trust;
 
+-- L3 is an expiring, control-backed server fact: missing controls, expiry,
+-- or suspension must remove shared-operation eligibility.
+update private.organization_security_profiles
+set verified_controls = verified_controls - 'crossOrgIsolationTestsPassed'
+where organization_id='72000000-0000-0000-0000-000000000003';
+do $l3_missing_control_is_rejected$
+begin
+  if private.operation_has_shared_trust('73000000-0000-0000-0000-000000000001') then
+    raise exception 'L3_ACCEPTED_WITH_MISSING_ISOLATION_CONTROL';
+  end if;
+end
+$l3_missing_control_is_rejected$;
+update private.organization_security_profiles
+set verified_controls = jsonb_set(verified_controls,'{crossOrgIsolationTestsPassed}','true'::jsonb,true)
+where organization_id='72000000-0000-0000-0000-000000000003';
+
+update private.organization_security_profiles
+set verified_at=now()-interval '60 days',valid_until=now()-interval '1 day'
+where organization_id='72000000-0000-0000-0000-000000000003';
+do $l3_expired_profile_is_rejected$
+begin
+  if private.operation_has_shared_trust('73000000-0000-0000-0000-000000000001') then
+    raise exception 'EXPIRED_L3_PROFILE_ALLOWED_SHARED_OPERATION';
+  end if;
+end
+$l3_expired_profile_is_rejected$;
+update private.organization_security_profiles
+set verified_at=now(),valid_until=now()+interval '30 days'
+where organization_id='72000000-0000-0000-0000-000000000003';
+
+update private.organization_security_profiles
+set verification_status='suspended'
+where organization_id='72000000-0000-0000-0000-000000000003';
+do $l3_suspended_profile_is_rejected$
+begin
+  if private.operation_has_shared_trust('73000000-0000-0000-0000-000000000001') then
+    raise exception 'SUSPENDED_L3_PROFILE_ALLOWED_SHARED_OPERATION';
+  end if;
+end
+$l3_suspended_profile_is_rejected$;
+update private.organization_security_profiles
+set verification_status='verified'
+where organization_id='72000000-0000-0000-0000-000000000003';
+
+
 -- The third acceptance automatically advances invited -> accepted.
 -- This behavior is implemented by operation_participant_auto_accept and
 -- audited as operation.accepted; do not issue a duplicate transition RPC.
