@@ -77,4 +77,17 @@ assert.match(financeHardening, /alter function private\.enforce_cost_item_compan
 assert.match(financeHardening, /alter function private\.recalculate_operation_margin\(uuid\) set search_path = ''/i);
 assert.match(financeHardening, /alter view public\.operation_audit_timeline set \(security_invoker = true\)/i);
 
+const companyIsolation = fs.readFileSync(
+  'supabase/migrations/20261114190000_company_data_isolation.sql', 'utf8'
+);
+assert.match(companyIsolation, /current_setting\('fia_co\.migration_mode', true\) = 'company_data_isolation'/i,
+  'historical backfill must not append audit rows with a null auth.uid()');
+assert.match(companyIsolation, /set_config\('fia_co\.migration_mode', 'company_data_isolation', true\)/i,
+  'audit suppression must be transaction-local and scoped to the backfill');
+assert.match(companyIsolation, /set_config\('fia_co\.migration_mode', 'off', true\)/i,
+  'normal trigger behavior must be restored immediately after backfill');
+assert.match(companyIsolation, /rebuild_financial_summaries/i,
+  'financial summaries must be rebuilt explicitly after the historical backfill');
+
+
 console.log('company inventory MVP security and migration history contract: ok');
