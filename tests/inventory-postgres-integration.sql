@@ -382,18 +382,18 @@ set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
 do $transition_idempotency_replay$
 declare
-  operation_id constant uuid := '30000000-0000-0000-0000-000000000001';
-  request_key constant uuid := '50000000-0000-0000-0000-000000000014';
+  v_operation_id constant uuid := '30000000-0000-0000-0000-000000000001';
+  v_request_key constant uuid := '50000000-0000-0000-0000-000000000014';
   initial_version integer;
   first_result public.operations;
   replay_result public.operations;
   audit_count integer;
 begin
   select version into initial_version
-  from public.operations where id=operation_id;
+  from public.operations where id=v_operation_id;
 
   first_result := public.transition_operation(
-    operation_id,'delivered',initial_version,request_key);
+    v_operation_id,'delivered',initial_version,v_request_key);
 
   if first_result.status is distinct from 'delivered'
      or first_result.version <> initial_version + 1 then
@@ -410,7 +410,7 @@ begin
 
   select count(*) into audit_count
   from public.operation_audit_events
-  where operation_id=operation_id and request_id=request_key;
+  where operation_id=v_operation_id and request_id=v_request_key;
 
   if audit_count <> 1 then
     raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_DUPLICATED_AUDIT_EVENT';
