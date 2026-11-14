@@ -28,7 +28,8 @@ const expectedNewMigrations = [
   '20261114200000_index_uncovered_foreign_keys.sql',
   '20261114210000_harden_finance_definer_search_paths.sql',
   '20261114220000_harden_financial_trigger_search_path.sql',
-  '20261114230000_index_l3_authority_foreign_keys.sql'
+  '20261114230000_index_l3_authority_foreign_keys.sql',
+  '20261114240000_create_three_party_operation_draft.sql'
 ];
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
@@ -95,6 +96,19 @@ assert.match(companyIsolation, /set_config\('fia_co\.migration_mode', 'off', tru
   'normal trigger behavior must be restored immediately after backfill');
 assert.match(companyIsolation, /rebuild_financial_summaries/i,
   'financial summaries must be rebuilt explicitly after the historical backfill');
+
+const threePartyCreation = fs.readFileSync(
+  'supabase/migrations/20261114240000_create_three_party_operation_draft.sql', 'utf8'
+);
+assert.match(threePartyCreation, /security definer\\s+set search_path = ''/i);
+assert.match(threePartyCreation, /three_distinct_organizations_required/i);
+assert.match(threePartyCreation, /all_three_real_organizations_must_be_active/i);
+assert.match(threePartyCreation, /active_owner_organization_membership_required/i);
+assert.match(threePartyCreation, /grant execute on function public\\.create_operation_draft[^;]+ to authenticated/i);
+assert.match(threePartyCreation, /revoke all on function public\\.create_operation_draft[^;]+ from public, anon/i);
+assert.match(threePartyCreation, /private\\.append_operation_audit/i);
+assert.doesNotMatch(threePartyCreation, /grant execute[^;]+ to anon/i);
+
 
 
 console.log('company inventory MVP security and migration history contract: ok');
