@@ -15,7 +15,17 @@ const expectedMigrationFiles = [
   '20261114004644_guard_operation_incident_resolution.sql',
   '20261114005027_bind_trust_levels_to_shared_privileges.sql'
 ];
+const expectedBaselineFiles = [
+  '20260916112600_initial_multi_tenant_operations.sql',
+  '20260916113200_server_validated_transitions.sql'
+];
 const availableMigrationFiles = fs.readdirSync('supabase/migrations');
+const availableBaselineFiles = fs.readdirSync('supabase/baseline');
+assert.deepEqual(
+  availableBaselineFiles.filter(file => file.endsWith('.sql')).sort(),
+  expectedBaselineFiles,
+  'Historical bootstrap SQL must remain outside the executable Supabase migration directory'
+);
 for (const file of expectedMigrationFiles) {
   assert.ok(availableMigrationFiles.includes(file), `Missing migration matching applied Supabase history: ${file}`);
 }
