@@ -171,7 +171,7 @@ revoke all on function private.organization_has_trust_level(uuid,text) from publ
 -- It never accepts a caller id: the actor always comes from auth.uid().
 create or replace function public.authorize_organization_l3(
   target_organization uuid,
-  request_key uuid,
+  target_request_key uuid,
   authorization_valid_until timestamptz default null
 ) returns uuid
 language plpgsql security definer
@@ -185,7 +185,7 @@ declare
   event_id uuid;
 begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
-  if target_organization is null or request_key is null then
+  if target_organization is null or target_request_key is null then
     raise exception 'ORGANIZATION_AND_REQUEST_KEY_REQUIRED' using errcode='22023';
   end if;
   if expiry <= statement_timestamp()
@@ -226,12 +226,12 @@ begin
   insert into private.organization_l3_authorization_events
     (organization_id,actor_id,authority_verification_id,authority_type,action,request_key,valid_until)
   values
-    (target_organization,caller,authority.id,authority.authority_type,'authorized',request_key,expiry)
+    (target_organization,caller,authority.id,authority.authority_type,'authorized',target_request_key,expiry)
   on conflict (request_key) do nothing;
 
   select e.id into event_id
   from private.organization_l3_authorization_events e
-  where e.request_key=request_key
+  where e.request_key=target_request_key
     and e.organization_id=target_organization
     and e.actor_id=caller
     and e.action='authorized';
@@ -257,7 +257,7 @@ declare
   event_id uuid;
 begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
-  if target_organization is null or request_key is null then
+  if target_organization is null or target_request_key is null then
     raise exception 'ORGANIZATION_AND_REQUEST_KEY_REQUIRED' using errcode='22023';
   end if;
   if not exists (
@@ -282,12 +282,12 @@ begin
   insert into private.organization_l3_authorization_events
     (organization_id,actor_id,authority_verification_id,authority_type,action,request_key,valid_until)
   values
-    (target_organization,caller,authority.id,authority.authority_type,'revoked',request_key,null)
+    (target_organization,caller,authority.id,authority.authority_type,'revoked',target_request_key,null)
   on conflict (request_key) do nothing;
 
   select e.id into event_id
   from private.organization_l3_authorization_events e
-  where e.request_key=request_key
+  where e.request_key=target_request_key
     and e.organization_id=target_organization
     and e.actor_id=caller
     and e.action='revoked';
