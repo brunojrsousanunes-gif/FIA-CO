@@ -3,7 +3,7 @@
 **Última verificación:** 14-11-2026  
 **Repositorio:** `brunojrsousanunes-gif/FIA-CO`  
 **Rama activa autorizada para integración:** `integration/fia-co-verified-snapshot-2026-11-14`  
-**HEAD verificado:** `cbe7a174360e72608286dab0ebaac849af67369b`  
+**HEAD verificado:** `71c96ec952c6f6b947a9ae005fb1ea6a9b3855b4`  
 **PR de integración:** [#185](https://github.com/brunojrsousanunes-gif/FIA-CO/pull/185) — abierta, borrador, base `main`.  
 **SHA de `main` verificado:** `63ec6df05fb5a24fa12a83de5989b617bae3a22d`.
 
@@ -51,7 +51,7 @@ El producto gestiona operaciones y sus confirmaciones, evidencias, responsabilid
 ## 4. Arquitectura documental y fuentes de referencia
 
 - Catálogo y jerarquía: `docs/assistant/DOCUMENTATION-CATALOG.md`.
-- Decisiones duraderas: `docs/assistant/DECISION-LOG.md`.
+- Notas técnicas mínimas para continuidad de la IA (no es un acta ni un registro para el propietario): `docs/assistant/DECISION-LOG.md`.
 - Cola de tareas y condiciones de cierre: `docs/assistant/WORK-REGISTER.md`.
 - Entrada general y mapa: `README.md`.
 
