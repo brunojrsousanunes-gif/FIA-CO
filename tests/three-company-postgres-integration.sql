@@ -219,6 +219,27 @@ begin
   end;
 end
 $l3_request_key_cannot_change_payload$;
+
+-- Reusing a request key with the default expiry must return the original
+-- authorization instead of treating a newly calculated 90-day expiry as a
+-- changed payload. Separate SQL statements intentionally advance statement_timestamp().
+select public.authorize_organization_l3(
+ '72000000-0000-0000-0000-000000000001',
+ '74000000-0000-0000-0000-000000000108',null);
+select pg_sleep(0.01);
+select public.authorize_organization_l3(
+ '72000000-0000-0000-0000-000000000001',
+ '74000000-0000-0000-0000-000000000108',null);
+do $l3_default_expiry_retry_is_idempotent$
+begin
+  if (select count(*) from private.organization_l3_authorization_events
+      where request_key='74000000-0000-0000-0000-000000000108'
+        and organization_id='72000000-0000-0000-0000-000000000001'
+        and action='authorized') <> 1 then
+    raise exception 'L3_DEFAULT_EXPIRY_RETRY_CREATED_DUPLICATE_AUTHORIZATION';
+  end if;
+end
+$l3_default_expiry_retry_is_idempotent$;
 reset role;
 
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000002';
