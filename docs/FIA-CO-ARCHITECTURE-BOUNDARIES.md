@@ -66,6 +66,12 @@ Otros límites del código de referencia:
 
 Estas observaciones describen los archivos revisados; no certifican todas las políticas RLS ni el comportamiento real de usuarios en producción.
 
+### 3.2 Reconciliación del borrador L4 con el esquema actual
+
+La PR #175 (`design/l4-authorization-model`) es un borrador documental creado sobre una base anterior de `main` y actualmente aparece como no fusionable. Su diseño técnico propone persistir un perfil de confianza por organización, pero la rama actual ya contiene la migración `20261114110000_bind_trust_levels_to_shared_privileges.sql`, que crea `private.organization_security_profiles` y funciones para evaluar niveles de confianza y su relación con permisos compartidos.
+
+**Regla para evitar duplicidades:** no crear una segunda tabla de confianza empresarial ni renombrar la existente por conveniencia documental. Antes de implementar L4, actualizar su diseño para reutilizar `private.organization_security_profiles` y separar únicamente los componentes que todavía no estén cubiertos, como grants concretos, aprobaciones, vigencia y revocación. La existencia y el esquema final de esos componentes deben volver a comprobarse contra la base antes de diseñar migraciones.
+
 ## 4. Módulos que se mantienen congelados, no borrados
 
 Hasta que exista un caso real, responsable y prueba de necesidad, no ampliar:
