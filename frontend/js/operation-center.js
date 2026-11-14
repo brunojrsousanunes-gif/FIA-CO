@@ -81,6 +81,7 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   if(backendBusy||!backendSession)return;
   backendBusy=true;backendStateText('CONSULTANDO');backendStatus('Comprobando permisos de tu cuenta…');
   try{
+   await ensureBackendSession();
    const [members,operations]=await Promise.all([
     backendGet(`organization_members?select=organization_id,member_role&user_id=eq.${encodeURIComponent(backendSession.user.id)}&status=eq.active`),
     backendGet('operations?select=id,reference,title,status,operation_type,version,created_at&order=created_at.desc&limit=50')
