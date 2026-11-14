@@ -327,3 +327,5 @@ begin
   end if;
 end
 $legacy_acceptance_remains_unbound$;
+
+select 'LEGACY ACCEPTANCE CLAIM BLOCKED: PASS' as security_result;
