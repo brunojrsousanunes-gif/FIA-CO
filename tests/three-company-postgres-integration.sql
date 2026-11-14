@@ -832,27 +832,24 @@ select 'CEO MEMBERSHIP SUSPENSION REVOKES L3: PASS' as security_result;
 
 -- Synthetic part recovery is isolated to synthetic companies and retries are
 -- idempotent: the same key/payload returns the same child operation.
-insert into public.organizations(id,name,status,is_synthetic,demo_code) values
- ('72000000-0000-0000-0000-000000000011','Synthetic sender CI','active',true,'SYN-FRAN'),
- ('72000000-0000-0000-0000-000000000012','Synthetic carrier CI','active',true,'SYN-GSM'),
- ('72000000-0000-0000-0000-000000000013','Synthetic buyer CI','active',true,'SYN-BUYER-CI');
-
-insert into public.organization_members(organization_id,user_id,member_role,status) values
- ('72000000-0000-0000-0000-000000000013','71000000-0000-0000-0000-000000000001','ceo','active');
+insert into public.organization_members(organization_id,user_id,member_role,status)
+select o.id,'71000000-0000-0000-0000-000000000001','ceo','active'
+from public.organizations o where o.demo_code='SYN-NARINO';
 
 insert into public.operations(
  id,reference,title,status,operation_type,created_by,owner_organization_id,is_synthetic
 ) values (
  '73000000-0000-0000-0000-000000000011','FIA-SYN-PARENT-CI-001',
  'Tractor sintético bloqueado para ensayo','blocked','machinery_purchase',
- '71000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000013',true
+ '71000000-0000-0000-0000-000000000001',
+ (select id from public.organizations where demo_code='SYN-NARINO'),true
 );
 insert into public.operation_participants
  (operation_id,organization_id,participant_role,status,invited_by)
 values
- ('73000000-0000-0000-0000-000000000011','72000000-0000-0000-0000-000000000011','seller','invited','71000000-0000-0000-0000-000000000001'),
- ('73000000-0000-0000-0000-000000000011','72000000-0000-0000-0000-000000000012','carrier','invited','71000000-0000-0000-0000-000000000001'),
- ('73000000-0000-0000-0000-000000000011','72000000-0000-0000-0000-000000000013','buyer','invited','71000000-0000-0000-0000-000000000001');
+ ('73000000-0000-0000-0000-000000000011',(select id from public.organizations where demo_code='SYN-FRAN'),'seller','invited','71000000-0000-0000-0000-000000000001'),
+ ('73000000-0000-0000-0000-000000000011',(select id from public.organizations where demo_code='SYN-GSM'),'carrier','invited','71000000-0000-0000-0000-000000000001'),
+ ('73000000-0000-0000-0000-000000000011',(select id from public.organizations where demo_code='SYN-NARINO'),'buyer','invited','71000000-0000-0000-0000-000000000001');
 insert into public.operation_incidents(
  operation_id,incident_type,description,status,blocks_progress,opened_by
 ) values (
