@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { resolvePublicOutputPath } from './public-output-path.mjs';
 
 const repoRoot=process.cwd();
 const frontendRoot=path.join(repoRoot,'frontend');
 const allowlistPath=path.join(repoRoot,'config','pages-public-allowlist.txt');
-const outDir=path.resolve(repoRoot,process.argv[2]||'pages-public');
+const outDir=resolvePublicOutputPath(repoRoot,process.argv[2]||'pages-public');
 
 const lines=fs.readFileSync(allowlistPath,'utf8').split(/\r?\n/).map(v=>v.trim()).filter(v=>v&&!v.startsWith('#'));
 const allowed=new Set(lines);

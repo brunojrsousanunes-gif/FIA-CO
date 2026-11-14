@@ -2,6 +2,7 @@
 set -euo pipefail
 
 # Current public surface
+node tests/pages-public-private-boundary.test.mjs
 node tests/company-inventory-mvp.test.mjs
 node tests/homepage-v2.test.mjs
 node tests/original-business-interface.test.mjs

@@ -4,14 +4,15 @@
 insert into auth.users(id) values
  ('10000000-0000-0000-0000-000000000001'),
  ('10000000-0000-0000-0000-000000000002'),
- ('10000000-0000-0000-0000-000000000003');
+ ('10000000-0000-0000-0000-000000000003'),
+ ('10000000-0000-0000-0000-000000000004');
 
 insert into public.organizations(id,name,status) values
  ('20000000-0000-0000-0000-000000000001','Empresa Uno','active'),
  ('20000000-0000-0000-0000-000000000002','Empresa Dos','active');
 
 insert into public.organization_members(organization_id,user_id,member_role,status) values
- ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','manager','active'),
+ ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','ceo','active'),
  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active');
 
 insert into public.operations(id,reference,title,status,created_by) values
@@ -80,9 +81,20 @@ begin
  if (select count(*) from public.inventory_movements) <> 0 then
    raise exception 'CROSS_ORG_MOVEMENT_LEAK';
  end if;
+
  if (select count(*) from public.inventory_reservations) <> 0 then
    raise exception 'CROSS_ORG_RESERVATION_LEAK';
  end if;
+ begin
+  insert into public.inventory_items(id,organization_id,sku,description,created_by)
+  values ('40000000-0000-0000-0000-000000000099',
+          '20000000-0000-0000-0000-000000000001',
+          'SKU-CROSS-ORG-ATTACK','Intento de escritura entre empresas',
+          '10000000-0000-0000-0000-000000000002');
+  raise exception 'CROSS_ORG_ITEM_INSERT_WAS_ALLOWED';
+ exception when insufficient_privilege then
+  null;
+ end;
 end $$;
 reset role;
 
@@ -218,7 +230,7 @@ begin
   exception when insufficient_privilege then
     if sqlerrm <> 'INCIDENT_TRANSITION_NOT_ALLOWED' then raise; end if;
   end;
-  if (select count(*) from public.operation_incidents
+  if (select count(id) from public.operation_incidents
       where id='60000000-0000-0000-0000-000000000001'
         and status='resolved'
         and description='Incidencia de prueba') <> 1 then
@@ -244,7 +256,40 @@ select id,'L3_SHARED','verified',
 from public.organizations where id in ('20000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000003');
 insert into public.organization_members(organization_id,user_id,member_role,status) values
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','manager','active'),
- ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
+ ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','ceo','active');
+
+-- CEO / zone-manager verification and explicit L3 consent for
+-- every organization participating in the shared-operation invitation test.
+insert into private.organization_l3_authority_verifications
+ (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
+values
+ ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',
+  'ceo','verified','ci://inventory/ceo-1','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+ ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002',
+  'zone_manager','verified','ci://inventory/zone-manager-2','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+ ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003',
+  'ceo','verified','ci://inventory/ceo-3','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days');
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+select public.authorize_organization_l3(
+ '20000000-0000-0000-0000-000000000001',
+ '50000000-0000-0000-0000-000000000021',now()+interval '30 days');
+reset role;
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+select public.authorize_organization_l3(
+ '20000000-0000-0000-0000-000000000002',
+ '50000000-0000-0000-0000-000000000022',now()+interval '30 days');
+reset role;
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+select public.authorize_organization_l3(
+ '20000000-0000-0000-0000-000000000003',
+ '50000000-0000-0000-0000-000000000023',now()+interval '30 days');
+reset role;
 
 -- The creator can invite three L3 organizations before their users accept,
 -- and can still cancel an invitation if a trust check later expires.
@@ -387,8 +432,10 @@ declare
   initial_version integer;
   first_result public.operations;
   replay_result public.operations;
-  audit_count integer;
+  audit_count_before integer;
+  audit_count_after integer;
 begin
+  select count(*) into audit_count_before from public.operation_audit_timeline where operation_id=v_operation_id;
   select version into initial_version
   from public.operations where id=v_operation_id;
 
@@ -418,11 +465,10 @@ begin
     raise exception 'TRANSITION_REPLAY_CHANGED_CURRENT_OPERATION_STATE';
   end if;
 
-  select count(*) into audit_count
-  from public.operation_audit_events
-  where operation_id=v_operation_id and request_id=v_request_key;
+  select count(*) into audit_count_after from public.operation_audit_timeline
+  where operation_id=v_operation_id;
 
-  if audit_count <> 1 then
+  if audit_count_after <> audit_count_before + 2 then
     raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_DUPLICATED_AUDIT_EVENT';
   end if;
 end $transition_idempotency_replay$;
@@ -539,11 +585,15 @@ declare
   table_row record;
 begin
   for table_row in
-    select c.oid, c.relname
+    select c.oid, c.relname, c.relrowsecurity
     from pg_class c
     join pg_namespace n on n.oid=c.relnamespace
     where n.nspname='public' and c.relkind in ('r','p')
   loop
+    if not table_row.relrowsecurity then
+      raise exception 'PUBLIC_TABLE_WITHOUT_RLS:%',table_row.relname;
+    end if;
+
     if has_table_privilege('anon',table_row.oid,'SELECT')
        or has_table_privilege('anon',table_row.oid,'INSERT')
        or has_table_privilege('anon',table_row.oid,'UPDATE')
@@ -570,6 +620,28 @@ begin
   if not has_table_privilege('authenticated','public.logistics_quotes','DELETE')
      or not has_table_privilege('authenticated','public.operation_cost_items','DELETE') then
     raise exception 'LEGITIMATE_QUOTE_OR_COST_DELETE_PERMISSION_REMOVED';
+  end if;
+
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public'
+      and c.relkind='v'
+      and has_table_privilege('authenticated',c.oid,'SELECT')
+      and not coalesce('security_invoker=true'=any(c.reloptions),false)
+  ) then
+    raise exception 'PUBLIC_API_VIEW_WITHOUT_SECURITY_INVOKER';
+  end if;
+
+  if exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public'
+      and has_function_privilege('anon',p.oid,'EXECUTE')
+  ) then
+    raise exception 'PUBLIC_FUNCTION_EXECUTABLE_BY_ANON';
   end if;
 
   if exists (
