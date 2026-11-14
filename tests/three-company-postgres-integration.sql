@@ -517,3 +517,32 @@ end
 $legacy_acceptance_remains_unbound$;
 
 select 'LEGACY ACCEPTANCE CLAIM BLOCKED: PASS' as security_result;
+
+
+-- Removing the CEO role or suspending that membership immediately revokes
+-- the trusted CEO attestation, so an old L3 consent cannot remain active.
+update public.organization_members
+set status='suspended'
+where organization_id='72000000-0000-0000-0000-000000000001'
+  and user_id='71000000-0000-0000-0000-000000000001';
+
+do $ceo_membership_suspension_revokes_l3$
+begin
+  if exists (
+    select 1 from private.organization_l3_authority_verifications
+    where organization_id='72000000-0000-0000-0000-000000000001'
+      and user_id='71000000-0000-0000-0000-000000000001'
+      and authority_type='ceo'
+      and verification_status='verified'
+  ) then
+    raise exception 'SUSPENDED_CEO_RETAINED_VERIFIED_AUTHORITY';
+  end if;
+  if private.organization_has_trust_level(
+    '72000000-0000-0000-0000-000000000001','L3_SHARED'
+  ) then
+    raise exception 'SUSPENDED_CEO_MEMBERSHIP_RETAINED_L3';
+  end if;
+end
+$ceo_membership_suspension_revokes_l3$;
+
+select 'CEO MEMBERSHIP SUSPENSION REVOKES L3: PASS' as security_result;
