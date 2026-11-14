@@ -29,6 +29,62 @@ insert into public.organization_members(organization_id,user_id,member_role,stat
  ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006','manager','active'),
  ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000007','manager','active');
 
+-- Draft creation must replay only an identical business request.
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $draft_creation_request_key_is_payload_bound$
+declare
+  first_id uuid;
+  retry_id uuid;
+begin
+  first_id := public.create_operation_draft(
+    'Pedido de prueba de idempotencia','standard',
+    '72000000-0000-0000-0000-000000000001',
+    '72000000-0000-0000-0000-000000000001',
+    '72000000-0000-0000-0000-000000000003',
+    '72000000-0000-0000-0000-000000000002',
+    '74000000-0000-0000-0000-000000000020'
+  );
+  retry_id := public.create_operation_draft(
+    'Pedido de prueba de idempotencia','standard',
+    '72000000-0000-0000-0000-000000000001',
+    '72000000-0000-0000-0000-000000000001',
+    '72000000-0000-0000-0000-000000000003',
+    '72000000-0000-0000-0000-000000000002',
+    '74000000-0000-0000-0000-000000000020'
+  );
+  if first_id is distinct from retry_id then
+    raise exception 'IDENTICAL_DRAFT_RETRY_CREATED_DUPLICATE_OPERATION';
+  end if;
+  begin
+    perform public.create_operation_draft(
+      'Pedido diferente con la misma clave','standard',
+      '72000000-0000-0000-0000-000000000001',
+      '72000000-0000-0000-0000-000000000001',
+      '72000000-0000-0000-0000-000000000003',
+      '72000000-0000-0000-0000-000000000002',
+      '74000000-0000-0000-0000-000000000020'
+    );
+    raise exception 'DRAFT_REQUEST_KEY_REUSED_WITH_DIFFERENT_PAYLOAD';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+  begin
+    perform public.create_operation_draft(
+      'Pedido sin clave','standard',
+      '72000000-0000-0000-0000-000000000001',
+      '72000000-0000-0000-0000-000000000001',
+      '72000000-0000-0000-0000-000000000003',
+      '72000000-0000-0000-0000-000000000002',null
+    );
+    raise exception 'DRAFT_WITH_NULL_REQUEST_KEY_ACCEPTED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'ALL_PARTIES_AND_REQUEST_KEY_REQUIRED' then raise; end if;
+  end;
+end
+$draft_creation_request_key_is_payload_bound$;
+reset role;
+
 insert into private.organization_security_profiles
  (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
 values
@@ -376,6 +432,28 @@ set role authenticated;
 select public.accept_operation_invitation(
  '73000000-0000-0000-0000-000000000001','seller',
  '74000000-0000-0000-0000-000000000002');
+do $invitation_acceptance_retry_and_key_collision$
+begin
+  perform public.accept_operation_invitation(
+    '73000000-0000-0000-0000-000000000001','seller',
+    '74000000-0000-0000-0000-000000000002');
+  begin
+    perform public.accept_operation_invitation(
+      '73000000-0000-0000-0000-000000000001','buyer',
+      '74000000-0000-0000-0000-000000000002');
+    raise exception 'INVITATION_REQUEST_KEY_REUSED_FOR_DIFFERENT_ROLE';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+  begin
+    perform public.accept_operation_invitation(
+      '73000000-0000-0000-0000-000000000001','seller',null);
+    raise exception 'INVITATION_ACCEPTED_WITH_NULL_REQUEST_KEY';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'OPERATION_AND_REQUEST_KEY_REQUIRED' then raise; end if;
+  end;
+end
+$invitation_acceptance_retry_and_key_collision$;
 reset role;
 
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000002';
@@ -750,3 +828,74 @@ end
 $ceo_membership_suspension_revokes_l3$;
 
 select 'CEO MEMBERSHIP SUSPENSION REVOKES L3: PASS' as security_result;
+
+
+-- Synthetic part recovery is isolated to synthetic companies and retries are
+-- idempotent: the same key/payload returns the same child operation.
+insert into public.organizations(id,name,status,is_synthetic,demo_code) values
+ ('72000000-0000-0000-0000-000000000011','Synthetic sender CI','active',true,'SYN-FRAN'),
+ ('72000000-0000-0000-0000-000000000012','Synthetic carrier CI','active',true,'SYN-GSM'),
+ ('72000000-0000-0000-0000-000000000013','Synthetic buyer CI','active',true,'SYN-BUYER-CI');
+
+insert into public.organization_members(organization_id,user_id,member_role,status) values
+ ('72000000-0000-0000-0000-000000000013','71000000-0000-0000-0000-000000000001','ceo','active');
+
+insert into public.operations(
+ id,reference,title,status,operation_type,created_by,owner_organization_id,is_synthetic
+) values (
+ '73000000-0000-0000-0000-000000000011','FIA-SYN-PARENT-CI-001',
+ 'Tractor sintético bloqueado para ensayo','blocked','machinery_purchase',
+ '71000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000013',true
+);
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by)
+values
+ ('73000000-0000-0000-0000-000000000011','72000000-0000-0000-0000-000000000011','seller','invited','71000000-0000-0000-0000-000000000001'),
+ ('73000000-0000-0000-0000-000000000011','72000000-0000-0000-0000-000000000012','carrier','invited','71000000-0000-0000-0000-000000000001'),
+ ('73000000-0000-0000-0000-000000000011','72000000-0000-0000-0000-000000000013','buyer','invited','71000000-0000-0000-0000-000000000001');
+insert into public.operation_incidents(
+ operation_id,incident_type,description,status,blocks_progress,opened_by
+) values (
+ '73000000-0000-0000-0000-000000000011','logistics',
+ 'Incidencia de bloqueo para probar la recuperación sintética','open',true,
+ '71000000-0000-0000-0000-000000000001'
+);
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $synthetic_recovery_retry_is_idempotent$
+declare
+  first_recovery public.operations;
+  retry_recovery public.operations;
+begin
+  first_recovery := public.create_synthetic_part_recovery(
+    '73000000-0000-0000-0000-000000000011',
+    'SYN-FRAN','SYN-GSM','Bomba hidráulica',
+    '74000000-0000-0000-0000-000000000030'
+  );
+  retry_recovery := public.create_synthetic_part_recovery(
+    '73000000-0000-0000-0000-000000000011',
+    'SYN-FRAN','SYN-GSM','Bomba hidráulica',
+    '74000000-0000-0000-0000-000000000030'
+  );
+  if first_recovery.id is distinct from retry_recovery.id then
+    raise exception 'SYNTHETIC_RECOVERY_RETRY_CREATED_DUPLICATE';
+  end if;
+  begin
+    perform public.create_synthetic_part_recovery(
+      '73000000-0000-0000-0000-000000000011',
+      'SYN-FRAN','SYN-GSM','Alternador',
+      '74000000-0000-0000-0000-000000000030'
+    );
+    raise exception 'SYNTHETIC_RECOVERY_KEY_REUSED_WITH_DIFFERENT_PART';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+  if (select count(*) from public.operations
+      where parent_operation_id='73000000-0000-0000-0000-000000000011'
+        and is_synthetic and operation_type='repair_part_delivery') <> 1 then
+    raise exception 'SYNTHETIC_RECOVERY_CREATED_MORE_THAN_ONE_CHILD';
+  end if;
+end
+$synthetic_recovery_retry_is_idempotent$;
+reset role;
