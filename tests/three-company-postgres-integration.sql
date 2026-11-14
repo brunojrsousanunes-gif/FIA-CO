@@ -111,14 +111,9 @@ from public.operation_participants
 where operation_id='73000000-0000-0000-0000-000000000001' and status='accepted';
 select private.operation_has_shared_trust('73000000-0000-0000-0000-000000000001') as diagnostic_shared_trust;
 
--- All three acceptances are required before the operation becomes accepted.
-set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
-set role authenticated;
-select public.transition_operation(
- '73000000-0000-0000-0000-000000000001','accepted',
- (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
- '74000000-0000-0000-0000-000000000005');
-
+-- The third acceptance automatically advances invited -> accepted.
+-- This behavior is implemented by operation_participant_auto_accept and
+-- audited as operation.accepted; do not issue a duplicate transition RPC.
 -- Seller and buyer cannot perform the carrier's dispatch transition.
 do $seller_cannot_dispatch$
 begin
@@ -207,10 +202,8 @@ values
  ('73000000-0000-0000-0000-000000000001','buyer','receipt',
   '71000000-0000-0000-0000-000000000002');
 
-select public.transition_operation(
- '73000000-0000-0000-0000-000000000001','completed',
-      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
- '74000000-0000-0000-0000-000000000012');
+-- The receipt confirmation trigger automatically advances delivered -> completed.
+-- The confirmation itself is the authoritative completion event.
 reset role;
 
 do $three_company_pilot_result$
@@ -220,18 +213,28 @@ begin
     raise exception 'THREE_COMPANY_PILOT_DID_NOT_COMPLETE';
   end if;
   if (select version from public.operations
-      where id='73000000-0000-0000-0000-000000000001') <> 9 then
-    raise exception 'THREE_COMPANY_PILOT_VERSION_SEQUENCE_INVALID_EXPECTED_9';
+      where id='73000000-0000-0000-0000-000000000001') <> 6 then
+    raise exception 'THREE_COMPANY_PILOT_VERSION_SEQUENCE_INVALID_EXPECTED_6';
   end if;
   if (select count(*) from public.operation_audit_events
       where operation_id='73000000-0000-0000-0000-000000000001'
-        and event_type='operation.transition') <> 5 then
+        and event_type='operation.transition') <> 3 then
     raise exception 'THREE_COMPANY_PILOT_TRANSITION_AUDIT_INCOMPLETE';
   end if;
   if (select count(*) from public.operation_audit_events
       where operation_id='73000000-0000-0000-0000-000000000001'
         and event_type='participant.accepted') <> 3 then
     raise exception 'THREE_COMPANY_PILOT_ACCEPTANCE_AUDIT_INCOMPLETE';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where operation_id='73000000-0000-0000-0000-000000000001'
+        and event_type='operation.accepted') <> 1 then
+    raise exception 'THREE_COMPANY_PILOT_AUTOMATIC_ACCEPTANCE_AUDIT_INCOMPLETE';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where operation_id='73000000-0000-0000-0000-000000000001'
+        and event_type='confirmation.receipt') <> 1 then
+    raise exception 'THREE_COMPANY_PILOT_RECEIPT_AUDIT_INCOMPLETE';
   end if;
 end
 $three_company_pilot_result$;
