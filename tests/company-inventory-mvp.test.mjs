@@ -1,6 +1,23 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
+const expectedMigrationFiles = [
+  '20261113212739_company_inventory_mvp.sql',
+  '20261113212950_inventory_stock_view_privileges_hardening.sql',
+  '20261113213334_inventory_reservation_lock_order_and_view_hardening.sql',
+  '20261114004644_guard_operation_incident_resolution.sql',
+  '20261114005027_bind_trust_levels_to_shared_privileges.sql'
+];
+const availableMigrationFiles = fs.readdirSync('supabase/migrations');
+for (const file of expectedMigrationFiles) {
+  assert.ok(availableMigrationFiles.includes(file), `Missing migration matching applied Supabase history: ${file}`);
+}
+assert.deepEqual([...expectedMigrationFiles].sort(), expectedMigrationFiles, 'Applied migrations must remain in chronological order');
+assert.ok(!availableMigrationFiles.includes('20261113150000_company_inventory_mvp.sql'));
+assert.ok(!availableMigrationFiles.includes('20261113230000_inventory_reservation_lock_order_and_view_hardening.sql'));
+assert.ok(!availableMigrationFiles.includes('20261114090000_guard_operation_incident_resolution.sql'));
+assert.ok(!availableMigrationFiles.includes('20261114110000_bind_trust_levels_to_shared_privileges.sql'));
+
 const migration = fs.readFileSync(
   'supabase/migrations/20261113212739_company_inventory_mvp.sql', 'utf8'
 );
