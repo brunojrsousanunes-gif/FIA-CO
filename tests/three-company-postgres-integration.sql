@@ -24,6 +24,7 @@ insert into public.organization_members(organization_id,user_id,member_role,stat
  ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000002','manager','active'),
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003','ceo','active'),
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000004','member','active'),
+ ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000001','member','active'),
  ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006','manager','active');
 
 insert into private.organization_security_profiles
@@ -39,10 +40,10 @@ values
   '{"organizationIdentified":true,"termsAccepted":true,"tenantBoundaryReady":true,"auditReady":true,"incidentContactDefined":true,"identityVerified":true,"strongAuthenticationReady":true,"secretsManaged":true,"dataMinimizationReady":true,"retentionPolicyReady":true,"securityTestsPassed":true,"dataPermitsReady":true,"grantExpiryReady":true,"grantRevocationReady":true,"partnerIdentityVerified":true,"purposeLimitationReady":true,"crossOrgIsolationTestsPassed":true}'::jsonb,
   now(),now()+interval '30 days','71000000-0000-0000-0000-000000000001');
 
-insert into public.operations(id,reference,title,status,amount_cents,currency,created_by)
+insert into public.operations(id,reference,title,status,amount_cents,currency,created_by,owner_organization_id)
 values ('73000000-0000-0000-0000-000000000001','FIA-PILOT-3ROLE-001',
         'Pieza industrial ficticia — ensayo de tres empresas','draft',125000,'EUR',
-        '71000000-0000-0000-0000-000000000001');
+        '71000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001');
 
 insert into public.operation_participants
  (operation_id,organization_id,participant_role,status,invited_by)
@@ -50,6 +51,23 @@ values
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001','seller','invited','71000000-0000-0000-0000-000000000001'),
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000001'),
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000001');
+
+do $explicit_owner_is_not_inferred_from_memberships$
+begin
+  if private.operation_owner_organization('73000000-0000-0000-0000-000000000001')
+     <> '72000000-0000-0000-0000-000000000001'::uuid then
+    raise exception 'OPERATION_OWNER_NOT_BOUND_TO_EXPLICIT_COMPANY';
+  end if;
+  begin
+    update public.operations
+    set owner_organization_id='72000000-0000-0000-0000-000000000002'
+    where id='73000000-0000-0000-0000-000000000001';
+    raise exception 'OPERATION_OWNER_WAS_CHANGED';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'OPERATION_OWNER_IMMUTABLE' then raise; end if;
+  end;
+end
+$explicit_owner_is_not_inferred_from_memberships$;
 
 -- L3 requires an explicit, traceable company authorization from a
 -- verified CEO OR a verified zone manager. A normal member cannot
