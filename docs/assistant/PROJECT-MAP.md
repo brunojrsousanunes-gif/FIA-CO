@@ -93,7 +93,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Niveles de presencia humana](../FIA-HUMAN-PRESENCE-CHECK-V1.md)
 - [Seguridad multiusuario](../MULTIUSER-SECURITY.md)
 - [Modelo de autorización para inversores](../AUTHORIZATION-PACK-INVESTOR-READY.md)
-- [Arquitectura de niveles de información](../../config/information-access-levels.json)
+- [Arquitectura de niveles de información](../../config/information-access-levels.v1.json)
 - [Niveles de seguridad Trust](../../config/trust-security-levels.v1.json)
 - [Estrategia de maximización de utilidad de seguridad](../FIA-SECURITY-UTILITY-MAXIMIZATION-V1.md)
 
