@@ -33,7 +33,8 @@ const expectedNewMigrations = [
   '20261115000000_owner_membership_access_hardening.sql',
   '20261115010000_make_l3_authorization_retry_idempotent.sql',
   '20261115020000_harden_operation_rpc_idempotency.sql',
-  '20261115030000_empty_search_path_for_security_definer_helpers.sql'
+  '20261115030000_empty_search_path_for_security_definer_helpers.sql',
+  '20261115040000_harden_l3_revocation_and_reservation_retries.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
@@ -67,6 +68,12 @@ for (const signature of [
     'SECURITY DEFINER helper must use an empty search_path: ' + signature
   );
 }
+const l3AndReservationHardening = fs.readFileSync(
+  'supabase/migrations/20261115040000_harden_l3_revocation_and_reservation_retries.sql', 'utf8'
+);
+assert.match(l3AndReservationHardening, /create or replace function public\.revoke_organization_l3_authorization[\s\S]*?authority_verification_id is distinct from authority\.id/i);
+assert.match(l3AndReservationHardening, /create or replace function public\.release_inventory_reservation[\s\S]*?reservation_row\.status=final_status[\s\S]*?return reservation_row/i);
+
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
   '20260916113200_server_validated_transitions.sql'
