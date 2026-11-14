@@ -143,13 +143,15 @@ begin
   select v.* into authority
   from private.organization_l3_authority_verifications v
   where v.organization_id=target_organization and v.user_id=caller
-    and v.verification_status='verified'
-    and v.verified_at <= statement_timestamp()
-    and v.valid_until > statement_timestamp()
-  order by v.verified_at desc,v.id desc
+  order by v.created_at desc,v.id desc
   limit 1;
-  if not found then
+  if not found or authority.verification_status <> 'verified'
+     or authority.verified_at > statement_timestamp()
+     or authority.valid_until <= statement_timestamp() then
     raise exception 'L3_AUTHORITY_NOT_VERIFIED' using errcode='42501';
+  end if;
+  if expiry > authority.valid_until then
+    raise exception 'AUTHORIZATION_EXCEEDS_AUTHORITY_VERIFICATION' using errcode='22023';
   end if;
 
   insert into private.organization_l3_authorization_events
@@ -200,12 +202,11 @@ begin
   select v.* into authority
   from private.organization_l3_authority_verifications v
   where v.organization_id=target_organization and v.user_id=caller
-    and v.verification_status='verified'
-    and v.verified_at <= statement_timestamp()
-    and v.valid_until > statement_timestamp()
-  order by v.verified_at desc,v.id desc
+  order by v.created_at desc,v.id desc
   limit 1;
-  if not found then
+  if not found or authority.verification_status <> 'verified'
+     or authority.verified_at > statement_timestamp()
+     or authority.valid_until <= statement_timestamp() then
     raise exception 'L3_AUTHORITY_NOT_VERIFIED' using errcode='42501';
   end if;
 
