@@ -227,7 +227,7 @@ begin
     (organization_id,actor_id,authority_verification_id,authority_type,action,request_key,valid_until)
   values
     (target_organization,caller,authority.id,authority.authority_type,'authorized',request_key,expiry)
-  on conflict (request_key) do nothing;
+  on conflict on constraint organization_l3_authorization_events_request_key_key do nothing;
 
   select e.id into event_id
   from private.organization_l3_authorization_events e
@@ -297,7 +297,7 @@ begin
     (organization_id,actor_id,authority_verification_id,authority_type,action,request_key,valid_until)
   values
     (target_organization,caller,authority.id,authority.authority_type,'revoked',request_key,null)
-  on conflict (request_key) do nothing;
+  on conflict on constraint organization_l3_authorization_events_request_key_key do nothing;
 
   select e.id into event_id
   from private.organization_l3_authorization_events e
