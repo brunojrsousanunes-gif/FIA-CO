@@ -3,7 +3,7 @@ create or replace function private.is_org_finance_manager(target_org uuid)
 returns boolean language sql stable security definer set search_path=pg_catalog,public as $$
 select (select auth.uid()) is not null and exists(select 1 from public.organization_members om
 where om.organization_id=target_org and om.user_id=(select auth.uid()) and om.status='active'
-and om.member_role in ('manager','admin','ceo')); $$$;
+and om.member_role in ('manager','admin','ceo')); $$;
 revoke all on function private.is_org_finance_manager(uuid) from public,anon;
 grant execute on function private.is_org_finance_manager(uuid) to authenticated;
 
@@ -22,7 +22,7 @@ update public.operation_cost_items ci set organization_id=private.operation_owne
 do $check_cost_item_ownership$ begin
 if exists(select 1 from public.operation_cost_items where organization_id is null) then
 raise exception 'COST_ITEM_OWNER_AMBIGUOUS: assign each existing cost item to its verified company before retrying'; end if;
-end $check_cost_item_ownership$$;
+end $check_cost_item_ownership$;
 alter table public.operation_cost_items alter column organization_id set not null;
 
 create or replace function private.enforce_cost_item_company()
@@ -124,7 +124,7 @@ update public.operations set status=case when status='blocked' and open_blockers
 status_before_block=case when status='blocked' and open_blockers=0 then null else status_before_block end,updated_at=now()
 where id=target_operation;
 end if;
-end; $$$;
+end; $$;
 revoke all on function private.recalculate_operation_margin(uuid) from public,anon,authenticated;
 
 revoke select on public.operations from authenticated;
@@ -145,5 +145,5 @@ on public.operation_incidents to authenticated;
 do $rebuild_financial_summaries$ declare op record; begin
 for op in select id from public.operations where private.operation_owner_organization(id) is not null
 loop perform private.recalculate_operation_margin(op.id); end loop;
-end $rebuild_financial_summaries$$;
+end $rebuild_financial_summaries$;
 commit;
