@@ -98,6 +98,29 @@ with check (
   )
 );
 
+-- Transaction amounts are exposed only through the owner-scoped finance table.
+-- The legacy operations amount fields must not bypass that boundary.
+revoke select (amount_cents, currency) on public.operations from anon, authenticated;
+
+-- A participant may identify the other organizations in an operation they can access.
+-- Only the organization row is exposed; private finance data remains separately scoped.
+drop policy if exists organizations_visible_select on public.organizations;
+create policy organizations_visible_select
+on public.organizations
+for select
+to authenticated
+using (
+  is_synthetic = true
+  or (select private.is_org_member(organizations.id))
+  or exists (
+    select 1
+    from public.operation_participants op
+    where op.organization_id = organizations.id
+      and op.status in ('invited','accepted')
+      and private.can_access_operation(op.operation_id)
+  )
+);
+
 revoke all on function private.can_access_operation(uuid) from public, anon;
 revoke all on function private.can_manage_operation(uuid) from public, anon;
 grant execute on function private.can_access_operation(uuid) to authenticated;
