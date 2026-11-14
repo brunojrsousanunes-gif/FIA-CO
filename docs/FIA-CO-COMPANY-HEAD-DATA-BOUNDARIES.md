@@ -33,6 +33,13 @@ L3 permite colaborar en un expediente; **no es un permiso general para consultar
 - `operation_incidents` permite a los participantes leer descripciones y notas de resolución. Debe distinguirse la incidencia compartida que afecta a la operación de las notas internas de una empresa.
 - `private.can_manage_operation` se basa en `operations.created_by`; no concede control al CEO de una empresa participante. No se debe sustituir por una regla que permita al CEO de una empresa gestionar datos de todas las partes.
 
+- La pertenencia de empresa tiene una restricción que solo admite `member`, `manager` y `admin`; el rol `ceo` aún no existe en esa tabla.
+- La única función revisada que usa directamente `member_role` es `private.is_inventory_manager`, que actualmente solo admite `manager` y `admin`. El CEO deberá añadirse de forma explícita, no hacerse pasar por `admin`.
+- `private.can_manage_operation` sigue dependiendo de `operations.created_by`. No debe ampliarse para que el CEO de una empresa pueda gestionar los datos internos de las otras partes.
+- Las políticas de participantes, confirmaciones, evidencias, incidencias, presupuestos logísticos, notificaciones y auditoría permiten lectura a participantes del expediente. Campos como `event_data`, `metadata`, `storage_path`, `description`, `resolution_note` y `message` necesitan clasificación y alcance explícitos antes de considerarlos compartibles.
+- `organization_members` no ofrece una política de alta/modificación directa al usuario autenticado; el rol CEO debe asignarse mediante un proceso administrativo confiable, nunca mediante `user_metadata` ni un campo editable por el propio usuario.
+- No se encontraron buckets ni políticas de Storage en la auditoría actual. Por tanto, la protección efectiva de archivos todavía no está validada y debe revisarse cuando se habilite el almacenamiento.
+
 ## Riesgo detectado
 
 La frontera actual protege varias tablas por pertenencia a una organización, pero el expediente compartido abre la lectura de algunas tablas completas a todas las empresas participantes. Esto incluye márgenes internos y partidas de costes. Por ello, el modelo actual no demuestra todavía la regla de que una empresa no pueda consultar la información sensible interna de otra.
