@@ -21,5 +21,96 @@ function reset(){state={created:false,index:0,reference:'',incident:false,closed
 function summary(){const lines=['FIA&CO · RESUMEN DE OPERACIÓN SINTÉTICA',`Referencia: ${state.reference}`,'Estado: CERRADA','Datos reales: NO','Fondos movidos por FIA&CO: NO','',...state.events.slice().reverse().map(x=>`${x.at} · ${x.text}`),'','Documento de demostración sin efectos jurídicos.'];const url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`${state.reference}-resumen.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $$('[data-action]').forEach(button=>button.addEventListener('click',()=>{const action=button.dataset.action;if(action==='create')create();else if(action==='incident')incident();else if(action==='resolve')resolve();else advance(action);}));
 $('[data-reset]').addEventListener('click',reset);download.addEventListener('click',summary);$('[data-field="type"]').addEventListener('change',event=>{const type=event.target.value;$('[data-model-link]').href=`form-models.html?model=${encodeURIComponent(type)}`;});
+
+ // Authenticated backend connection. Only a publishable key is present in the
+ // browser; all data access is governed by Supabase RLS and column privileges.
+ const SB_URL='https://etttredbkbcgqwciipls.supabase.co';
+ const SB_PUBLIC_KEY='sb_publishable_xds7pTBOHvywaLIpg4W3eA_d_guZbA9';
+ const loginForm=$('[data-backend-login]');
+ const backendState=$('[data-backend-state]');
+ const backendMessage=$('[data-backend-message]');
+ const backendActions=$('[data-backend-actions]');
+ const backendResults=$('[data-backend-results]');
+ const backendList=$('[data-backend-list]');
+ let backendSession=null;
+ let backendBusy=false;
+ function backendStatus(text,kind=''){backendMessage.textContent=text;backendMessage.className=`backend-message ${kind}`;}
+ function backendStateText(text){backendState.textContent=text;}
+ async function authCall(path,body){
+  const response=await fetch(`${SB_URL}/auth/v1/${path}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_PUBLIC_KEY},body:JSON.stringify(body),cache:'no-store',credentials:'omit'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.msg||data.message||data.error_description||'No se pudo completar la autenticación.');
+  return data;
+ }
+ async function ensureBackendSession(){
+  if(!backendSession)throw new Error('Inicia sesión para consultar tus operaciones.');
+  if(backendSession.expiresAt-Date.now()/1000<60){
+   const refreshed=await authCall('token?grant_type=refresh_token',{refresh_token:backendSession.refreshToken});
+   backendSession={accessToken:refreshed.access_token,refreshToken:refreshed.refresh_token,expiresAt:Date.now()/1000+Number(refreshed.expires_in||3600),user:refreshed.user};
+  }
+  return backendSession;
+ }
+ async function backendGet(path){
+  const current=await ensureBackendSession();
+  const response=await fetch(`${SB_URL}/rest/v1/${path}`,{method:'GET',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`,'Accept':'application/json'},cache:'no-store',credentials:'omit'});
+  const data=await response.json().catch(()=>[]);
+  if(!response.ok)throw new Error(data.message||data.details||'No se pudieron consultar los datos autorizados.');
+  return data;
+ }
+ function renderBackendRows(rows){
+  backendList.replaceChildren();
+  if(!rows.length){const li=document.createElement('li');li.className='backend-empty';li.textContent='No hay operaciones visibles para esta cuenta.';backendList.append(li);return;}
+  for(const op of rows){
+   const li=document.createElement('li'),title=document.createElement('strong'),meta=document.createElement('span'),ref=document.createElement('small');
+   title.textContent=op.title||'Operación sin título';ref.textContent=op.reference||'Sin referencia';
+   meta.textContent=`${String(op.status||'').toUpperCase()} · ${op.operation_type||'operación'} · v${op.version||1}`;
+   li.append(ref,title,meta);backendList.append(li);
+  }
+ }
+ async function loadBackend(){
+  if(backendBusy||!backendSession)return;
+  backendBusy=true;backendStateText('CONSULTANDO');backendStatus('Comprobando permisos de tu cuenta…');
+  try{
+   const [members,operations]=await Promise.all([
+    backendGet(`organization_members?select=organization_id,member_role&user_id=eq.${encodeURIComponent(backendSession.user.id)}&status=eq.active`),
+    backendGet('operations?select=id,reference,title,status,operation_type,version,created_at&order=created_at.desc&limit=50')
+   ]);
+   $('[data-backend-memberships]').textContent=`Empresas activas: ${members.length}`;
+   $('[data-backend-count]').textContent=`Operaciones visibles: ${operations.length}`;
+   renderBackendRows(operations);backendResults.hidden=false;backendStateText('CONECTADO');
+   backendStatus('Conexión autenticada. La base de datos ha aplicado los permisos de esta cuenta.','success');
+  }catch(error){
+   backendStateText('ERROR DE ACCESO');backendStatus(error.message||'No se pudo consultar el backend.','error');
+   if(/JWT|refresh token|session/i.test(error.message||''))logoutBackend(false);
+  }finally{backendBusy=false;}
+ }
+ function logoutBackend(notify=true){
+  backendSession=null;backendResults.hidden=true;backendActions.hidden=true;loginForm.hidden=false;
+  loginForm.reset();backendList.replaceChildren();backendStateText('DESCONECTADO');
+  if(notify)backendStatus('Sesión cerrada. No se ha guardado la contraseña ni la sesión.');
+ }
+ loginForm.addEventListener('submit',async event=>{
+  event.preventDefault();if(backendBusy)return;
+  const email=loginForm.elements.email.value.trim(),password=loginForm.elements.password.value;
+  if(!email||!password){backendStatus('Introduce el correo y la contraseña de una cuenta habilitada.','error');return;}
+  backendBusy=true;backendStateText('AUTENTICANDO');backendStatus('Verificando la cuenta…');
+  try{
+   const result=await authCall('token?grant_type=password',{email,password});
+   if(!result.access_token||!result.refresh_token||!result.user?.id)throw new Error('La respuesta de autenticación está incompleta.');
+   backendSession={accessToken:result.access_token,refreshToken:result.refresh_token,expiresAt:Date.now()/1000+Number(result.expires_in||3600),user:result.user};
+   loginForm.reset();loginForm.hidden=true;backendActions.hidden=false;
+   $('[data-backend-user]').textContent='Cuenta autenticada · sesión solo en memoria';
+   backendBusy=false;await loadBackend();
+  }catch(error){backendStateText('DESCONECTADO');backendStatus(error.message||'No se pudo iniciar sesión.','error');}
+  finally{backendBusy=false;}
+ });
+ $('[data-backend-refresh]').addEventListener('click',loadBackend);
+ $('[data-backend-logout]').addEventListener('click',async()=>{
+  const current=backendSession;
+  if(current){try{await fetch(`${SB_URL}/auth/v1/logout`,{method:'POST',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`},cache:'no-store',credentials:'omit'});}catch(_error){}}
+  logoutBackend();
+ });
+ window.addEventListener('pagehide',()=>{backendSession=null;});
+
 window.addEventListener('pagehide',()=>{state.events=[];});show(0);
 })();
