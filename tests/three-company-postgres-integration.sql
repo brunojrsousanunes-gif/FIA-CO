@@ -85,6 +85,35 @@ end
 $draft_creation_request_key_is_payload_bound$;
 reset role;
 
+-- A legacy collision across two operations must not silently replay one draft.
+select private.append_operation_audit(
+ '73000000-0000-0000-0000-000000000001',
+ 'test.idempotency.collision',
+ '71000000-0000-0000-0000-000000000001',
+ '{}'::jsonb,
+ '74000000-0000-0000-0000-000000000020'
+);
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $draft_request_key_rejects_multiple_audit_events$
+begin
+  begin
+    perform public.create_operation_draft(
+      'Pedido de prueba de idempotencia','standard',
+      '72000000-0000-0000-0000-000000000001',
+      '72000000-0000-0000-0000-000000000001',
+      '72000000-0000-0000-0000-000000000003',
+      '72000000-0000-0000-0000-000000000002',
+      '74000000-0000-0000-0000-000000000020'
+    );
+    raise exception 'DRAFT_REQUEST_KEY_WITH_MULTIPLE_EVENTS_REPLAYED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$draft_request_key_rejects_multiple_audit_events$;
+reset role;
+
 insert into private.organization_security_profiles
  (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
 values
