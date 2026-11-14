@@ -12,7 +12,7 @@ insert into public.organizations(id,name,status) values
  ('20000000-0000-0000-0000-000000000002','Empresa Dos','active');
 
 insert into public.organization_members(organization_id,user_id,member_role,status) values
- ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','manager','active'),
+ ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','ceo','active'),
  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active');
 
 insert into public.operations(id,reference,title,status,created_by) values
