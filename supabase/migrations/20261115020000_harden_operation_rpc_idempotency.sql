@@ -166,15 +166,20 @@ begin
 
   perform pg_advisory_xact_lock(hashtextextended(caller::text || ':' || request_key::text,0));
 
-  select e,o into existing_event,existing_operation
+  select e.* into existing_event
   from public.operation_audit_events e
-  join public.operations o on o.id=e.operation_id
   where e.actor_id=caller and e.request_id=request_key
     and e.event_type='operation.created'
   order by e.id desc
   limit 1;
 
   if found then
+    select o.* into existing_operation
+    from public.operations o
+    where o.id=existing_event.operation_id;
+    if not found then
+      raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
+    end if;
     if existing_event.event_data->>'owner_organization_id' is distinct from target_owner_organization::text
        or existing_event.event_data->>'seller_organization_id' is distinct from target_seller_organization::text
        or existing_event.event_data->>'carrier_organization_id' is distinct from target_carrier_organization::text
