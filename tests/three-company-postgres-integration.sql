@@ -107,7 +107,8 @@ $three_independent_acceptors$;
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
 select public.transition_operation(
- '73000000-0000-0000-0000-000000000001','accepted',2,
+ '73000000-0000-0000-0000-000000000001','accepted',
+ (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
  '74000000-0000-0000-0000-000000000005');
 
 -- Seller and buyer cannot perform the carrier's dispatch transition.
@@ -115,7 +116,8 @@ do $seller_cannot_dispatch$
 begin
   begin
     perform public.transition_operation(
-      '73000000-0000-0000-0000-000000000001','in_transit',3,
+      '73000000-0000-0000-0000-000000000001','in_transit',
+      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
       '74000000-0000-0000-0000-000000000006');
     raise exception 'SELLER_PERFORMED_CARRIER_TRANSITION';
   exception when insufficient_privilege then
@@ -131,7 +133,8 @@ do $buyer_cannot_dispatch$
 begin
   begin
     perform public.transition_operation(
-      '73000000-0000-0000-0000-000000000001','in_transit',3,
+      '73000000-0000-0000-0000-000000000001','in_transit',
+      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
       '74000000-0000-0000-0000-000000000007');
     raise exception 'BUYER_PERFORMED_CARRIER_TRANSITION';
   exception when insufficient_privilege then
@@ -149,7 +152,8 @@ do $other_carrier_member_cannot_dispatch$
 begin
   begin
     perform public.transition_operation(
-      '73000000-0000-0000-0000-000000000001','in_transit',3,
+      '73000000-0000-0000-0000-000000000001','in_transit',
+      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
       '74000000-0000-0000-0000-000000000008');
     raise exception 'NON_ACCEPTING_CARRIER_MEMBER_PERFORMED_TRANSITION';
   exception when insufficient_privilege then
@@ -163,10 +167,12 @@ reset role;
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000003';
 set role authenticated;
 select public.transition_operation(
- '73000000-0000-0000-0000-000000000001','in_transit',3,
+ '73000000-0000-0000-0000-000000000001','in_transit',
+      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
  '74000000-0000-0000-0000-000000000009');
 select public.transition_operation(
- '73000000-0000-0000-0000-000000000001','delivered',4,
+ '73000000-0000-0000-0000-000000000001','delivered',
+      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
  '74000000-0000-0000-0000-000000000010');
 
 -- Buyer cannot close the operation until its own receipt confirmation exists.
@@ -177,7 +183,8 @@ do $buyer_must_confirm_receipt$
 begin
   begin
     perform public.transition_operation(
-      '73000000-0000-0000-0000-000000000001','completed',5,
+      '73000000-0000-0000-0000-000000000001','completed',
+      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
       '74000000-0000-0000-0000-000000000011');
     raise exception 'BUYER_CLOSED_WITHOUT_RECEIPT_CONFIRMATION';
   exception when insufficient_privilege then
@@ -193,7 +200,8 @@ values
   '71000000-0000-0000-0000-000000000002');
 
 select public.transition_operation(
- '73000000-0000-0000-0000-000000000001','completed',5,
+ '73000000-0000-0000-0000-000000000001','completed',
+      (select version from public.operations where id='73000000-0000-0000-0000-000000000001'),
  '74000000-0000-0000-0000-000000000012');
 reset role;
 
@@ -204,8 +212,8 @@ begin
     raise exception 'THREE_COMPANY_PILOT_DID_NOT_COMPLETE';
   end if;
   if (select version from public.operations
-      where id='73000000-0000-0000-0000-000000000001') <> 6 then
-    raise exception 'THREE_COMPANY_PILOT_VERSION_SEQUENCE_INVALID';
+      where id='73000000-0000-0000-0000-000000000001') <> 9 then
+    raise exception 'THREE_COMPANY_PILOT_VERSION_SEQUENCE_INVALID_EXPECTED_9';
   end if;
   if (select count(*) from public.operation_audit_events
       where operation_id='73000000-0000-0000-0000-000000000001'
