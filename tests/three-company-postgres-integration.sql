@@ -56,11 +56,11 @@ insert into private.organization_l3_authority_verifications
  (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
 values
  ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000001',
-  'ceo','verified','ci://authority/company-head-1','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days'),
+  'ceo','verified','ci://authority/ceo-1','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days'),
  ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000002',
   'zone_manager','verified','ci://authority/zone-manager-2','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days'),
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003',
-  'ceo','verified','ci://authority/company-head-3','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
+  'ceo','verified','ci://authority/ceo-3','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
 
 -- Consent cannot outlive the verified authority that grants it.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
