@@ -37,7 +37,8 @@ Los valores +/− indican commits por delante/por detrás de `main`, no un juici
 | CEO y gerente de zona como vías alternativas de autoridad L3 | Migraciones y pruebas en #184; CI #520 SUCCESS | Implementado en rama de trabajo; despliegue real pendiente |
 | Revocación de autoridad CEO por baja, suspensión o cambio de cargo | Migración y prueba de integración en #184 | Probado en PostgreSQL aislado |
 | Flujo de tres empresas | Prueba con identidades separadas en #184 | Probado en CI; cuentas piloto reales pendientes |
-| Aislamiento de información financiera | Migración de límites por organización y pruebas negativas | Probado en CI; revisión de runtime alojado pendiente |
+| Propiedad explícita de la operación | `operations.owner_organization_id`; backfill heredado solo si identifica una única empresa; propiedad inmutable una vez asignada | Implementado en rama #184; CI PostgreSQL en ejecución |
+| Aislamiento de información financiera | CEO/admin de la empresa titular consultan sus costes y margen; los participantes ajenos no reciben esos datos | Prueba sintética previa PASS; nueva prueba de pertenencia múltiple en CI pendiente |
 | Inventario | Integración y pruebas de inventario | Probado en CI |
 | Historial de migraciones Supabase | PR #177 alinea nombres y separa baseline histórica | Pendiente de reconciliar con #184 |
 | Frontera pública/privada de Pages | PR #178 incorpora allowlist, test de artefacto y validación de ruta de salida | Pendiente de reconciliar con #184 |
@@ -46,13 +47,13 @@ Los valores +/− indican commits por delante/por detrás de `main`, no un juici
 | Autenticación real y comprobación documental de cargos | CI utiliza identidades/fixtures sintéticos | Pendiente antes de piloto con empresas |
 | Matriz exhaustiva de todos los roles y privilegios | Solo se han validado los límites concretos descritos arriba | Pendiente de cierre |
 
-## 4. Riesgo importante de publicación
+## 4. Límite financiero pendiente\n\nLa migración actual delimita las finanzas de la **empresa titular de la operación**. No constituye todavía un libro de costes independiente para cada una de las tres empresas participantes. Si se decide que vendedor, comprador y transportista deben registrar cada uno sus propios costes internos dentro del mismo expediente, hará falta un modelo por organización y reglas explícitas para ingresos, costes logísticos y márgenes; no se deben sumar importes de empresas distintas sin esa definición.\n\nLas operaciones históricas cuya empresa titular no pueda identificarse de forma inequívoca quedan sin titular financiero. Si existen partidas de coste históricas sin empresa verificable, la migración aborta en vez de asignarlas por aproximación.\n\n## 5. Riesgo importante de publicación
 
 El repositorio GitHub es público. La allowlist de GitHub Pages limita lo que se publica en el sitio Pages, pero **no vuelve privados los archivos versionados en GitHub**. La PR #178 documenta que el código del Centro privado está presente en el repositorio y que la clave publicable de Supabase no es un secreto. La confidencialidad debe descansar en Auth, RLS, privilegios y controles de servidor, no en ocultar rutas o usar `noindex`.
 
 Antes de incorporar la frontera Pages a la línea principal, revisar también si los archivos fuente privados deben permanecer en un repositorio público. No introducir secretos en el repositorio ni en el frontend.
 
-## 5. Secuencia segura de consolidación
+## 6. Secuencia segura de consolidación
 
 1. Mantener `main` sin cambios y conservar las ramas históricas.
 2. Reconciliar primero PR #177 (historial de migraciones) con la cadena de migraciones que ejecuta #184.
@@ -62,7 +63,7 @@ Antes de incorporar la frontera Pages a la línea principal, revisar también si
 6. Verificar Auth, RLS, Storage y configuración real en un entorno de pruebas separado.
 7. Solo después de revisión y autorización expresa, decidir qué PR integrar en `main`. No borrar ramas antiguas hasta comprobar que existe una referencia de recuperación adecuada.
 
-## 6. Límites de esta auditoría
+## 7. Límites de esta auditoría
 
 - Se consultaron metadatos de repositorio, ramas, PR y comparaciones de commits; no se descargó ni ejecutó localmente el repositorio completo.
 - Los resultados de CI son pruebas aisladas con datos sintéticos, no certificación de producción.
