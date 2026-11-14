@@ -82,19 +82,26 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   backendBusy=true;backendStateText('CONSULTANDO');backendStatus('Comprobando permisos de tu cuenta…');
   try{
    await ensureBackendSession();
-   const [members,operations]=await Promise.all([
-    backendGet(`organization_members?select=organization_id,member_role&user_id=eq.${encodeURIComponent(backendSession.user.id)}&status=eq.active`),
-    backendGet('operations?select=id,reference,title,status,operation_type,version,created_at&order=created_at.desc&limit=50')
+   const members=await backendGet(`organization_members?select=organization_id,member_role&user_id=eq.${encodeURIComponent(backendSession.user.id)}&status=eq.active`);
+   const memberOrgIds=members.map(member=>member.organization_id);
+   const [organizations,operations]=await Promise.all([
+    memberOrgIds.length
+     ? backendGet(`organizations?select=id,status,is_synthetic&id=in.(${memberOrgIds.join(',')})&status=eq.active&is_synthetic=eq.false`)
+     : Promise.resolve([]),
+    backendGet('operations?select=id,reference,title,status,operation_type,version,created_at&is_synthetic=eq.false&order=created_at.desc&limit=50')
    ]);
-   activeMemberships=members;
+   const realActiveOrganizationIds=new Set(organizations.map(org=>org.id));
+   activeMemberships=members.filter(member=>realActiveOrganizationIds.has(member.organization_id));
    backendOwnerSelect.replaceChildren();
-   const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Selecciona una empresa tuya';backendOwnerSelect.append(placeholder);
-   for(const member of members){const option=document.createElement('option');option.value=member.organization_id;option.textContent=`${member.member_role} · ${member.organization_id}`;backendOwnerSelect.append(option);}
-   backendCreateForm.hidden=members.length===0;
-   $('[data-backend-memberships]').textContent=`Empresas activas: ${members.length}`;
-   $('[data-backend-count]').textContent=`Operaciones visibles: ${operations.length}`;
+   const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Selecciona una empresa real tuya';backendOwnerSelect.append(placeholder);
+   for(const member of activeMemberships){const option=document.createElement('option');option.value=member.organization_id;option.textContent=`${member.member_role} · ${member.organization_id}`;backendOwnerSelect.append(option);}
+   backendCreateForm.hidden=activeMemberships.length===0;
+   $('[data-backend-memberships]').textContent=`Empresas reales activas: ${activeMemberships.length} · Pertenencias activas: ${members.length}`;
+   $('[data-backend-count]').textContent=`Operaciones reales visibles: ${operations.length}`;
    renderBackendRows(operations);backendResults.hidden=false;backendStateText('CONECTADO');
-   backendStatus('Conexión autenticada. La base de datos ha aplicado los permisos de esta cuenta.','success');
+   backendStatus(activeMemberships.length
+    ? 'Conexión autenticada. Se muestran solo empresas y operaciones reales autorizadas.'
+    : 'Conexión autenticada, pero esta cuenta solo tiene pertenencias sintéticas o ninguna empresa real activa. El alta de borradores reales permanece bloqueada.','success');
   }catch(error){
    backendStateText('ERROR DE ACCESO');backendStatus(error.message||'No se pudo consultar el backend.','error');
    if(/JWT|refresh token|session/i.test(error.message||''))logoutBackend(false);
