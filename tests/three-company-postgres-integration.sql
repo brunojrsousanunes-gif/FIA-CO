@@ -54,6 +54,35 @@ values
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000001'),
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000001');
 
+do $financial_amount_columns_are_private$
+begin
+  if has_column_privilege('authenticated','public.operations','amount_cents','SELECT')
+     or has_column_privilege('authenticated','public.operations','currency','SELECT') then
+    raise exception 'LEGACY_OPERATION_FINANCIAL_COLUMNS_EXPOSED';
+  end if;
+end
+$financial_amount_columns_are_private$;
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $participants_can_identify_counterpart_companies$
+declare visible_count integer;
+begin
+  select count(*) into visible_count
+  from public.organizations
+  where id in (
+    '72000000-0000-0000-0000-000000000001',
+    '72000000-0000-0000-0000-000000000002',
+    '72000000-0000-0000-0000-000000000003'
+  );
+  if visible_count <> 3 then
+    raise exception 'PARTICIPANT_COMPANY_NAMES_NOT_VISIBLE:%',visible_count;
+  end if;
+end
+$participants_can_identify_counterpart_companies$;
+reset role;
+
+
 -- Creator access is also tenant-scoped: creator status alone is not a permanent grant.
 insert into public.operations(id,reference,title,status,created_by,owner_organization_id)
 values ('73000000-0000-0000-0000-000000000002','FIA-PILOT-OWNER-REVOKE-001',
