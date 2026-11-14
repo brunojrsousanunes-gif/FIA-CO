@@ -111,6 +111,17 @@ La ausencia de implementación no significa falta de valor. En particular, no el
 | 4 | Verificar tres cuentas/organizaciones reales en entorno de prueba separado, con datos sintéticos | Pendiente |
 | 5 | Comprobar el estado remoto de Supabase mediante lectura antes de proponer cualquier migración | Pendiente |
 
-## 8. Registro de cambios de este documento
+## 8. Organización documental incorporada
+
+- `README.md` es la entrada rápida del repositorio.
+- `docs/assistant/PROJECT-MAP.md` es el mapa maestro: conecta áreas funcionales, código, configuración, base de datos, pruebas y documentación.
+- `docs/assistant/DOCUMENTATION-CATALOG.md` explica jerarquía y selección de fuentes.
+- `docs/assistant/WORK-REGISTER.md` mantiene la cola de trabajo y criterios de cierre.
+- `docs/assistant/DECISION-LOG.md` queda reducido a límites técnicos mínimos para la continuidad de la IA; no es un registro para el propietario ni requiere que lo mantenga.
+- No se movieron ni eliminaron documentos existentes.
+- Se comprobaron enlaces relativos en README y cinco documentos de continuidad contra el árbol de GitHub; se corrigieron cuatro nombres de configuración que habían cambiado a sufijo `.v1.json`.
+- La organización se añadió en la rama de integración, sin modificar `main` ni Supabase remoto.
+
+## 9. Registro de cambios de este documento
 
 - **14-11-2026:** creado como punto único de traspaso para asistentes. Resume el estado verificado de #185, CI run 43601293253 y la integración selectiva de seguridad procedente de #171. No modifica ni sustituye los documentos históricos o jurídicos.
