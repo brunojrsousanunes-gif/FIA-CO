@@ -94,6 +94,16 @@ begin
   if exists(select 1 from public.operations where id='73000000-0000-0000-0000-000000000002') then
     raise exception 'REVOKED_CREATOR_CAN_STILL_READ_OPERATION';
   end if;
+  begin
+    update public.operations
+    set title='Unauthorized edit after membership revocation'
+    where id='73000000-0000-0000-0000-000000000002';
+    if found then
+      raise exception 'REVOKED_CREATOR_UPDATED_DRAFT';
+    end if;
+  exception when insufficient_privilege then
+    null;
+  end;
 end
 $revoked_creator_cannot_retain_company_access$;
 reset role;
