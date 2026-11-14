@@ -1,4 +1,4 @@
-# FIA&CO — límites de información y permisos del jefe de empresa
+# FIA&CO — límites de información y permisos del CEO
 
 **Estado:** auditoría de solo lectura y diseño previo.  
 **Fecha:** 2026-11-14.  
@@ -6,9 +6,9 @@
 
 ## Regla funcional acordada
 
-El jefe de una empresa puede acceder a todos los módulos y a toda la información empresarial de su propia organización, incluida la información comercial, económica y confidencial. No puede consultar información sensible que pertenezca a otras empresas por el mero hecho de participar en un expediente.
+El jefe de la empresa es el CEO. El CEO puede acceder a todos los módulos y a toda la información empresarial de su propia organización, incluida la información comercial, económica y confidencial. No puede consultar información sensible que pertenezca a otras empresas por el mero hecho de participar en un expediente.
 
-El gerente de zona puede autorizar L3 cuando su cargo esté verificado. Esa facultad no le concede automáticamente el acceso general del jefe.
+El gerente de zona puede autorizar L3 cuando su cargo esté verificado. Esa facultad no le concede automáticamente el acceso general del CEO.
 
 L3 permite colaborar en un expediente; **no es un permiso general para consultar todos los datos confidenciales de los socios**.
 
@@ -34,7 +34,7 @@ No se debe corregir ampliando o reduciendo indiscriminadamente `can_access_opera
 ## Modelo objetivo
 
 1. **Propiedad clara:** cada dato empresarial interno debe tener una organización propietaria explícita. No inferirla solo de `created_by`, porque una persona puede pertenecer a más de una organización.
-2. **Jefe de empresa:** rol interno verificado, con acceso completo a los datos y módulos de su organización. Su acceso no le permite suplantar al usuario que aceptó un papel operativo de vendedor, comprador o transportista.
+2. **CEO:** máxima autoridad ejecutiva de la empresa, con cargo y vinculación verificados, y acceso completo a los datos y módulos de su organización. Su acceso no le permite suplantar al usuario que aceptó un papel operativo de vendedor, comprador o transportista.
 3. **Gerente de zona:** puede autorizar L3 tras verificar su cargo y ámbito. No recibe acceso general a los datos internos de las empresas por esa autorización.
 4. **Expediente compartido:** solo contiene los campos necesarios para la operación y expresamente compartidos: estado, aceptación, entrega, recepción y los importes/ofertas que formen parte de la propuesta aceptada.
 5. **Datos confidenciales de cada empresa:** márgenes internos, costes propios, notas internas, documentación de verificación y demás información no compartida quedan restringidos a su organización.
@@ -50,16 +50,16 @@ Clasificar cada tabla y campo como dato interno de una organización, dato perso
 ### Fase 2 — separación de información financiera
 Separar los márgenes y costes internos de los campos compartidos de `operations`. Evitar que las empresas participantes reciban columnas internas mediante una lectura de fila completa. Mantener una vista o respuesta compartida con los campos autorizados.
 
-### Fase 3 — permisos del jefe
-Incorporar el rol de jefe a la pertenencia de empresa y a las comprobaciones de servidor. Permitirle acceder a los datos de su organización, incluidos inventario, equipo, operaciones, documentos y seguridad, sin ampliar el acceso a organizaciones ajenas.
+### Fase 3 — permisos del CEO
+Incorporar el rol interno `ceo` a la pertenencia de empresa y a las comprobaciones de servidor. Permitirle acceder a los datos de su organización, incluidos inventario, equipo, operaciones, documentos y seguridad, sin ampliar el acceso a organizaciones ajenas.
 
 ### Fase 4 — permisos explícitos entre empresas
 Crear concesiones de acceso por dato/recurso, organización destinataria, finalidad, caducidad y revocación. Separar estas concesiones de la autorización L3 de colaboración.
 
 ### Fase 5 — pruebas negativas y positivas
 Probar con tres empresas y, como mínimo, jefe, gerente de zona, operador y miembro ordinario:
-- el jefe lee y administra los datos internos de su empresa;
-- el jefe no lee márgenes, costes ni documentación confidencial de otra empresa;
+- el CEO lee y administra los datos internos de su empresa;
+- el CEO no lee márgenes, costes ni documentación confidencial de otra empresa;
 - un gerente de zona puede autorizar L3, pero no obtiene acceso general por ello;
 - los participantes solo ven los campos compartidos del expediente;
 - un permiso explícito abre únicamente el dato, destinatario y finalidad autorizados;
