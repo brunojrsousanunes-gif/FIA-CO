@@ -12,11 +12,16 @@ permissions:
 
 jobs:
   test:
+    name: MVP tests (PostgreSQL ${{ matrix.postgres_version }})
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres_version: ['16', '17.6']
     services:
       postgres:
-        image: postgres:16
+        image: postgres:${{ matrix.postgres_version }}
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: fia_inventory_test
@@ -52,6 +57,11 @@ jobs:
           PGPASSWORD: postgres
         run: |
           psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f tests/inventory-postgres-bootstrap.sql
+          # Historical bootstrap SQL is intentionally outside Supabase's tracked migration directory.
+          for baseline in supabase/baseline/*.sql; do
+            echo "Applying baseline $baseline"
+            psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f "$baseline"
+          done
           for migration in supabase/migrations/*.sql; do
             echo "Applying $migration"
             psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f "$migration"
