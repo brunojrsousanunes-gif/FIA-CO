@@ -57,3 +57,4 @@ jobs:
             psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f "$migration"
           done
           psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f tests/inventory-postgres-integration.sql
+          psql -h localhost -U postgres -d fia_inventory_test -v ON_ERROR_STOP=1 -f tests/three-company-postgres-integration.sql

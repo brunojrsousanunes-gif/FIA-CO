@@ -4,7 +4,8 @@
 insert into auth.users(id) values
  ('10000000-0000-0000-0000-000000000001'),
  ('10000000-0000-0000-0000-000000000002'),
- ('10000000-0000-0000-0000-000000000003');
+ ('10000000-0000-0000-0000-000000000003'),
+ ('10000000-0000-0000-0000-000000000004');
 
 insert into public.organizations(id,name,status) values
  ('20000000-0000-0000-0000-000000000001','Empresa Uno','active'),
@@ -80,9 +81,20 @@ begin
  if (select count(*) from public.inventory_movements) <> 0 then
    raise exception 'CROSS_ORG_MOVEMENT_LEAK';
  end if;
+
  if (select count(*) from public.inventory_reservations) <> 0 then
    raise exception 'CROSS_ORG_RESERVATION_LEAK';
  end if;
+ begin
+  insert into public.inventory_items(id,organization_id,sku,description,created_by)
+  values ('40000000-0000-0000-0000-000000000099',
+          '20000000-0000-0000-0000-000000000001',
+          'SKU-CROSS-ORG-ATTACK','Intento de escritura entre empresas',
+          '10000000-0000-0000-0000-000000000002');
+  raise exception 'CROSS_ORG_ITEM_INSERT_WAS_ALLOWED';
+ exception when insufficient_privilege then
+  null;
+ end;
 end $$;
 reset role;
 
@@ -245,6 +257,39 @@ from public.organizations where id in ('20000000-0000-0000-0000-000000000001','2
 insert into public.organization_members(organization_id,user_id,member_role,status) values
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','manager','active'),
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
+
+-- CEO / zone-manager verification and explicit L3 consent for
+-- every organization participating in the shared-operation invitation test.
+insert into private.organization_l3_authority_verifications
+ (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
+values
+ ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',
+  'ceo','verified','ci://inventory/ceo-1','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+ ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002',
+  'zone_manager','verified','ci://inventory/zone-manager-2','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+ ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003',
+  'ceo','verified','ci://inventory/ceo-3','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days');
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+select public.authorize_organization_l3(
+ '20000000-0000-0000-0000-000000000001',
+ '50000000-0000-0000-0000-000000000021',now()+interval '30 days');
+reset role;
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+select public.authorize_organization_l3(
+ '20000000-0000-0000-0000-000000000002',
+ '50000000-0000-0000-0000-000000000022',now()+interval '30 days');
+reset role;
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+select public.authorize_organization_l3(
+ '20000000-0000-0000-0000-000000000003',
+ '50000000-0000-0000-0000-000000000023',now()+interval '30 days');
+reset role;
 
 -- The creator can invite three L3 organizations before their users accept,
 -- and can still cancel an invitation if a trust check later expires.
