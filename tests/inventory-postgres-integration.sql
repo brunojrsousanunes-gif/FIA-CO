@@ -256,7 +256,7 @@ select id,'L3_SHARED','verified',
 from public.organizations where id in ('20000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000003');
 insert into public.organization_members(organization_id,user_id,member_role,status) values
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','manager','active'),
- ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
+ ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','ceo','active');
 
 -- CEO / zone-manager verification and explicit L3 consent for
 -- every organization participating in the shared-operation invitation test.
