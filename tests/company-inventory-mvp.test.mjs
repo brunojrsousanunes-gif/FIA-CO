@@ -127,8 +127,8 @@ for (const signature of [
   'private.is_org_member(uuid)',
   'private.validate_evidence_role()'
 ]) {
-  assert.ok(ownerMembershipHardening.includes(\`alter function \${signature} set search_path = ''\`),
-    \`SECURITY DEFINER search_path must be hardened for \${signature}\`);
+  assert.ok(ownerMembershipHardening.includes(`alter function ${signature} set search_path = ''`),
+    `SECURITY DEFINER search_path must be hardened for ${signature}`);
 }
 assert.ok(ownerMembershipHardening.includes('drop policy if exists operations_creator_draft_update on public.operations;'));
 assert.ok((ownerMembershipHardening.match(/and om\.status = 'active'/g) || []).length >= 4,
