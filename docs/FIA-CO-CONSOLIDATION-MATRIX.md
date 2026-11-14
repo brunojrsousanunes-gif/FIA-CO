@@ -9,8 +9,8 @@
 ## 1. Referencias comprobadas
 
 - `main` es la rama predeterminada del repositorio.
-- PR #184 permanece abierta, en borrador y no fusionada. Su HEAD auditado es `5636256f0cae87d2145d0ae51e0839b1795b7b6f`.
-- PR #184 está 57 commits por delante de `main` y 0 por detrás.
+- PR #184 permanece abierta, en borrador y no fusionada. Su HEAD auditado es `5636256f0cae87d2145d0ae51e0839b1795b7b6f (commit validado por CI #520)`.
+- En el HEAD actual de esta matriz, PR #184 está 58 commits por delante de `main` y 0 por detrás.
 - CI #520 figura como SUCCESS para ese HEAD, con pruebas JavaScript, contrato Pages, batería MVP, cadena PostgreSQL 16, inventario e integración de tres empresas.
 - PR #184 está 20 commits por delante de `test/three-independent-company-pilot`; la rama de tres empresas es una base anterior de ese trabajo, no una línea que deba fusionarse de nuevo sin necesidad.
 - El repositorio contiene numerosas ramas históricas. La búsqueda paginada devolvió 184 referencias de rama en dos páginas; esto no significa que todas estén activas ni que deban integrarse.
