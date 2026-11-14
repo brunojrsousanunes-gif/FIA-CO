@@ -11,7 +11,8 @@ insert into auth.users(id) values
  ('71000000-0000-0000-0000-000000000002'),
  ('71000000-0000-0000-0000-000000000003'),
  ('71000000-0000-0000-0000-000000000004'),
- ('71000000-0000-0000-0000-000000000005');
+ ('71000000-0000-0000-0000-000000000005'),
+ ('71000000-0000-0000-0000-000000000006');
 
 insert into public.organizations(id,name,status) values
  ('72000000-0000-0000-0000-000000000001','Vendedor Demo CI','active'),
@@ -19,10 +20,11 @@ insert into public.organizations(id,name,status) values
  ('72000000-0000-0000-0000-000000000003','Transportista Demo CI','active');
 
 insert into public.organization_members(organization_id,user_id,member_role,status) values
- ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000001','manager','active'),
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000001','ceo','active'),
  ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000002','manager','active'),
- ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003','manager','active'),
- ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000004','member','active');
+ ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003','ceo','active'),
+ ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000004','member','active'),
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006','manager','active');
 
 insert into private.organization_security_profiles
  (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
@@ -60,7 +62,9 @@ values
  ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000002',
   'zone_manager','verified','ci://authority/zone-manager-2','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days'),
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003',
-  'ceo','verified','ci://authority/ceo-3','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
+  'ceo','verified','ci://authority/ceo-3','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days'),
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006',
+  'ceo','verified','ci://authority/ceo-role-mismatch','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
 
 -- Consent cannot outlive the verified authority that grants it.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
@@ -146,10 +150,33 @@ select public.authorize_organization_l3(
  '74000000-0000-0000-0000-000000000105',now()+interval '30 days');
 reset role;
 
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000006';
+set role authenticated;
+do $verified_ceo_without_ceo_membership_is_rejected$
+begin
+  begin
+    perform public.authorize_organization_l3(
+      '72000000-0000-0000-0000-000000000001',
+      '74000000-0000-0000-0000-000000000107',now()+interval '30 days');
+    raise exception 'NON_CEO_MEMBER_USED_CEO_AUTHORITY';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'CEO_ROLE_MEMBERSHIP_REQUIRED' then raise; end if;
+  end;
+end
+$verified_ceo_without_ceo_membership_is_rejected$;
+reset role;
+
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000004';
 set role authenticated;
 do $ordinary_member_cannot_authorize_l3$
 begin
+  begin
+    update public.organization_members set member_role='ceo'
+    where organization_id='72000000-0000-0000-0000-000000000003'
+      and user_id='71000000-0000-0000-0000-000000000004';
+    raise exception 'ORDINARY_MEMBER_PROMOTED_SELF_TO_CEO';
+  exception when insufficient_privilege then null;
+  end;
   begin
     perform public.authorize_organization_l3(
       '72000000-0000-0000-0000-000000000003',
