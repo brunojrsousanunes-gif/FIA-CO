@@ -62,6 +62,23 @@ values
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003',
   'company_head','verified','ci://authority/company-head-3','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
 
+-- Consent cannot outlive the verified authority that grants it.
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $authorization_cannot_outlive_authority$
+begin
+  begin
+    perform public.authorize_organization_l3(
+      '72000000-0000-0000-0000-000000000001',
+      '74000000-0000-0000-0000-000000000100',now()+interval '120 days');
+    raise exception 'L3_CONSENT_OUTLIVED_AUTHORITY_VERIFICATION';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'AUTHORIZATION_EXCEEDS_AUTHORITY_VERIFICATION' then raise; end if;
+  end;
+end
+$authorization_cannot_outlive_authority$;
+reset role;
+
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
 select public.authorize_organization_l3(
