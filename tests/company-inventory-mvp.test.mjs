@@ -100,7 +100,7 @@ assert.match(companyIsolation, /rebuild_financial_summaries/i,
 const threePartyCreation = fs.readFileSync(
   'supabase/migrations/20261114240000_create_three_party_operation_draft.sql', 'utf8'
 );
-assert.match(threePartyCreation, /security definer\\s+set search_path = ''/i);
+assert.match(threePartyCreation, /language plpgsql\\s+security definer\\s+set search_path = ''/i);
 assert.match(threePartyCreation, /three_distinct_organizations_required/i);
 assert.match(threePartyCreation, /all_three_real_organizations_must_be_active/i);
 assert.match(threePartyCreation, /active_owner_organization_membership_required/i);
