@@ -30,7 +30,8 @@ const expectedNewMigrations = [
   '20261114220000_harden_financial_trigger_search_path.sql',
   '20261114230000_index_l3_authority_foreign_keys.sql',
   '20261114240000_create_three_party_operation_draft.sql',
-  '20261115000000_owner_membership_access_hardening.sql'
+  '20261115000000_owner_membership_access_hardening.sql',
+  '20261115010000_make_l3_authorization_retry_idempotent.sql'
 ];
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
