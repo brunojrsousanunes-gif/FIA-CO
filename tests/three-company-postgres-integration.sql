@@ -12,7 +12,8 @@ insert into auth.users(id) values
  ('71000000-0000-0000-0000-000000000003'),
  ('71000000-0000-0000-0000-000000000004'),
  ('71000000-0000-0000-0000-000000000005'),
- ('71000000-0000-0000-0000-000000000006');
+ ('71000000-0000-0000-0000-000000000006'),
+ ('71000000-0000-0000-0000-000000000007');
 
 insert into public.organizations(id,name,status) values
  ('72000000-0000-0000-0000-000000000001','Vendedor Demo CI','active'),
@@ -25,7 +26,8 @@ insert into public.organization_members(organization_id,user_id,member_role,stat
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003','ceo','active'),
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000004','member','active'),
  ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000001','member','active'),
- ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006','manager','active');
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006','manager','active'),
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000007','manager','active');
 
 insert into private.organization_security_profiles
  (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
@@ -51,6 +53,51 @@ values
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001','seller','invited','71000000-0000-0000-0000-000000000001'),
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000001'),
  ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000001');
+
+-- Creator access is also tenant-scoped: creator status alone is not a permanent grant.
+insert into public.operations(id,reference,title,status,created_by,owner_organization_id)
+values ('73000000-0000-0000-0000-000000000002','FIA-PILOT-OWNER-REVOKE-001',
+        'Revocación de pertenencia del creador — ensayo','draft',
+        '71000000-0000-0000-0000-000000000007','72000000-0000-0000-0000-000000000001');
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by)
+values
+ ('73000000-0000-0000-0000-000000000002','72000000-0000-0000-0000-000000000001','seller','invited','71000000-0000-0000-0000-000000000007'),
+ ('73000000-0000-0000-0000-000000000002','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000007'),
+ ('73000000-0000-0000-0000-000000000002','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000007');
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000007';
+set role authenticated;
+do $creator_access_requires_active_owner_membership$
+begin
+  if not private.can_access_operation('73000000-0000-0000-0000-000000000002')
+     or not private.can_manage_operation('73000000-0000-0000-0000-000000000002') then
+    raise exception 'ACTIVE_OWNER_CREATOR_ACCESS_NOT_GRANTED';
+  end if;
+end
+$creator_access_requires_active_owner_membership$;
+reset role;
+
+update public.organization_members
+set status='revoked'
+where organization_id='72000000-0000-0000-0000-000000000001'
+  and user_id='71000000-0000-0000-0000-000000000007';
+
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000007';
+set role authenticated;
+do $revoked_creator_cannot_retain_company_access$
+begin
+  if private.can_access_operation('73000000-0000-0000-0000-000000000002')
+     or private.can_manage_operation('73000000-0000-0000-0000-000000000002') then
+    raise exception 'REVOKED_CREATOR_RETAINED_COMPANY_ACCESS';
+  end if;
+  if exists(select 1 from public.operations where id='73000000-0000-0000-0000-000000000002') then
+    raise exception 'REVOKED_CREATOR_CAN_STILL_READ_OPERATION';
+  end if;
+end
+$revoked_creator_cannot_retain_company_access$;
+reset role;
+
 
 do $explicit_owner_is_not_inferred_from_memberships$
 begin
