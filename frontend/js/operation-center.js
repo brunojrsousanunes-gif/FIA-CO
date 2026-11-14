@@ -32,8 +32,11 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
  const backendActions=$('[data-backend-actions]');
  const backendResults=$('[data-backend-results]');
  const backendList=$('[data-backend-list]');
+ const backendCreateForm=$('[data-backend-create]');
+ const backendOwnerSelect=$('[data-backend-owner]');
  let backendSession=null;
  let backendBusy=false;
+ let activeMemberships=[];
  function backendStatus(text,kind=''){backendMessage.textContent=text;backendMessage.className=`backend-message ${kind}`;}
  function backendStateText(text){backendState.textContent=text;}
  async function authCall(path,body){
@@ -57,6 +60,13 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   if(!response.ok)throw new Error(data.message||data.details||'No se pudieron consultar los datos autorizados.');
   return data;
  }
+ async function backendPost(path,body){
+  const current=await ensureBackendSession();
+  const response=await fetch(`${SB_URL}/rest/v1/${path}`,{method:'POST',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:JSON.stringify(body),cache:'no-store',credentials:'omit'});
+  const data=await response.json().catch(()=>null);
+  if(!response.ok)throw new Error(data?.message||data?.details||'No se pudo crear el borrador.');
+  return data;
+ }
  function renderBackendRows(rows){
   backendList.replaceChildren();
   if(!rows.length){const li=document.createElement('li');li.className='backend-empty';li.textContent='No hay operaciones visibles para esta cuenta.';backendList.append(li);return;}
@@ -75,6 +85,11 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
     backendGet(`organization_members?select=organization_id,member_role&user_id=eq.${encodeURIComponent(backendSession.user.id)}&status=eq.active`),
     backendGet('operations?select=id,reference,title,status,operation_type,version,created_at&order=created_at.desc&limit=50')
    ]);
+   activeMemberships=members;
+   backendOwnerSelect.replaceChildren();
+   const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Selecciona una empresa tuya';backendOwnerSelect.append(placeholder);
+   for(const member of members){const option=document.createElement('option');option.value=member.organization_id;option.textContent=`${member.member_role} · ${member.organization_id}`;backendOwnerSelect.append(option);}
+   backendCreateForm.hidden=members.length===0;
    $('[data-backend-memberships]').textContent=`Empresas activas: ${members.length}`;
    $('[data-backend-count]').textContent=`Operaciones visibles: ${operations.length}`;
    renderBackendRows(operations);backendResults.hidden=false;backendStateText('CONECTADO');
@@ -85,8 +100,8 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   }finally{backendBusy=false;}
  }
  function logoutBackend(notify=true){
-  backendSession=null;backendResults.hidden=true;backendActions.hidden=true;loginForm.hidden=false;
-  loginForm.reset();backendList.replaceChildren();backendStateText('DESCONECTADO');
+  backendSession=null;activeMemberships=[];backendResults.hidden=true;backendActions.hidden=true;backendCreateForm.hidden=true;loginForm.hidden=false;
+  loginForm.reset();backendCreateForm.reset();backendOwnerSelect.replaceChildren();backendList.replaceChildren();backendStateText('DESCONECTADO');
   if(notify)backendStatus('Sesión cerrada. No se ha guardado la contraseña ni la sesión.');
  }
  loginForm.addEventListener('submit',async event=>{
@@ -104,6 +119,31 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   }catch(error){backendStateText('DESCONECTADO');backendStatus(error.message||'No se pudo iniciar sesión.','error');}
   finally{backendBusy=false;}
  });
+
+ backendCreateForm.addEventListener('submit',async event=>{
+  event.preventDefault();if(backendBusy||!backendSession)return;
+  const form=backendCreateForm;
+  const title=form.elements.title.value.trim(),operationType=form.elements.operationType.value;
+  const ownerOrg=form.elements.ownerOrg.value,sellerOrg=form.elements.sellerOrg.value.trim(),carrierOrg=form.elements.carrierOrg.value.trim(),buyerOrg=form.elements.buyerOrg.value.trim();
+  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if(title.length<3||title.length>180||![sellerOrg,carrierOrg,buyerOrg,ownerOrg].every(value=>uuid.test(value))){backendStatus('Revisa el título y los cuatro identificadores UUID.','error');return;}
+  if(new Set([sellerOrg,carrierOrg,buyerOrg]).size!==3){backendStatus('Vendedor, transportista y comprador deben ser tres empresas distintas.','error');return;}
+  if(!activeMemberships.some(member=>member.organization_id===ownerOrg)||![sellerOrg,carrierOrg,buyerOrg].includes(ownerOrg)){backendStatus('La empresa propietaria debe ser una de tus empresas activas y participar en la operación.','error');return;}
+  backendBusy=true;backendStateText('CREANDO');backendStatus('Validando las tres empresas y creando el borrador…');
+  try{
+   const result=await backendPost('rpc/create_operation_draft',{
+    target_title:title,target_operation_type:operationType,target_owner_organization:ownerOrg,
+    target_seller_organization:sellerOrg,target_carrier_organization:carrierOrg,target_buyer_organization:buyerOrg,
+    request_key:crypto.randomUUID()
+   });
+   const operationId=Array.isArray(result)?result[0]:result;
+   backendStatus(`Borrador creado correctamente · identificador ${String(operationId||'registrado')}. No se han enviado invitaciones por correo.`,'success');
+   form.elements.title.value='';form.elements.sellerOrg.value='';form.elements.carrierOrg.value='';form.elements.buyerOrg.value='';
+   backendBusy=false;await loadBackend();
+  }catch(error){backendStateText('ERROR DE CREACIÓN');backendStatus(error.message||'No se pudo crear el borrador.','error');}
+  finally{backendBusy=false;}
+ });
+
  $('[data-backend-refresh]').addEventListener('click',loadBackend);
  $('[data-backend-logout]').addEventListener('click',async()=>{
   const current=backendSession;
