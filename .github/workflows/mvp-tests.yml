@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [fia-development, legal-use-cases, wallet-crypto-demo, multiuser-demo, multiuser-hardened, test/ceo-organization-data-boundaries-ci3]
+    branches: [fia-development, legal-use-cases, wallet-crypto-demo, multiuser-demo, multiuser-hardened]
 
 permissions:
   contents: read

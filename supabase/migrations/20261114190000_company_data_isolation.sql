@@ -12,8 +12,7 @@ returns uuid language sql stable security definer set search_path=pg_catalog,pub
 select case when count(distinct op.organization_id)=1 then min(op.organization_id::text)::uuid else null end
 from public.operations o join public.operation_participants op on op.operation_id=o.id
 join public.organization_members om on om.organization_id=op.organization_id and om.user_id=o.created_by
-where o.id=target_operation
-  and ((select auth.uid()) is null or private.can_access_operation(o.id)); $;
+where o.id=target_operation; $$;
 revoke all on function private.operation_owner_organization(uuid) from public,anon;
 grant execute on function private.operation_owner_organization(uuid) to authenticated;
 
@@ -24,28 +23,6 @@ if exists(select 1 from public.operation_cost_items where organization_id is nul
 raise exception 'COST_ITEM_OWNER_AMBIGUOUS: assign each existing cost item to its verified company before retrying'; end if;
 end $check_cost_item_ownership$;
 alter table public.operation_cost_items alter column organization_id set not null;
-
-create or replace function private.enforce_cost_item_company()
-returns trigger language plpgsql security definer
-set search_path=pg_catalog,public,private as $
-declare expected_org uuid;
-begin
-  expected_org:=private.operation_owner_organization(new.operation_id);
-  if expected_org is null then
-    raise exception 'OPERATION_OWNER_ORGANIZATION_AMBIGUOUS' using errcode='23514';
-  end if;
-  if new.organization_id is not null and new.organization_id is distinct from expected_org then
-    raise exception 'COST_ITEM_COMPANY_MISMATCH' using errcode='42501';
-  end if;
-  new.organization_id:=expected_org;
-  return new;
-end;
-$;
-revoke all on function private.enforce_cost_item_company() from public,anon,authenticated;
-create trigger operation_cost_items_company_guard
-before insert or update of operation_id,organization_id on public.operation_cost_items
-for each row execute function private.enforce_cost_item_company();
-
 create index if not exists operation_cost_items_org_operation_idx on public.operation_cost_items(organization_id,operation_id,created_at desc);
 
 drop policy if exists cost_items_operation_select on public.operation_cost_items;
