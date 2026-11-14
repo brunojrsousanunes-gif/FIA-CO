@@ -506,6 +506,32 @@ end $trust_profile_read$;
 reset role;
 
 
+-- Privileged RPCs that are intentionally callable by authenticated users
+-- must resolve built-ins and application objects without writable search paths.
+do $security_definer_search_path$
+declare
+  fn record;
+begin
+  for fn in
+    select p.oid,p.proname,coalesce(array_to_string(p.proconfig,','),'') config
+    from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public'
+      and p.proname in (
+        'accept_operation_invitation',
+        'create_synthetic_part_recovery',
+        'record_inventory_movement',
+        'release_inventory_reservation',
+        'reserve_inventory_item',
+        'transition_operation'
+      )
+  loop
+    if fn.config not like '%search_path=""%' then
+      raise exception 'SECURITY_DEFINER_SEARCH_PATH_NOT_EMPTY:%:%',fn.proname,fn.config;
+    end if;
+  end loop;
+end
+$security_definer_search_path$;
+
 -- Public tables must not retain anonymous access or client privileges that
 -- bypass RLS / are not part of the browser application contract.
 do $least_privilege_table_grants$
