@@ -48,9 +48,9 @@ const migration = fs.readFileSync(
   'supabase/migrations/20261113212739_company_inventory_mvp.sql', 'utf8'
 );
 for (const table of ['inventory_items','inventory_movements','inventory_reservations']) {
-  assert.match(migration, new RegExp('create table public\\.' + table, 'i'));
-  assert.match(migration, new RegExp('alter table public\\.' + table + ' enable row level security', 'i'));
-  assert.match(migration, new RegExp('revoke all on public\\.inventory_items, public\\.inventory_movements, public\\.inventory_reservations from anon, authenticated', 'i'));
+  assert.match(migration, new RegExp('create table public\.' + table, 'i'));
+  assert.match(migration, new RegExp('alter table public\.' + table + ' enable row level security', 'i'));
+  assert.match(migration, new RegExp('revoke all on public\.inventory_items, public\.inventory_movements, public\.inventory_reservations from anon, authenticated', 'i'));
 }
 assert.match(migration, /private\.is_org_member\(organization_id\)/);
 assert.match(migration, /private\.is_inventory_manager\(organization_id\)/);
@@ -100,13 +100,13 @@ assert.match(companyIsolation, /rebuild_financial_summaries/i,
 const threePartyCreation = fs.readFileSync(
   'supabase/migrations/20261114240000_create_three_party_operation_draft.sql', 'utf8'
 );
-assert.match(threePartyCreation, /language plpgsql\\s+security definer\\s+set search_path = ''/i);
+assert.match(threePartyCreation, /language plpgsql\s+security definer\s+set search_path = ''/i);
 assert.match(threePartyCreation, /three_distinct_organizations_required/i);
 assert.match(threePartyCreation, /all_three_real_organizations_must_be_active/i);
 assert.match(threePartyCreation, /active_owner_organization_membership_required/i);
-assert.match(threePartyCreation, /grant execute on function public\\.create_operation_draft[^;]+ to authenticated/i);
-assert.match(threePartyCreation, /revoke all on function public\\.create_operation_draft[^;]+ from public, anon/i);
-assert.match(threePartyCreation, /private\\.append_operation_audit/i);
+assert.match(threePartyCreation, /grant execute on function public\.create_operation_draft[^;]+ to authenticated/i);
+assert.match(threePartyCreation, /revoke all on function public\.create_operation_draft[^;]+ from public, anon/i);
+assert.match(threePartyCreation, /private\.append_operation_audit/i);
 assert.doesNotMatch(threePartyCreation, /grant execute[^;]+ to anon/i);
 
 const operationCenterHtml = fs.readFileSync('frontend/operation-center.html', 'utf8');
