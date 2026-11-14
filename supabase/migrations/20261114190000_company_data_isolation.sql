@@ -33,12 +33,12 @@ create or replace function private.operation_owner_organization(target_operation
 returns uuid
 language sql stable security definer
 set search_path = ''
-as $
+as $$
   select o.owner_organization_id
   from public.operations o
   where o.id = target_operation
     and ((select auth.uid()) is null or private.can_access_operation(o.id));
-$;
+$$;
 revoke all on function private.operation_owner_organization(uuid) from public,anon;
 grant execute on function private.operation_owner_organization(uuid) to authenticated;
 
@@ -49,7 +49,7 @@ create or replace function private.guard_operation_owner_organization()
 returns trigger
 language plpgsql security definer
 set search_path = ''
-as $
+as $$
 begin
   if tg_op = 'UPDATE'
      and old.owner_organization_id is not null
@@ -66,7 +66,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 revoke all on function private.guard_operation_owner_organization() from public,anon,authenticated;
 create trigger operations_owner_organization_guard
 before insert or update of owner_organization_id,created_by on public.operations
