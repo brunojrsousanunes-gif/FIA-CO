@@ -400,12 +400,22 @@ begin
     raise exception 'TRANSITION_FIRST_REQUEST_RESULT_INVALID';
   end if;
 
+  -- Advance the operation after the first request. A replay of the original
+  -- request must still return the original delivered/version snapshot.
+  perform public.transition_operation(
+    v_operation_id,'disputed',first_result.version,
+    '50000000-0000-0000-0000-000000000015');
+
   replay_result := public.transition_operation(
     v_operation_id,'delivered',initial_version,v_request_key);
 
   if replay_result.status is distinct from first_result.status
      or replay_result.version <> first_result.version then
-    raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_CHANGED_RESULT';
+    raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_CHANGED_ORIGINAL_RESULT';
+  end if;
+
+  if (select status from public.operations where id=v_operation_id) <> 'disputed' then
+    raise exception 'TRANSITION_REPLAY_CHANGED_CURRENT_OPERATION_STATE';
   end if;
 
   select count(*) into audit_count
