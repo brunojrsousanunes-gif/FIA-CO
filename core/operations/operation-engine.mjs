@@ -140,9 +140,11 @@ export function canRequestRelease(operation) {
 
 export function requestRelease(operation, actor = 'system', options = {}) {
   if (!canRequestRelease(operation)) throw new Error('RELEASE_NOT_ALLOWED');
-  moveOperation(operation, 'READY_FOR_RELEASE', actor, {}, options);
-  operation.releaseRequested = true;
-  moveOperation(operation, 'RELEASE_REQUESTED', actor, { instruction: 'PSP_ONLY' }, options);
+  const candidate = snapshotOperation(operation);
+  moveOperation(candidate, 'READY_FOR_RELEASE', actor, {}, options);
+  candidate.releaseRequested = true;
+  moveOperation(candidate, 'RELEASE_REQUESTED', actor, { instruction: 'PSP_ONLY' }, options);
+  Object.assign(operation, candidate);
   return operation;
 }
 
