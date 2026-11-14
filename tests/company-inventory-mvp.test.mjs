@@ -23,6 +23,7 @@ const expectedNewMigrations = [
   '20261114130000_prevent_legacy_participant_claim.sql',
   '20261114150000_authorize_l3_by_company_head_or_zone_manager.sql',
   '20261114170000_bind_ceo_membership_to_l3_authority.sql',
+  '20261114180000_add_missing_foreign_key_indexes.sql',
   '20261114180000_revoke_ceo_authority_when_membership_ends.sql',
   '20261114190000_company_data_isolation.sql',
   '20261114200000_index_uncovered_foreign_keys.sql',
