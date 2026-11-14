@@ -116,17 +116,17 @@ set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000007';
 set role authenticated;
 do $revoked_creator_cannot_retain_company_access$
 begin
-  if private.can_access_operation('73000000-0000-0000-0000-000000000002')
-     or private.can_manage_operation('73000000-0000-0000-0000-000000000002') then
+  if private.can_access_operation('73000000-0000-0000-0000-000000000003')
+     or private.can_manage_operation('73000000-0000-0000-0000-000000000003') then
     raise exception 'REVOKED_CREATOR_RETAINED_COMPANY_ACCESS';
   end if;
-  if exists(select 1 from public.operations where id='73000000-0000-0000-0000-000000000002') then
+  if exists(select 1 from public.operations where id='73000000-0000-0000-0000-000000000003') then
     raise exception 'REVOKED_CREATOR_CAN_STILL_READ_OPERATION';
   end if;
   begin
     update public.operations
     set title='Unauthorized edit after membership revocation'
-    where id='73000000-0000-0000-0000-000000000002';
+    where id='73000000-0000-0000-0000-000000000003';
     if found then
       raise exception 'REVOKED_CREATOR_UPDATED_DRAFT';
     end if;
