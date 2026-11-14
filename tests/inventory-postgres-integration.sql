@@ -124,7 +124,6 @@ begin
  end;
 end $$;
 reset role;
-select 'FULL MIGRATION CHAIN + INVENTORY POSTGRESQL TESTS: PASS' as result;
 
 
 -- Incident resolution guard: authorized resolver may resolve once, but cannot
@@ -227,7 +226,6 @@ begin
   end if;
 end $incident_guard$;
 reset role;
-select 'FULL MIGRATION CHAIN + INVENTORY + INCIDENT GUARD TESTS: PASS' as result;
 
 
 -- Three-party confirmation gate: invited users cannot confirm; buyer closure
@@ -379,29 +377,44 @@ end $accepted_account_gate$;
 reset role;
 
 -- The exact account that accepted the carrier role remains authorized.
+-- Retry with the ORIGINAL expected_version to simulate a lost response.
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
-select public.transition_operation(
- '30000000-0000-0000-0000-000000000001','delivered',
- (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
- '50000000-0000-0000-0000-000000000014');
-do $accepted_carrier_can_advance$
-begin
- if (select status from public.operations where id='30000000-0000-0000-0000-000000000001') <> 'delivered' then
-   raise exception 'ACCEPTED_CARRIER_ACCOUNT_COULD_NOT_ADVANCE';
- end if;
-end $accepted_carrier_can_advance$;
-
--- Replaying the same request returns without advancing the operation twice.
-select public.transition_operation(
- '30000000-0000-0000-0000-000000000001','delivered',
- (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
- '50000000-0000-0000-0000-000000000014');
 do $transition_idempotency_replay$
+declare
+  operation_id constant uuid := '30000000-0000-0000-0000-000000000001';
+  request_key constant uuid := '50000000-0000-0000-0000-000000000014';
+  initial_version integer;
+  first_result public.operations;
+  replay_result public.operations;
+  audit_count integer;
 begin
- if (select version from public.operations where id='30000000-0000-0000-0000-000000000001') <> 3 then
-   raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_ADVANCED_VERSION';
- end if;
+  select version into initial_version
+  from public.operations where id=operation_id;
+
+  first_result := public.transition_operation(
+    operation_id,'delivered',initial_version,request_key);
+
+  if first_result.status is distinct from 'delivered'
+     or first_result.version <> initial_version + 1 then
+    raise exception 'TRANSITION_FIRST_REQUEST_RESULT_INVALID';
+  end if;
+
+  replay_result := public.transition_operation(
+    operation_id,'delivered',initial_version,request_key);
+
+  if replay_result.status is distinct from first_result.status
+     or replay_result.version <> first_result.version then
+    raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_CHANGED_RESULT';
+  end if;
+
+  select count(*) into audit_count
+  from public.operation_audit_events
+  where operation_id=operation_id and request_id=request_key;
+
+  if audit_count <> 1 then
+    raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_DUPLICATED_AUDIT_EVENT';
+  end if;
 end $transition_idempotency_replay$;
 
 do $transition_idempotency_reuse$
@@ -451,6 +464,15 @@ begin
   end if;
 end $completion_result$;
 reset role;
+
+-- Private role helper is an internal authorization primitive, not a client API.
+do $private_role_helper_boundary$
+begin
+  if has_function_privilege('authenticated','private.has_operation_role(uuid,text)','EXECUTE')
+     or has_function_privilege('anon','private.has_operation_role(uuid,text)','EXECUTE') then
+    raise exception 'PRIVATE_ROLE_HELPER_EXECUTABLE_BY_CLIENT';
+  end if;
+end $private_role_helper_boundary$;
 
 -- Trust profiles are internal security state, not part of the public API.
 do $trust_profile_boundary$

@@ -157,7 +157,10 @@ set search_path = pg_catalog, public as $$
       and op.accepted_by = (select auth.uid())
       and private.organization_has_trust_level(op.organization_id,'L3_SHARED')
   );
-$$;
+$;
+
+-- This helper is only called inside the privileged transition function.
+revoke all on function private.has_operation_role(uuid,text) from public, anon, authenticated;
 
 -- Closing requires an explicit receipt/completion confirmation from the buyer.
 create or replace function public.transition_operation(
