@@ -6,7 +6,9 @@
     "preferredFutureMethod": "webauthn-passkey",
     "mfaPrepared": true,
     "oidcPrepared": true,
-    "tokensInLocalStorage": false
+    "tokensInLocalStorage": false,
+    "privatePilotSupabaseAuthPresentInSource": true,
+    "deployedRuntimeIndependentlyVerified": false
   },
   "secrets": {
     "frontendAllowed": false,
@@ -38,5 +40,6 @@
     "enforcement": false,
     "premiumMode": "shadow-read-only",
     "maxUnacceptedRisk": "medium"
-  }
+  },
+  "scope": "DEFAULT_DEMO_PREPILOT_POLICY_NOT_RUNTIME_ATTESTATION"
 }
