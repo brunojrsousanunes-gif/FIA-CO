@@ -1,6 +1,34 @@
 begin;
 
 -- Explicit company owner for every operation; historical ambiguity stays null.
+-- The historical cost-item backfill runs without a signed-in user. Suppress only
+-- the existing audit/recalculation trigger during that backfill; summaries are
+-- rebuilt explicitly at the end of this migration. Normal application writes
+-- continue to recalculate margins and append audit events.
+create or replace function private.after_financial_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = 'pg_catalog', 'public', 'private'
+as $function$
+declare
+  target uuid := coalesce(new.operation_id, old.operation_id);
+begin
+  if current_setting('fia_co.migration_mode', true) = 'company_data_isolation' then
+    return coalesce(new, old);
+  end if;
+
+  perform private.recalculate_operation_margin(target);
+  perform private.append_operation_audit(
+    target,
+    'finance.recalculated',
+    (select auth.uid()),
+    jsonb_build_object('source', tg_table_name)
+  );
+  return coalesce(new, old);
+end;
+$function$;
+
 alter table public.operations
   add column if not exists owner_organization_id uuid
   references public.organizations(id) on delete restrict;
@@ -98,7 +126,9 @@ with check (
 );
 
 alter table public.operation_cost_items add column if not exists organization_id uuid references public.organizations(id) on delete restrict;
+select set_config('fia_co.migration_mode', 'company_data_isolation', true);
 update public.operation_cost_items ci set organization_id=private.operation_owner_organization(ci.operation_id) where ci.organization_id is null;
+select set_config('fia_co.migration_mode', 'off', true);
 do $check_cost_item_ownership$ begin
 if exists(select 1 from public.operation_cost_items where organization_id is null) then
 raise exception 'COST_ITEM_OWNER_AMBIGUOUS: assign each existing cost item to its verified company before retrying'; end if;
