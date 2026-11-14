@@ -307,6 +307,32 @@ select public.authorize_organization_l3(
 select public.revoke_organization_l3_authorization(
  '72000000-0000-0000-0000-000000000002',
  '74000000-0000-0000-0000-000000000103');
+select public.revoke_organization_l3_authorization(
+ '72000000-0000-0000-0000-000000000002',
+ '74000000-0000-0000-0000-000000000103');
+reset role;
+
+-- The same key cannot silently refer to a different authority verification.
+insert into private.organization_l3_authority_verifications
+ (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
+values
+ ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000002',
+  'zone_manager','verified','ci://authority/zone-manager-2-renewed',
+  '71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $l3_revoke_key_bound_to_verification$
+begin
+  begin
+    perform public.revoke_organization_l3_authorization(
+      '72000000-0000-0000-0000-000000000002',
+      '74000000-0000-0000-0000-000000000103');
+    raise exception 'L3_REVOKE_KEY_REUSED_FOR_NEW_VERIFICATION';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$l3_revoke_key_bound_to_verification$;
 reset role;
 
 do $l3_revocation_closes_shared_access$
