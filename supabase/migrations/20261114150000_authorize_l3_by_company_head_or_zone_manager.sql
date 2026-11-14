@@ -51,8 +51,16 @@ alter table private.organization_l3_authority_verifications enable row level sec
 alter table private.organization_l3_authorization_events enable row level security;
 revoke all on private.organization_l3_authority_verifications from public, anon, authenticated;
 revoke all on private.organization_l3_authorization_events from public, anon, authenticated;
-grant select,insert,update,delete on private.organization_l3_authority_verifications to service_role;
-grant select on private.organization_l3_authorization_events to service_role;
+do $service_role_grants$
+begin
+  -- Supabase provides service_role; the isolated plain-PostgreSQL CI harness
+  -- does not. In CI the migration owner remains the only trusted verifier.
+  if exists (select 1 from pg_roles where rolname='service_role') then
+    grant select,insert,update,delete on private.organization_l3_authority_verifications to service_role;
+    grant select on private.organization_l3_authorization_events to service_role;
+  end if;
+end
+$service_role_grants$;
 
 create or replace function private.organization_has_l3_authorization(target_organization uuid)
 returns boolean
