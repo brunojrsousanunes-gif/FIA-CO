@@ -127,11 +127,13 @@ end if;
 end; $$;
 revoke all on function private.recalculate_operation_margin(uuid) from public,anon,authenticated;
 
-revoke select on public.operations from authenticated;
+revoke select on public.operations from public,anon,authenticated;
+revoke select (margin_floor_cents,calculated_margin_cents,margin_status) on public.operations from public,anon,authenticated;
 grant select(id,reference,title,status,amount_cents,currency,created_by,version,created_at,updated_at,
 is_synthetic,operation_type,parent_operation_id,item_description,origin_label,destination_label)
 on public.operations to authenticated;
-revoke select on public.operation_audit_events from authenticated;
+revoke select on public.operation_audit_events from public,anon,authenticated;
+revoke select (event_data,previous_hash,event_hash,request_id) on public.operation_audit_events from public,anon,authenticated;
 grant select(id,operation_id,event_type,actor_id,created_at) on public.operation_audit_events to authenticated;
 create or replace view public.operation_audit_timeline
 with (security_barrier=true)
@@ -141,12 +143,15 @@ from public.operation_audit_events
 where private.can_access_operation(operation_id);
 revoke all on public.operation_audit_timeline from public,anon;
 grant select on public.operation_audit_timeline to authenticated;
-revoke select on public.operation_confirmations from authenticated;
+revoke select on public.operation_confirmations from public,anon,authenticated;
+revoke select (metadata) on public.operation_confirmations from public,anon,authenticated;
 grant select(id,operation_id,participant_role,confirmation_type,confirmed_by,idempotency_key,confirmed_at)
 on public.operation_confirmations to authenticated;
-revoke select on public.operation_evidence from authenticated;
+revoke select on public.operation_evidence from public,anon,authenticated;
+revoke select (storage_path) on public.operation_evidence from public,anon,authenticated;
 grant select(id,operation_id,evidence_type,sha256_hex,uploaded_by,created_at) on public.operation_evidence to authenticated;
-revoke select on public.operation_incidents from authenticated;
+revoke select on public.operation_incidents from public,anon,authenticated;
+revoke select (resolution_note) on public.operation_incidents from public,anon,authenticated;
 grant select(id,operation_id,incident_type,description,status,blocks_progress,opened_by,resolved_by,created_at,resolved_at)
 on public.operation_incidents to authenticated;
 
