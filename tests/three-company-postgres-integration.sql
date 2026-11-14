@@ -222,16 +222,7 @@ $l3_request_key_cannot_change_payload$;
 
 -- Reusing a request key with the default expiry must return the original
 -- authorization instead of treating a newly calculated 90-day expiry as a
--- changed payload. The authority verification is extended for this isolated
--- test so the default 90-day grant remains within its verified validity.
-reset role;
-update private.organization_l3_authority_verifications
-set valid_until=now()+interval '180 days'
-where organization_id='72000000-0000-0000-0000-000000000001'
-  and user_id='71000000-0000-0000-0000-000000000001'
-  and authority_type='ceo' and verification_status='verified';
-set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
-set role authenticated;
+-- changed payload. The default expiry is capped at the verified authority expiry.
 select public.authorize_organization_l3(
  '72000000-0000-0000-0000-000000000001',
  '74000000-0000-0000-0000-000000000108',null);
