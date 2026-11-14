@@ -28,7 +28,7 @@ async function refreshSession(){
     body:JSON.stringify({refresh_token:oldRefreshToken}),cache:'no-store',credentials:'omit'
    });
    const payload=await response.json().catch(()=>({}));
-   if(!response.ok)throw new Error(payload.msg||payload.message||payload.error_description||'SESSION_REFRESH_FAILED');
+   if(!response.ok){const error=new Error(payload.msg||payload.message||payload.error_description||'SESSION_REFRESH_FAILED');error.code='SESSION_REFRESH_FAILED';throw error;}
    if(state.refreshToken!==oldRefreshToken)throw new Error('SESSION_CLOSED');
    saveSession(payload);
   })();
@@ -47,7 +47,7 @@ async function api(path,options={}){
    return supabase.request(path,options);
   }
  }catch(error){
-  if(!state.accessToken||/SESSION_REFRESH|SESSION_CLOSED|AUTH_SESSION_INCOMPLETE/.test(error.message))clearSession();
+  if(!state.accessToken||error.code==='SESSION_REFRESH_FAILED'||/SESSION_REFRESH|SESSION_CLOSED|AUTH_SESSION_INCOMPLETE/.test(error.message))clearSession();
   throw error;
  }
 }
