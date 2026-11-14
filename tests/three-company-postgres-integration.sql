@@ -10,7 +10,8 @@ insert into auth.users(id) values
  ('71000000-0000-0000-0000-000000000001'),
  ('71000000-0000-0000-0000-000000000002'),
  ('71000000-0000-0000-0000-000000000003'),
- ('71000000-0000-0000-0000-000000000004');
+ ('71000000-0000-0000-0000-000000000004'),
+ ('71000000-0000-0000-0000-000000000005');
 
 insert into public.organizations(id,name,status) values
  ('72000000-0000-0000-0000-000000000001','Vendedor Demo CI','active'),
@@ -55,11 +56,11 @@ insert into private.organization_l3_authority_verifications
  (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
 values
  ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000001',
-  'company_head','verified','ci://authority/company-head-1','71000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+  'company_head','verified','ci://authority/company-head-1','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days'),
  ('72000000-0000-0000-0000-000000000002','71000000-0000-0000-0000-000000000002',
-  'zone_manager','verified','ci://authority/zone-manager-2','71000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+  'zone_manager','verified','ci://authority/zone-manager-2','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days'),
  ('72000000-0000-0000-0000-000000000003','71000000-0000-0000-0000-000000000003',
-  'company_head','verified','ci://authority/company-head-3','71000000-0000-0000-0000-000000000004',now(),now()+interval '90 days');
+  'company_head','verified','ci://authority/company-head-3','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
 
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
@@ -134,6 +135,25 @@ begin
   end if;
 end
 $l3_authority_approval_gate$;
+
+-- Revoking the verified authority itself (not only the consent event)
+-- immediately disables L3 for that organization.
+update private.organization_l3_authority_verifications
+set verification_status='revoked'
+where organization_id='72000000-0000-0000-0000-000000000002'
+  and user_id='71000000-0000-0000-0000-000000000002';
+do $revoked_zone_manager_loses_l3$
+begin
+  if private.organization_has_trust_level(
+    '72000000-0000-0000-0000-000000000002','L3_SHARED') then
+    raise exception 'REVOKED_ZONE_MANAGER_AUTHORITY_STILL_ALLOWS_L3';
+  end if;
+end
+$revoked_zone_manager_loses_l3$;
+update private.organization_l3_authority_verifications
+set verification_status='verified'
+where organization_id='72000000-0000-0000-0000-000000000002'
+  and user_id='71000000-0000-0000-0000-000000000002';
 
 -- Seller creates the invitation only when all three organizations are L3.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
