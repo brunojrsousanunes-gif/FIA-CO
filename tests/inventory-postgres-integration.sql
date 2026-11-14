@@ -15,8 +15,8 @@ insert into public.organization_members(organization_id,user_id,member_role,stat
  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','ceo','active'),
  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active');
 
-insert into public.operations(id,reference,title,status,created_by) values
- ('30000000-0000-0000-0000-000000000001','FIA-INV-0001','Operación inventario','accepted','10000000-0000-0000-0000-000000000001');
+insert into public.operations(id,reference,title,status,created_by,owner_organization_id) values
+ ('30000000-0000-0000-0000-000000000001','FIA-INV-0001','Operación inventario','accepted','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
 
 insert into public.operation_participants(operation_id,organization_id,participant_role,status,invited_by,accepted_by,accepted_at)
 values ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','seller','accepted',
