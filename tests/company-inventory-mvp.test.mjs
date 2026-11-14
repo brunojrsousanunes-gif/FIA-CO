@@ -109,6 +109,20 @@ assert.match(threePartyCreation, /revoke all on function public\\.create_operati
 assert.match(threePartyCreation, /private\\.append_operation_audit/i);
 assert.doesNotMatch(threePartyCreation, /grant execute[^;]+ to anon/i);
 
+const operationCenterHtml = fs.readFileSync('frontend/operation-center.html', 'utf8');
+const operationCenterJs = fs.readFileSync('frontend/js/operation-center.js', 'utf8');
+assert.match(operationCenterHtml, /connect-src 'self' https:\/\/etttredbkbcgqwciipls\.supabase\.co/i);
+assert.match(operationCenterHtml, /data-backend-login/);
+assert.match(operationCenterHtml, /data-backend-results/);
+assert.match(operationCenterJs, /sb_publishable_[A-Za-z0-9_-]+/);
+assert.match(operationCenterJs, /auth\/v1\/token\?grant_type=password/);
+assert.match(operationCenterJs, /organization_members\?select=organization_id,member_role/);
+assert.match(operationCenterJs, /operations\?select=id,reference,title,status,operation_type,version,created_at/);
+assert.doesNotMatch(operationCenterJs, /service_role|localStorage|sessionStorage|amount_cents|calculated_margin_cents|total_cost_cents/i,
+  'browser integration must not use service credentials, persist sessions, or request financial columns');
+assert.match(operationCenterJs, /window\.addEventListener\('pagehide',\(\)=>\{backendSession=null;\}\)/);
+
+
 
 
 console.log('company inventory MVP security and migration history contract: ok');
