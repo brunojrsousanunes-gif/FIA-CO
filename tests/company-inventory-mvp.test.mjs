@@ -37,13 +37,9 @@ const expectedNewMigrations = [
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
 );
-for (const rpc of [
-  'public.accept_operation_invitation',
-  'public.create_operation_draft',
-  'public.create_synthetic_part_recovery'
-]) {
-  assert.match(operationRpcHardening, new RegExp('create or replace function ' + rpc.replaceAll('.', '\\\\.') + '[\\\\s\\\\S]*?security definer[\\\\s\\\\S]*?set search_path to', 'i'));
-}
+assert.match(operationRpcHardening, /create or replace function public\.accept_operation_invitation[\s\S]*?security definer[\s\S]*?set search_path to ''/i);
+assert.match(operationRpcHardening, /create or replace function public\.create_operation_draft[\s\S]*?security definer[\s\S]*?set search_path to ''/i);
+assert.match(operationRpcHardening, /create or replace function public\.create_synthetic_part_recovery[\s\S]*?security definer[\s\S]*?set search_path to ''/i);
 assert.match(operationRpcHardening, /request_key is null/i);
 assert.match(operationRpcHardening, /IDEMPOTENCY_KEY_REUSED/i);
 assert.match(operationRpcHardening, /pg_advisory_xact_lock/i);
