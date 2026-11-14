@@ -137,3 +137,39 @@ body.portal-ready{overflow-x:hidden}.portal-ready main>.flow-section,.portal-rea
  .demo-stage-track{grid-template-columns:repeat(3,1fr);row-gap:10px}
  .demo-case-top b{margin-left:0}
 }
+
+
+/* FIA&CO — integración visual del expediente demo con la portada pública */
+.demo-expedient{padding:clamp(58px,7vw,88px) 0;background:linear-gradient(180deg,#eef5f7 0%,#f7fafb 100%);border-top:1px solid #dce8ec;border-bottom:1px solid #dce8ec}
+.demo-expedient .public-kicker{color:#007fa8}
+.demo-expedient .public-heading{margin-bottom:30px}
+.demo-expedient .public-heading h2 span{color:#7d8b93}
+.demo-metrics{gap:10px;margin:24px 0}
+.demo-metrics article{border-color:#dce7eb;border-radius:14px;box-shadow:0 8px 22px rgba(12,35,47,.045)}
+.demo-metrics strong{color:#007fa8}
+.demo-metrics span{color:#596a73}
+.demo-case{border-color:#d7e3e8;border-radius:20px;box-shadow:0 20px 48px rgba(12,35,47,.09)}
+.demo-case-main{background:linear-gradient(145deg,#fff,#fbfdfe)}
+.demo-case-top span,.demo-side-label{color:#647680}
+.demo-case-top b{background:#dff5fb;color:#006f91}
+.demo-company-flow article{border-color:#dbe8ec;background:#f6fbfc}
+.demo-company-flow small{color:#007fa8}
+.demo-company-flow i{color:#0098c1}
+.demo-stage-track span{border-color:#d8e4e8;color:#74838b}
+.demo-stage-track .complete{border-color:#16866f;color:#126a59}
+.demo-stage-track .complete b{background:#16866f}
+.demo-stage-track .active{border-color:#009ac3;color:#007fa8}
+.demo-stage-track .active b{background:#0089ae}
+.demo-case-side{background:#0c1118}
+.demo-case-side>a{color:#69d8f2}
+.demo-disclaimer{color:#647680}
+@media(max-width:760px){
+ .demo-expedient{padding:54px 0}
+ .demo-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .demo-case{grid-template-columns:1fr}
+ .demo-case-main,.demo-case-side{padding:22px}
+ .demo-company-flow{grid-template-columns:1fr;gap:7px}
+ .demo-company-flow i{transform:rotate(90deg);justify-self:center}
+ .demo-stage-track{grid-template-columns:repeat(3,1fr);row-gap:10px}
+ .demo-case-top b{margin-left:0}
+}
