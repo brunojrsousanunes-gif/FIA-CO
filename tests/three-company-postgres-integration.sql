@@ -519,6 +519,57 @@ $legacy_acceptance_remains_unbound$;
 select 'LEGACY ACCEPTANCE CLAIM BLOCKED: PASS' as security_result;
 
 
+
+-- Separación entre información compartida y finanzas internas.
+update public.operations set margin_floor_cents=10000 where id='73000000-0000-0000-0000-000000000001';
+insert into public.operation_cost_items(operation_id,organization_id,category,label,amount_cents,currency,created_by)
+values('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001',
+'service','Coste interno del vendedor',2000,'EUR','71000000-0000-0000-0000-000000000001');
+
+set request.jwt.claim.sub='71000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $company_ceo_can_read_own_finance$
+declare visible_rows integer; own_costs integer; own_margin bigint;
+begin
+select count(*),max(calculated_margin_cents) into visible_rows,own_margin
+from public.operation_financials where operation_id='73000000-0000-0000-0000-000000000001'
+and organization_id='72000000-0000-0000-0000-000000000001';
+select count(*) into own_costs from public.operation_cost_items where operation_id='73000000-0000-0000-0000-000000000001';
+if visible_rows<>1 or own_costs<>1 or own_margin<>123000 then raise exception 'CEO_CANNOT_READ_OWN_COMPANY_FINANCE'; end if;
+end $company_ceo_can_read_own_finance$;
+
+do $shared_operation_hides_private_columns$
+begin
+begin perform margin_floor_cents from public.operations where id='73000000-0000-0000-0000-000000000001';
+raise exception 'PARTICIPANT_CAN_READ_MARGIN_FLOOR';
+exception when insufficient_privilege then null; end;
+begin perform event_data from public.operation_audit_events where operation_id='73000000-0000-0000-0000-000000000001';
+raise exception 'PARTICIPANT_CAN_READ_RAW_AUDIT_DATA';
+exception when insufficient_privilege then null; end;
+begin perform metadata from public.operation_confirmations limit 1;
+raise exception 'PARTICIPANT_CAN_READ_CONFIRMATION_METADATA';
+exception when insufficient_privilege then null; end;
+begin perform storage_path from public.operation_evidence limit 1;
+raise exception 'PARTICIPANT_CAN_READ_PRIVATE_EVIDENCE_PATH';
+exception when insufficient_privilege then null; end;
+begin perform resolution_note from public.operation_incidents limit 1;
+raise exception 'PARTICIPANT_CAN_READ_PRIVATE_RESOLUTION_NOTE';
+exception when insufficient_privilege then null; end;
+end $shared_operation_hides_private_columns$;
+reset role;
+
+set request.jwt.claim.sub='71000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $other_company_cannot_read_seller_finance$
+declare finance_rows integer; cost_rows integer;
+begin
+select count(*) into finance_rows from public.operation_financials where operation_id='73000000-0000-0000-0000-000000000001';
+select count(*) into cost_rows from public.operation_cost_items where operation_id='73000000-0000-0000-0000-000000000001';
+if finance_rows<>0 or cost_rows<>0 then raise exception 'BUYER_READS_SELLER_PRIVATE_FINANCE'; end if;
+end $other_company_cannot_read_seller_finance$;
+reset role;
+select 'AISLAMIENTO FINANCIERO Y METADATOS PRIVADOS: PASS' as security_result;
+
 -- Removing the CEO role or suspending that membership immediately revokes
 -- the trusted CEO attestation, so an old L3 consent cannot remain active.
 update public.organization_members
