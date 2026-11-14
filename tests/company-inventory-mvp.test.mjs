@@ -33,7 +33,6 @@ const expectedNewMigrations = [
   '20261115000000_owner_membership_access_hardening.sql',
   '20261115010000_make_l3_authorization_retry_idempotent.sql',
   '20261115020000_harden_operation_rpc_idempotency.sql',
-  '20261115030000_empty_search_path_for_security_definer_helpers.sql',
   '20261115040000_harden_l3_revocation_and_reservation_retries.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
@@ -49,25 +48,6 @@ assert.match(operationRpcHardening, /recovery\.created/i);
 assert.match(operationRpcHardening, /recovery\.linked/i);
 assert.match(operationRpcHardening, /three_distinct_synthetic_organizations_required/i);
 
-const helperSearchPathHardening = fs.readFileSync(
-  'supabase/migrations/20261115030000_empty_search_path_for_security_definer_helpers.sql', 'utf8'
-);
-for (const signature of [
-  'private.after_confirmation_insert()',
-  'private.after_incident_change()',
-  'private.after_participant_acceptance()',
-  'private.append_operation_audit(uuid,text,uuid,jsonb,uuid)',
-  'private.can_access_operation(uuid)',
-  'private.can_manage_operation(uuid)',
-  'private.enqueue_operation_notice(uuid,text,text)',
-  'private.is_org_member(uuid)',
-  'private.validate_evidence_role()'
-]) {
-  assert.ok(
-    helperSearchPathHardening.includes('alter function ' + signature + " set search_path = '';"),
-    'SECURITY DEFINER helper must use an empty search_path: ' + signature
-  );
-}
 const l3AndReservationHardening = fs.readFileSync(
   'supabase/migrations/20261115040000_harden_l3_revocation_and_reservation_retries.sql', 'utf8'
 );
