@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { resolvePublicOutputPath } from '../scripts/public-output-path.mjs';
 
 const root=process.cwd();
 const allowlist=fs.readFileSync(path.join(root,'config/pages-public-allowlist.txt'),'utf8')
@@ -22,6 +23,18 @@ for(const rel of privatePaths){
 const tempRoot=fs.mkdtempSync(path.join(os.tmpdir(),'fia-pages-boundary-'));
 const output=path.join(tempRoot,'artifact');
 try{
+  assert.equal(resolvePublicOutputPath(root,'pages-public'),path.join(root,'pages-public'));
+  assert.equal(resolvePublicOutputPath(root,'.pages-public-test'),path.join(root,'.pages-public-test'));
+  assert.equal(resolvePublicOutputPath(root,output),output);
+
+  for(const unsafePath of ['.','frontend','docs',path.dirname(root),os.tmpdir()]){
+    assert.throws(
+      ()=>resolvePublicOutputPath(root,unsafePath),
+      /UNSAFE_PUBLIC_OUTPUT_PATH/,
+      `Unsafe output path should be rejected: ${unsafePath}`
+    );
+  }
+
   const build=spawnSync(process.execPath,[
     path.join(root,'scripts/build-pages-public.mjs'),output
   ],{cwd:root,encoding:'utf8'});
@@ -37,4 +50,4 @@ try{
   fs.rmSync(tempRoot,{recursive:true,force:true});
 }
 
-console.log('public/private Pages boundary: ok');
+console.log('public/private Pages boundary and safe output path: ok');
