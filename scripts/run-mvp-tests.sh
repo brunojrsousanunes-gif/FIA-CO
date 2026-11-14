@@ -18,6 +18,7 @@ node tests/contracts-provider-onboarding.test.mjs
 node tests/fia-chat-layout.test.mjs
 node tests/fia-piggy-interaction.test.mjs
 node tests/fia-mobile-entry.test.mjs
+node tests/service-worker-cache.test.mjs
 node tests/homepage-role-visuals.test.mjs
 node tests/supabase-browser-config.test.mjs
 node tests/architecture-boundaries.test.mjs
