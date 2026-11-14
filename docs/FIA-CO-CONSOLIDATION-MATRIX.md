@@ -13,9 +13,9 @@ Esta matriz registra cambios y comprobaciones. No autoriza fusionar, desplegar e
 | Referencia | Estado comprobado | Decisión |
 |---|---|---|
 | `main` | Base estable; sin cambios realizados durante esta auditoría | Mantener intacta |
-| PR #184 — `test/ceo-organization-data-boundaries-ci3` | Abierta, borrador; 76 commits por delante y 0 por detrás de `main` en la última comparación | Mantener como línea de integración y completar CI/revisión |
+| PR #184 — `test/ceo-organization-data-boundaries-ci3` | Abierta, borrador; 78 commits por delante y 0 por detrás de `main` en la última comparación | Mantener como línea de integración y completar CI/revisión |
 | PR #177 — `fix/supabase-migration-history-sync` | Abierta, no fusionada | Sus cambios de historial y baseline se han reconciliado selectivamente en #184; no fusionar ambas líneas a ciegas |
-| PR #178 — `fia/architecture-public-private-boundary` | Abierta, borrador | Se han incorporado a #184 el control seguro de ruta de salida y su prueba; la documentación de arquitectura de #178 queda como referencia pendiente de revisión, no se ha copiado íntegra |
+| PR #178 — `fia/architecture-public-private-boundary` | Abierta, borrador | Se han incorporado a #184 el control seguro de ruta de salida, su prueba y el documento `docs/FIA-CO-ARCHITECTURE-BOUNDARIES.md`; se corrigió en él la referencia a la versión de la migración de confianza tras alinear el historial |
 | PR #180 — piloto de tres empresas | Antecedente funcional de #184 | Conservar como referencia, sin duplicar su integración |
 
 No se han cerrado PR ni borrado ramas.
@@ -43,6 +43,7 @@ La batería de contrato comprueba que los archivos de migración coinciden exact
 - Se añadió `tests/pages-public-private-boundary.test.mjs` y se integró en `scripts/run-mvp-tests.sh`.
 - La prueba verifica que las rutas privadas no entren en la allowlist ni en el artefacto público y que se rechacen destinos peligrosos.
 - El workflow de #184 conserva la prueba de construcción pública.
+- La batería SQL también comprueba que las tablas públicas tengan RLS, que las vistas expuestas a usuarios autenticados usen `security_invoker` y que `anon` no pueda ejecutar funciones públicas.
 
 **Riesgo que permanece:** el repositorio GitHub es público. La allowlist protege el artefacto de Pages, pero no hace privados los archivos versionados en GitHub. La visibilidad del repositorio requiere una decisión separada porque puede afectar Pages, CI y alojamiento. No se ha cambiado.
 
@@ -76,7 +77,7 @@ El workflow de #184 se ha ampliado para ejecutar:
 - Pruebas de inventario, permisos y flujo de tres empresas.
 - Prueba de frontera pública/privada de Pages.
 
-**PENDIENTE:** la CI correspondiente al último cambio de código está en ejecución. No se declara superada hasta que ambas versiones de PostgreSQL finalicen correctamente.
+**PENDIENTE:** la CI correspondiente a los últimos cambios de código y documentación está en ejecución. No se declara superada hasta que ambas versiones de PostgreSQL finalicen correctamente.
 
 ## 6. Estado real del entorno remoto
 
