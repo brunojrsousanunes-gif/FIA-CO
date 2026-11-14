@@ -246,7 +246,7 @@ grant execute on function public.authorize_organization_l3(uuid,uuid,timestamptz
 
 create or replace function public.revoke_organization_l3_authorization(
   target_organization uuid,
-  request_key uuid
+  target_request_key uuid
 ) returns uuid
 language plpgsql security definer
 set search_path = ''
