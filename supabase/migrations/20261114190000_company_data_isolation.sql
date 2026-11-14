@@ -1,4 +1,5 @@
 begin;
+
 create or replace function private.is_org_finance_manager(target_org uuid)
 returns boolean language sql stable security definer set search_path=pg_catalog,public as $$
 select (select auth.uid()) is not null and exists(select 1 from public.organization_members om
@@ -16,6 +17,80 @@ where o.id=target_operation
   and ((select auth.uid()) is null or private.can_access_operation(o.id)); $$;
 revoke all on function private.operation_owner_organization(uuid) from public,anon;
 grant execute on function private.operation_owner_organization(uuid) to authenticated;
+
+-- Backfill only when the legacy rule identifies exactly one participating
+-- company for the creator. This result is not reused for future operations.
+update public.operations o
+set owner_organization_id = private.operation_owner_organization(o.id)
+where o.owner_organization_id is null;
+
+create or replace function private.operation_owner_organization(target_operation uuid)
+returns uuid
+language sql stable security definer
+set search_path = ''
+as $
+  select o.owner_organization_id
+  from public.operations o
+  where o.id = target_operation
+    and ((select auth.uid()) is null or private.can_access_operation(o.id));
+$;
+revoke all on function private.operation_owner_organization(uuid) from public,anon;
+grant execute on function private.operation_owner_organization(uuid) to authenticated;
+
+create index if not exists operations_owner_organization_idx
+  on public.operations(owner_organization_id);
+
+create or replace function private.guard_operation_owner_organization()
+returns trigger
+language plpgsql security definer
+set search_path = ''
+as $
+begin
+  if tg_op = 'UPDATE'
+     and old.owner_organization_id is not null
+     and new.owner_organization_id is distinct from old.owner_organization_id then
+    raise exception 'OPERATION_OWNER_IMMUTABLE' using errcode = '42501';
+  end if;
+  if new.owner_organization_id is not null and not exists (
+    select 1 from public.organization_members om
+    where om.organization_id = new.owner_organization_id
+      and om.user_id = new.created_by and om.status = 'active'
+  ) then
+    raise exception 'OPERATION_OWNER_MUST_BE_CREATOR_ACTIVE_ORGANIZATION'
+      using errcode = '42501';
+  end if;
+  return new;
+end;
+$;
+revoke all on function private.guard_operation_owner_organization() from public,anon,authenticated;
+create trigger operations_owner_organization_guard
+before insert or update of owner_organization_id,created_by on public.operations
+for each row execute function private.guard_operation_owner_organization();
+
+drop policy if exists operations_creator_insert on public.operations;
+create policy operations_creator_insert on public.operations
+for insert to authenticated with check (
+  created_by = (select auth.uid()) and status = 'draft'
+  and owner_organization_id is not null
+  and exists (
+    select 1 from public.organization_members om
+    where om.organization_id = owner_organization_id
+      and om.user_id = (select auth.uid()) and om.status = 'active'
+  )
+);
+
+drop policy if exists operations_creator_draft_update on public.operations;
+create policy operations_creator_draft_update on public.operations
+for update to authenticated
+using (created_by = (select auth.uid()) and status = 'draft')
+with check (
+  created_by = (select auth.uid()) and status = 'draft'
+  and (owner_organization_id is null or exists (
+    select 1 from public.organization_members om
+    where om.organization_id = owner_organization_id
+      and om.user_id = (select auth.uid()) and om.status = 'active'
+  ))
+);
 
 alter table public.operation_cost_items add column if not exists organization_id uuid references public.organizations(id) on delete restrict;
 update public.operation_cost_items ci set organization_id=private.operation_owner_organization(ci.operation_id) where ci.organization_id is null;
