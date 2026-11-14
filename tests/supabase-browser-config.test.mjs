@@ -8,6 +8,11 @@ assert.throws(()=>validatePublicConfig('http://example.supabase.co','sb_publisha
 assert.throws(()=>validatePublicConfig('https://example.invalid','sb_publishable_12345678901234567890'),/SUPABASE_URL_INVALID/);
 assert.throws(()=>validatePublicConfig('https://example.supabase.co','sb_secret_12345678901234567890'),/SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER/);
 assert.throws(()=>validatePublicConfig('https://example.supabase.co','service_role_12345678901234567890'),/SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER/);
+const serviceRolePayload=Buffer.from(JSON.stringify({role:'service_role'})).toString('base64url');
+const anonPayload=Buffer.from(JSON.stringify({role:'anon'})).toString('base64url');
+assert.throws(()=>validatePublicConfig('https://example.supabase.co',`eyJhbGciOiJub25lIn0.${serviceRolePayload}.signature`),/SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER/);
+assert.doesNotThrow(()=>validatePublicConfig('https://example.supabase.co',`eyJhbGciOiJub25lIn0.${anonPayload}.signature`));
+
 
 const privateClient=fs.readFileSync('frontend/js/operation-center-private.js','utf8');
 const html=fs.readFileSync('frontend/operation-center-private.html','utf8');
