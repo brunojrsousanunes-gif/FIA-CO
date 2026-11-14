@@ -141,7 +141,8 @@ assert.ok(privateOperationCenterJs.includes("ui.password.value='';saveSession(pa
 assert.ok(privateOperationCenterJs.includes("ui.registerPassword.value='';sessionStorage.removeItem('fia_pending_pilot_access')"));
 assert.ok(privateOperationCenterJs.includes('async function refreshSession()'));
 assert.ok(privateOperationCenterJs.includes('Promise.allSettled(['));
-assert.ok(privateOperationCenterJs.includes("if(error.status===401&&state.refreshToken)"));
+assert.ok(privateOperationCenterJs.includes("if(error.status!==401||!state.refreshToken)throw error;"));
+assert.ok(privateOperationCenterJs.includes("error.code==='SESSION_REFRESH_FAILED'"));
 assert.ok(privateOperationCenterJs.includes("if(token)fetch(\u0060\u0024{SUPABASE_URL}/auth/v1/logout\u0060"));
 assert.ok(privateOperationCenterJs.includes("finance?money(finance.amount_cents):'Solo visible para la empresa titular'"));
 assert.match(privateOperationCenterJs, /operations\?select=id,reference,title,status,version,operation_type/);
