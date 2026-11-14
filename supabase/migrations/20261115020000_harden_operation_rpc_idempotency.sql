@@ -120,6 +120,7 @@ declare
   caller uuid := (select auth.uid());
   new_operation_id uuid;
   existing_operation_id uuid;
+  generated_reference text;
   existing_event public.operation_audit_events;
   existing_operation public.operations;
   active_org_count integer;
@@ -165,7 +166,7 @@ begin
 
   perform pg_advisory_xact_lock(hashtextextended(caller::text || ':' || request_key::text,0));
 
-  select e.*,o.* into existing_event,existing_operation
+  select e,o into existing_event,existing_operation
   from public.operation_audit_events e
   join public.operations o on o.id=e.operation_id
   where e.actor_id=caller and e.request_id=request_key
