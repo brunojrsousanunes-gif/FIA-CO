@@ -23,7 +23,10 @@ assert.equal(/sessionStorage\.(?:getItem|setItem)/.test(shell),false,'capability
 assert.equal(allowlist.includes('beta-mobile.html'),false,'deep app must not be published on Pages');
 assert.equal(allowlist.includes('js/unified-app.js'),false,'legacy app runtime must not be published on Pages');
 assert.equal(allowlist.includes('css/unified-app.css'),false,'deep app stylesheet must not be published on Pages');
-assert.ok(legacy.includes("fia_unified_beta_v2"),'legacy internal demo state remains available for internal development');
+assert.ok(legacy.includes("fia_unified_demo_session_v3"),'legacy internal demo state must use a session-scoped key');
+assert.ok(/sessionStorage\\.getItem\\(STORAGE_KEY\\)/.test(legacy),'legacy demo state must be loaded only for the current browser session');
+assert.ok(/sessionStorage\\.setItem\\(STORAGE_KEY,JSON\\.stringify\\(next\\)\\)/.test(legacy),'legacy demo state must be saved only for the current browser session');
+assert.equal(/localStorage\\.(?:getItem|setItem)\\(STORAGE_KEY/.test(legacy),false,'legacy demo state must not persist across browser sessions');
 assert.equal(legacy.includes('purgeLegacyStorage'),false,'automatic legacy storage purge must stay disabled');
 assert.equal(/\bfetch\s*\(/.test(legacy),false,'legacy local demo must not call network APIs');
 assert.ok(css.includes('@media(max-width:760px)'),'mobile navigation breakpoint missing');
