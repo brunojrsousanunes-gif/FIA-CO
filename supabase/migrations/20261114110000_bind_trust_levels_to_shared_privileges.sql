@@ -197,6 +197,15 @@ begin
     if existing_event.event_type='operation.transition'
        and existing_event.actor_id=caller
        and existing_event.event_data->>'to'=target_status then
+      -- Return the exact row produced by the original request, even if the
+      -- operation has advanced since then. Older events without a snapshot
+      -- retain the legacy fallback for backward compatibility.
+      if existing_event.event_data ? 'result' then
+        return jsonb_populate_record(
+          null::public.operations,
+          existing_event.event_data->'result'
+        );
+      end if;
       return current_row;
     end if;
     raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
@@ -249,7 +258,11 @@ begin
   insert into public.operation_audit_events
     (operation_id,event_type,actor_id,event_data,previous_hash,event_hash,created_at,request_id)
   values (target_operation,'operation.transition',caller,
-    jsonb_build_object('to',target_status,'version',current_row.version),
+    jsonb_build_object(
+      'to',target_status,
+      'version',current_row.version,
+      'result',to_jsonb(current_row)
+    ),
     previous,calculated,happened_at,request_key)
   on conflict (operation_id,request_id) do nothing;
   return current_row;
