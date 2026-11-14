@@ -66,13 +66,6 @@ values
  ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006',
   'ceo','verified','ci://authority/ceo-role-mismatch','71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
 
-insert into private.organization_l3_authority_verifications
- (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
-values
- ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006',
-  'zone_manager','verified','ci://authority/zone-manager-finance-boundary',
-  '71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
-
 -- Consent cannot outlive the verified authority that grants it.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
@@ -526,6 +519,13 @@ $legacy_acceptance_remains_unbound$;
 select 'LEGACY ACCEPTANCE CLAIM BLOCKED: PASS' as security_result;
 
 
+
+insert into private.organization_l3_authority_verifications
+ (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
+values
+ ('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000006',
+  'zone_manager','verified','ci://authority/zone-manager-finance-boundary',
+  '71000000-0000-0000-0000-000000000005',now(),now()+interval '90 days');
 
 -- Separación entre información compartida y finanzas internas.
 update public.operations set margin_floor_cents=10000 where id='73000000-0000-0000-0000-000000000001';
