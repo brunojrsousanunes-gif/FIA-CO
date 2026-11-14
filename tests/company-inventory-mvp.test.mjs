@@ -25,7 +25,8 @@ const expectedNewMigrations = [
   '20261114170000_bind_ceo_membership_to_l3_authority.sql',
   '20261114180000_revoke_ceo_authority_when_membership_ends.sql',
   '20261114190000_company_data_isolation.sql',
-  '20261114200000_index_uncovered_foreign_keys.sql'
+  '20261114200000_index_uncovered_foreign_keys.sql',
+  '20261114210000_harden_finance_definer_search_paths.sql'
 ];
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
@@ -66,5 +67,17 @@ const viewHardening = fs.readFileSync(
 assert.match(viewHardening, /alter view public\.inventory_stock set \(security_invoker = true\)/i);
 assert.match(viewHardening, /revoke all on public\.inventory_stock from public, anon/i);
 assert.match(viewHardening, /grant select on public\.inventory_stock to authenticated/i);
+
+
+const financeHardening = fs.readFileSync(
+  'supabase/migrations/20261114210000_harden_finance_definer_search_paths.sql', 'utf8'
+);
+for (const signature of [
+  'private.is_org_finance_manager(uuid)',
+  'private.enforce_cost_item_company()',
+  'private.recalculate_operation_margin(uuid)'
+]) {
+  assert.match(financeHardening, new RegExp('alter function ' + signature.replace(/[.*+?^${}()|[\]\\]/g, '\\console.log('company inventory MVP security and migration history contract: ok');') + " set search_path = ''", 'i'));
+}
 
 console.log('company inventory MVP security and migration history contract: ok');
