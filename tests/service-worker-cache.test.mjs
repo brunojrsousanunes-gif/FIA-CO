@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
 const worker=fs.readFileSync('frontend/sw.js','utf8');
+const headers=fs.readFileSync('frontend/_headers','utf8');
+assert.match(headers,/connect-src 'self' https:\/\/etttredbkbcgqwciipls\.supabase\.co/);
 assert.match(worker,/CACHE_NAME='fia-co-public-v2'/);
 assert.match(worker,/cache\.put\(request,response\.clone\(\)\)/);
 assert.match(worker,/cache\.match\(request\)/);
