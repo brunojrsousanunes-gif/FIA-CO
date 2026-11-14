@@ -114,7 +114,12 @@ const operationCenterJs = fs.readFileSync('frontend/js/operation-center.js', 'ut
 assert.match(operationCenterHtml, /connect-src 'self' https:\/\/etttredbkbcgqwciipls\.supabase\.co/i);
 assert.match(operationCenterHtml, /data-backend-login/);
 assert.match(operationCenterHtml, /data-backend-results/);
+assert.match(operationCenterHtml, /data-backend-create/);
+assert.match(operationCenterHtml, /Identificador del vendedor/);
 assert.match(operationCenterJs, /sb_publishable_[A-Za-z0-9_-]+/);
+assert.match(operationCenterJs, /rpc\/create_operation_draft/);
+assert.match(operationCenterJs, /new Set\(\[sellerOrg,carrierOrg,buyerOrg\]\)\.size!==3/);
+assert.match(operationCenterJs, /crypto\.randomUUID\(\)/);
 assert.match(operationCenterJs, /auth\/v1\/token\?grant_type=password/);
 assert.match(operationCenterJs, /organization_members\?select=organization_id,member_role/);
 assert.match(operationCenterJs, /operations\?select=id,reference,title,status,operation_type,version,created_at/);
