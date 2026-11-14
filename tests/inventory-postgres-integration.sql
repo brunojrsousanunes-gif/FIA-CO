@@ -401,7 +401,7 @@ begin
   end if;
 
   replay_result := public.transition_operation(
-    operation_id,'delivered',initial_version,request_key);
+    v_operation_id,'delivered',initial_version,v_request_key);
 
   if replay_result.status is distinct from first_result.status
      or replay_result.version <> first_result.version then
