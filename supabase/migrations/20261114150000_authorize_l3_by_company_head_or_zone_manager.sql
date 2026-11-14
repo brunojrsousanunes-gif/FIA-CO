@@ -51,8 +51,16 @@ alter table private.organization_l3_authority_verifications enable row level sec
 alter table private.organization_l3_authorization_events enable row level security;
 revoke all on private.organization_l3_authority_verifications from public, anon, authenticated;
 revoke all on private.organization_l3_authorization_events from public, anon, authenticated;
-grant select,insert,update,delete on private.organization_l3_authority_verifications to service_role;
-grant select on private.organization_l3_authorization_events to service_role;
+do $service_role_grants$
+begin
+  -- Supabase provides service_role; plain PostgreSQL CI intentionally does not.
+  if exists (select 1 from pg_roles where rolname='service_role') then
+    grant usage on schema private to service_role;
+    grant select,insert,update,delete on private.organization_l3_authority_verifications to service_role;
+    grant select on private.organization_l3_authorization_events to service_role;
+  end if;
+end
+$service_role_grants$;
 
 create or replace function private.organization_has_l3_authorization(target_organization uuid)
 returns boolean
@@ -163,7 +171,10 @@ begin
   where e.request_key=request_key
     and e.organization_id=target_organization
     and e.actor_id=caller
-    and e.action='authorized';
+    and e.authority_verification_id=authority.id
+    and e.authority_type=authority.authority_type
+    and e.action='authorized'
+    and e.valid_until=expiry;
   if event_id is null then
     raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
   end if;
@@ -184,11 +195,22 @@ declare
   caller uuid := (select auth.uid());
   authority private.organization_l3_authority_verifications;
   event_id uuid;
+  org_status text;
 begin
   if caller is null then raise exception 'AUTH_REQUIRED' using errcode='42501'; end if;
   if target_organization is null or request_key is null then
     raise exception 'ORGANIZATION_AND_REQUEST_KEY_REQUIRED' using errcode='22023';
   end if;
+
+  -- Serialize authorize/revoke operations on the same organization.
+  select o.status into org_status
+  from public.organizations o
+  where o.id=target_organization
+  for update;
+  if not found or org_status <> 'active' then
+    raise exception 'ORGANIZATION_NOT_ACTIVE' using errcode='42501';
+  end if;
+
   if not exists (
     select 1 from public.organization_members om
     where om.organization_id=target_organization
