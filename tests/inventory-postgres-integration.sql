@@ -530,7 +530,8 @@ begin
 
     if has_table_privilege('authenticated',table_row.oid,'TRUNCATE')
        or has_table_privilege('authenticated',table_row.oid,'REFERENCES')
-       or has_table_privilege('authenticated',table_row.oid,'TRIGGER') then
+       or has_table_privilege('authenticated',table_row.oid,'TRIGGER')
+       or has_table_privilege('authenticated',table_row.oid,'MAINTAIN') then
       raise exception 'AUTHENTICATED_DANGEROUS_TABLE_PRIVILEGE_REMAINS:%',table_row.relname;
     end if;
 
@@ -547,6 +548,31 @@ begin
 
   if exists (
     select 1
+    from pg_class c
+    join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public' and c.relkind='S'
+      and (
+        has_sequence_privilege('anon',c.oid,'USAGE')
+        or has_sequence_privilege('anon',c.oid,'SELECT')
+        or has_sequence_privilege('anon',c.oid,'UPDATE')
+      )
+  ) then
+    raise exception 'ANON_SEQUENCE_PRIVILEGE_REMAINS';
+  end if;
+
+  if exists (
+    select 1
+    from pg_default_acl d
+    cross join lateral aclexplode(d.defaclacl) a
+    where d.defaclobjtype='S'
+      and d.defaclnamespace='public'::regnamespace
+      and a.grantee='anon'::regrole
+  ) then
+    raise exception 'UNSAFE_PUBLIC_SEQUENCE_DEFAULT_PRIVILEGES_REMAIN';
+  end if;
+
+  if exists (
+    select 1
     from pg_default_acl d
     cross join lateral aclexplode(d.defaclacl) a
     where d.defaclobjtype='r'
@@ -555,7 +581,7 @@ begin
         a.grantee='anon'::regrole
         or (
           a.grantee='authenticated'::regrole
-          and a.privilege_type in ('DELETE','TRUNCATE','REFERENCES','TRIGGER')
+          and a.privilege_type in ('DELETE','TRUNCATE','REFERENCES','TRIGGER','MAINTAIN')
         )
       )
   ) then
