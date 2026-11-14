@@ -399,7 +399,7 @@ select public.transition_operation(
  '50000000-0000-0000-0000-000000000014');
 do $transition_idempotency_replay$
 begin
- if (select version from public.operations where id='30000000-0000-0000-0000-000000000001') <> 2 then
+ if (select version from public.operations where id='30000000-0000-0000-0000-000000000001') <> 3 then
    raise exception 'TRANSITION_IDEMPOTENCY_REPLAY_ADVANCED_VERSION';
  end if;
 end $transition_idempotency_replay$;
