@@ -294,14 +294,4 @@ alter default privileges for role postgres in schema public
 alter default privileges for role postgres in schema public
   revoke delete, truncate, references, trigger on tables from authenticated;
 
-do $default_privileges_supabase_admin$
-begin
-  if exists (select 1 from pg_roles where rolname = 'supabase_admin') then
-    execute 'alter default privileges for role supabase_admin in schema public revoke all on tables from anon';
-    execute 'alter default privileges for role supabase_admin in schema public revoke all on sequences from anon';
-    execute 'alter default privileges for role supabase_admin in schema public revoke delete, truncate, references, trigger on tables from authenticated';
-  end if;
-end
-$default_privileges_supabase_admin$;
-
 commit;
