@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0b1118">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https://etttredbkbcgqwciipls.supabase.co; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
 <title>FIA&CO — Centro de operaciones</title>
 <link rel="stylesheet" href="css/operation-center.css?v=1">
 </head>
@@ -16,6 +16,19 @@
 <section class="intro">
  <div><span class="eyebrow">OPERACIÓN GUIADA</span><h1>Del acuerdo al cierre, bajo control.</h1><p>Crea una operación ficticia y avanza solo cuando estén preparados los controles necesarios.</p></div>
  <aside><b>Entorno seguro</b><span>No introduzcas nombres reales, DNI, IBAN, correos, credenciales ni documentos privados.</span></aside>
+</section>
+
+<section class="backend-panel" aria-labelledby="backend-title">
+ <div class="backend-heading"><div><small>CONEXIÓN AUTENTICADA · SUPABASE</small><h2 id="backend-title">Mis operaciones FIA&CO</h2><p>Acceso de lectura protegido por la cuenta y las políticas de cada empresa. Esta conexión no usa datos de demostración.</p></div><span class="backend-state" data-backend-state>DESCONECTADO</span></div>
+ <form class="backend-login" data-backend-login>
+  <label>Correo de acceso<input type="email" name="email" maxlength="254" autocomplete="username" required></label>
+  <label>Contraseña<input type="password" name="password" maxlength="256" autocomplete="current-password" required></label>
+  <button class="primary" type="submit">Entrar de forma segura</button>
+ </form>
+ <div class="backend-actions" data-backend-actions hidden><span data-backend-user></span><button type="button" data-backend-refresh>Actualizar operaciones</button><button type="button" data-backend-logout>Cerrar sesión</button></div>
+ <p class="backend-message" data-backend-message role="status" aria-live="polite">Inicia sesión con una cuenta FIA&CO ya habilitada. No hay registro público desde esta pantalla.</p>
+ <div class="backend-results" data-backend-results hidden><div><strong data-backend-memberships>Empresas: —</strong><strong data-backend-count>Operaciones: —</strong></div><ol data-backend-list></ol></div>
+ <p class="backend-note">La contraseña no se guarda. La sesión permanece solo en memoria de esta pestaña y se cierra al salir o recargar. Los importes y márgenes no se solicitan ni se muestran aquí.</p>
 </section>
 
 <section class="statusbar" aria-label="Estado de la operación">
