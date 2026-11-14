@@ -64,6 +64,40 @@ alter function private.enqueue_operation_notice(uuid,text,text) set search_path 
 alter function private.is_org_member(uuid) set search_path = '';
 alter function private.validate_evidence_role() set search_path = '';
 
+
+-- The draft UPDATE policy must enforce the same active-owner boundary in
+-- both USING and WITH CHECK; otherwise a revoked creator remains a candidate
+-- row for direct updates even though the check rejects the final row.
+drop policy if exists operations_creator_draft_update on public.operations;
+create policy operations_creator_draft_update
+on public.operations
+for update
+to authenticated
+using (
+  created_by = (select auth.uid())
+  and status = 'draft'
+  and owner_organization_id is not null
+  and exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = operations.owner_organization_id
+      and om.user_id = (select auth.uid())
+      and om.status = 'active'
+  )
+)
+with check (
+  created_by = (select auth.uid())
+  and status = 'draft'
+  and owner_organization_id is not null
+  and exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = operations.owner_organization_id
+      and om.user_id = (select auth.uid())
+      and om.status = 'active'
+  )
+);
+
 revoke all on function private.can_access_operation(uuid) from public, anon;
 revoke all on function private.can_manage_operation(uuid) from public, anon;
 grant execute on function private.can_access_operation(uuid) to authenticated;
