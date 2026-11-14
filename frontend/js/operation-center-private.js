@@ -9,7 +9,6 @@ const supabase=createSupabaseBrowserClient({url:SUPABASE_URL,publishableKey:SUPA
 let refreshPromise=null;
 
 function setMessage(text,type=''){ui.message.textContent=text;ui.message.className=type;}
-const api=(path,options={})=>supabase.request(path,options);
 const money=cents=>cents==null?'Pendiente':new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(cents)/100);
 const line=(strong,small='')=>{const p=document.createElement('p'),b=document.createElement('strong');b.textContent=strong;p.append(b);if(small){const span=document.createElement('span');span.className='muted';span.textContent=` · ${small}`;p.append(span);}return p;};
 
