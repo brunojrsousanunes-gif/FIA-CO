@@ -27,7 +27,8 @@ const expectedNewMigrations = [
   '20261114190000_company_data_isolation.sql',
   '20261114200000_index_uncovered_foreign_keys.sql',
   '20261114210000_harden_finance_definer_search_paths.sql',
-  '20261114220000_harden_financial_trigger_search_path.sql'
+  '20261114220000_harden_financial_trigger_search_path.sql',
+  '20261114230000_index_l3_authority_foreign_keys.sql'
 ];
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
