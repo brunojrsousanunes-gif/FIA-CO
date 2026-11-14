@@ -50,6 +50,11 @@ El producto gestiona operaciones y sus confirmaciones, evidencias, responsabilid
 
 ## 4. Arquitectura documental y fuentes de referencia
 
+- Catálogo y jerarquía: `docs/assistant/DOCUMENTATION-CATALOG.md`.
+- Decisiones duraderas: `docs/assistant/DECISION-LOG.md`.
+- Cola de tareas y condiciones de cierre: `docs/assistant/WORK-REGISTER.md`.
+- Entrada general y mapa: `README.md`.
+
 | Tema | Fuente que debe consultarse |
 |---|---|
 | Reglas generales del proyecto | `skills/fia-co-project/SKILL.md` |
