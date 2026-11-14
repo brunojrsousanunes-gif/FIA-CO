@@ -141,6 +141,13 @@ as $$
        where latest.organization_id=target_organization
          and latest.action='authorized'
          and latest.valid_until>statement_timestamp()
+         and exists (
+           select 1 from private.organization_l3_authority_verifications authority
+           where authority.id=latest.authority_verification_id
+             and authority.verification_status='verified'
+             and authority.verified_at<=statement_timestamp()
+             and authority.valid_until>statement_timestamp()
+         )
          and not exists (
            select 1 from private.organization_l3_authorization_events newer
            where newer.organization_id=latest.organization_id
