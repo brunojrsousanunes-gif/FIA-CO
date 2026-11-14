@@ -26,9 +26,9 @@ assert.doesNotMatch(migration, /grant (?:insert|update|delete).*inventory_reserv
 const viewHardening = fs.readFileSync(
   'supabase/migrations/20261113212950_inventory_stock_view_privileges_hardening.sql', 'utf8'
 );
-assert.match(viewHardening, /alter view public\\.inventory_stock set \\(security_invoker = true\\)/i);
-assert.match(viewHardening, /revoke all on public\\.inventory_stock from public, anon/i);
-assert.match(viewHardening, /grant select on public\\.inventory_stock to authenticated/i);
+assert.match(viewHardening, /alter view public\.inventory_stock set \(security_invoker = true\)/i);
+assert.match(viewHardening, /revoke all on public\.inventory_stock from public, anon/i);
+assert.match(viewHardening, /grant select on public\.inventory_stock to authenticated/i);
 
 console.log('company inventory MVP security contract: ok');
 
