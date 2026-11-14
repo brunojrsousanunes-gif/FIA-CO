@@ -75,5 +75,6 @@ const financeHardening = fs.readFileSync(
 assert.match(financeHardening, /alter function private\.is_org_finance_manager\(uuid\) set search_path = ''/i);
 assert.match(financeHardening, /alter function private\.enforce_cost_item_company\(\) set search_path = ''/i);
 assert.match(financeHardening, /alter function private\.recalculate_operation_margin\(uuid\) set search_path = ''/i);
+assert.match(financeHardening, /alter view public\.operation_audit_timeline set \(security_invoker = true\)/i);
 
 console.log('company inventory MVP security and migration history contract: ok');
