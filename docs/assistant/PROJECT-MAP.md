@@ -94,7 +94,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Seguridad multiusuario](../MULTIUSER-SECURITY.md)
 - [Modelo de autorización para inversores](../AUTHORIZATION-PACK-INVESTOR-READY.md)
 - [Arquitectura de niveles de información](../../config/information-access-levels.json)
-- [Niveles de seguridad Trust](../../config/trust-security-levels.json)
+- [Niveles de seguridad Trust](../../config/trust-security-levels.v1.json)
 - [Estrategia de maximización de utilidad de seguridad](../FIA-SECURITY-UTILITY-MAXIMIZATION-V1.md)
 
 ### D. Finanzas, economía y pagos
