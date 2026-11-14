@@ -6,7 +6,17 @@ function validatePublicConfig(url,publishableKey){
   if(parsed.protocol!=='https:'||!parsed.hostname.endsWith('.supabase.co'))throw new Error('SUPABASE_URL_INVALID');
   if(typeof publishableKey!=='string'||publishableKey.length<20)throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
   if(SECRET_KEY_PATTERNS.some(pattern=>pattern.test(publishableKey)))throw new Error('SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER');
-  if(!publishableKey.startsWith('sb_publishable_')&&publishableKey.split('.').length!==3)throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
+  if(!publishableKey.startsWith('sb_publishable_')){
+    const parts=publishableKey.split('.');
+    if(parts.length!==3)throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
+    try{
+      const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+      if(payload.role!=='anon')throw new Error('SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER');
+    }catch(error){
+      if(error.message==='SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER')throw error;
+      throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
+    }
+  }
   return Object.freeze({url:parsed.origin,publishableKey});
 }
 
