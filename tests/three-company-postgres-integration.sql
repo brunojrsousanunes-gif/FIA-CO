@@ -103,6 +103,14 @@ begin
 end
 $three_independent_acceptors$;
 
+-- Diagnostic snapshot after acceptance, executed as the migration-test owner.
+select status as diagnostic_operation_status, version as diagnostic_operation_version
+from public.operations where id='73000000-0000-0000-0000-000000000001';
+select count(*) as diagnostic_accepted_participants
+from public.operation_participants
+where operation_id='73000000-0000-0000-0000-000000000001' and status='accepted';
+select private.operation_has_shared_trust('73000000-0000-0000-0000-000000000001') as diagnostic_shared_trust;
+
 -- All three acceptances are required before the operation becomes accepted.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
