@@ -26,7 +26,8 @@ const expectedNewMigrations = [
   '20261114180000_revoke_ceo_authority_when_membership_ends.sql',
   '20261114190000_company_data_isolation.sql',
   '20261114200000_index_uncovered_foreign_keys.sql',
-  '20261114210000_harden_finance_definer_search_paths.sql'
+  '20261114210000_harden_finance_definer_search_paths.sql',
+  '20261114220000_harden_financial_trigger_search_path.sql'
 ];
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
@@ -76,6 +77,11 @@ assert.match(financeHardening, /alter function private\.is_org_finance_manager\(
 assert.match(financeHardening, /alter function private\.enforce_cost_item_company\(\) set search_path = ''/i);
 assert.match(financeHardening, /alter function private\.recalculate_operation_margin\(uuid\) set search_path = ''/i);
 assert.match(financeHardening, /alter view public\.operation_audit_timeline set \(security_invoker = true\)/i);
+const financeTriggerHardening = fs.readFileSync(
+  'supabase/migrations/20261114220000_harden_financial_trigger_search_path.sql', 'utf8'
+);
+assert.match(financeTriggerHardening, /alter function private\.after_financial_change\(\) set search_path = ''/i);
+
 
 const companyIsolation = fs.readFileSync(
   'supabase/migrations/20261114190000_company_data_isolation.sql', 'utf8'
