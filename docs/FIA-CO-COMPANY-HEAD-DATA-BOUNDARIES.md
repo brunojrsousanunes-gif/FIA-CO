@@ -25,6 +25,14 @@ L3 permite colaborar en un expediente; **no es un permiso general para consultar
 - La aplicación tiene una jerarquía de capacidades `OWNER/ADMIN/OPERATOR/VIEWER`, pero no está demostrada una correspondencia segura entre esos nombres y los cargos reales de `organization_members`.
 - La política de datos clasifica información comercial confidencial, pero la clasificación por sí sola no identifica a qué empresa pertenece cada dato ni sustituye una autorización por recurso.
 
+## Auditoría ampliada de operaciones y trazabilidad
+
+- `operation_participants`, `operation_confirmations` y `operation_notifications` también son legibles por los participantes autorizados del expediente. Su contenido debe revisarse campo por campo para distinguir datos operativos compartidos de datos internos.
+- `operation_audit_events` expone a los participantes `event_data` completo, además del actor, tipo de evento y hashes. Como el JSON puede contener detalles variables, no es seguro asumir que todo su contenido sea apto para todas las empresas.
+- `operation_cost_items` tiene `created_by`, pero no una organización propietaria explícita. El creador no es una forma fiable de determinar la propiedad: una misma persona podría pertenecer a varias empresas.
+- `operation_incidents` permite a los participantes leer descripciones y notas de resolución. Debe distinguirse la incidencia compartida que afecta a la operación de las notas internas de una empresa.
+- `private.can_manage_operation` se basa en `operations.created_by`; no concede control al CEO de una empresa participante. No se debe sustituir por una regla que permita al CEO de una empresa gestionar datos de todas las partes.
+
 ## Riesgo detectado
 
 La frontera actual protege varias tablas por pertenencia a una organización, pero el expediente compartido abre la lectura de algunas tablas completas a todas las empresas participantes. Esto incluye márgenes internos y partidas de costes. Por ello, el modelo actual no demuestra todavía la regla de que una empresa no pueda consultar la información sensible interna de otra.
@@ -41,6 +49,11 @@ No se debe corregir ampliando o reduciendo indiscriminadamente `can_access_opera
 6. **Compartición excepcional:** un dato confidencial de otra empresa solo se comparte mediante autorización específica del propietario, con destinatario, finalidad, alcance, caducidad y revocación. La participación L3 no sustituye este permiso.
 7. **Denegación por defecto:** si no se puede determinar de forma fiable la organización propietaria o el alcance de una autorización, no se muestra el dato.
 8. **Separación de responsabilidades:** el jefe puede supervisar y delegar dentro de su empresa; las transiciones que corresponden al usuario aceptante de un papel siguen vinculadas a esa identidad y a sus confirmaciones.
+
+
+### Decisión técnica antes de migrar
+
+No aplicar todavía un cambio general de RLS ni una ampliación de `can_access_operation`. La solución requiere primero identificar el propietario organizativo de cada dato y separar el expediente compartido de los datos internos. Para los campos financieros y de auditoría, la opción segura es mover la información interna a tablas protegidas por `organization_id` y ofrecer a los socios una salida compartida explícita y limitada. No basta con ocultar campos en la interfaz: la protección debe aplicarse en PostgreSQL.
 
 ## Secuencia de implementación
 
