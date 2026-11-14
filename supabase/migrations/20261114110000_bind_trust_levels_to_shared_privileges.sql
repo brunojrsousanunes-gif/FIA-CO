@@ -270,6 +270,12 @@ end;
 $$;
 
 
+-- These RPCs are intentionally callable by authenticated users, but their
+-- privileged execution must not resolve objects through writable schemas.
+alter function public.accept_operation_invitation(uuid,text,uuid) set search_path = '';
+alter function public.create_synthetic_part_recovery(uuid,text,text,text,uuid) set search_path = '';
+alter function public.transition_operation(uuid,text,integer,uuid) set search_path = '';
+
 -- Remove table privileges that browser users do not need. RLS does not
 -- protect TRUNCATE, REFERENCES or TRIGGER privileges, and anonymous users
 -- have no row policies in this schema.
