@@ -21,7 +21,7 @@ Una prueba local no demuestra despliegue; una configuración no demuestra que es
 | Área | Ubicación | Uso |
 |---|---|---|
 | Estado y continuidad entre IAs | `PROJECT-HANDOFF.md` | Estado de ramas, pruebas, límites y siguiente trabajo |
-| Decisiones duraderas | `DECISION-LOG.md` | Decisiones confirmadas, razones, evidencia y revisiones |
+| Notas técnicas mínimas para continuidad de IA | `DECISION-LOG.md` | Solo límites técnicos duraderos que evitan errores al retomar el trabajo |
 | Tareas y prioridades | `WORK-REGISTER.md` | Cola de trabajo, dependencias y estado |
 | Reglas del proyecto | `../../skills/fia-co-project/SKILL.md` | Instrucciones generales |
 | Reglas operativas | `../../skills/fia-co-project/references/operating-rules.md` | Cambios, seguridad, piloto y aceptación |
