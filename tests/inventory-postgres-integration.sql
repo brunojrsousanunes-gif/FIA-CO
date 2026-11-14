@@ -294,9 +294,8 @@ values
   '20000000-0000-0000-0000-000000000002','buyer','invited',
   '10000000-0000-0000-0000-000000000001',null,null),
  ('30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000003','carrier','accepted',
-  '10000000-0000-0000-0000-000000000001',
-  '10000000-0000-0000-0000-000000000001',now());
+  '20000000-0000-0000-0000-000000000003','carrier','invited',
+  '10000000-0000-0000-0000-000000000001',null,null);
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
 set role authenticated;
@@ -315,10 +314,31 @@ begin
 end $confirmation_gate$;
 reset role;
 
--- Accept the buyer invitation through the authorized server function.
+-- Each role is accepted by a different authenticated account.
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
 select public.accept_operation_invitation(
  '30000000-0000-0000-0000-000000000001','buyer',
  '50000000-0000-0000-0000-000000000009');
+reset role;
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+select public.accept_operation_invitation(
+ '30000000-0000-0000-0000-000000000001','carrier',
+ '50000000-0000-0000-0000-000000000016');
+reset role;
+
+do $three_distinct_role_acceptors$
+begin
+  if (select count(distinct accepted_by)
+      from public.operation_participants
+      where operation_id='30000000-0000-0000-0000-000000000001'
+        and status='accepted') <> 3 then
+    raise exception 'THREE_DISTINCT_ROLE_ACCEPTORS_REQUIRED';
+  end if;
+end
+$three_distinct_role_acceptors$;
 -- L2 is insufficient for cross-company confirmations.
 reset role;
 update private.organization_security_profiles set trust_level='L2_VERIFIED'
@@ -356,11 +376,11 @@ reset role;
 update private.organization_security_profiles set trust_level='L3_SHARED'
 where organization_id='20000000-0000-0000-0000-000000000003';
 
--- A second active member of the carrier company must not act on the
--- role accepted by a different account.
+-- The seller account is also an active member of the carrier company,
+-- but it did not accept the carrier role and must not act as the carrier.
 update public.operations set status='in_transit',version=version+1
 where id='30000000-0000-0000-0000-000000000001';
-set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
 do $accepted_account_gate$
 begin
@@ -376,9 +396,9 @@ begin
 end $accepted_account_gate$;
 reset role;
 
--- The exact account that accepted the carrier role remains authorized.
+-- The distinct carrier account that accepted the role remains authorized.
 -- Retry with the ORIGINAL expected_version to simulate a lost response.
-set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
 set role authenticated;
 do $transition_idempotency_replay$
 declare
@@ -616,4 +636,4 @@ begin
 end
 $least_privilege_table_grants$;
 
-select 'FULL MIGRATION CHAIN + INCIDENT + TRUST + PRIVATE PROFILE TESTS: PASS' as result;
+select 'FULL MIGRATION CHAIN + THREE DISTINCT ROLE USERS + INCIDENT + TRUST TESTS: PASS' as result;
