@@ -94,7 +94,7 @@ begin
  exception when insufficient_privilege then
   null;
  end;
-end $;
+end $$;
 reset role;
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
