@@ -50,7 +50,7 @@ La entrada `frontend/js/operation-center-private.js` importa la configuración p
 En ese cliente se han identificado llamadas REST a:
 - `operations`, `organization_members` y `pilot_access_requests`;
 - `operation_participants`, `operation_confirmations`, `logistics_quotes`, `operation_cost_items`, `operation_incidents` y `operation_audit_events`;
-- `inventory_items`, `inventory_movements`, `inventory_reservations` e `inventory_stock`.
+- `inventory_items`, `inventory_reservations` e `inventory_stock`.
 
 Y llamadas RPC a:
 - `accept_operation_invitation`, `select_logistics_quote`, `create_synthetic_part_recovery` y `request_pilot_access`;
