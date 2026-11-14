@@ -505,4 +505,63 @@ begin
 end $trust_profile_read$;
 reset role;
 
+
+-- Public tables must not retain anonymous access or client privileges that
+-- bypass RLS / are not part of the browser application contract.
+do $least_privilege_table_grants$
+declare
+  table_row record;
+begin
+  for table_row in
+    select c.oid, c.relname
+    from pg_class c
+    join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public' and c.relkind in ('r','p')
+  loop
+    if has_table_privilege('anon',table_row.oid,'SELECT')
+       or has_table_privilege('anon',table_row.oid,'INSERT')
+       or has_table_privilege('anon',table_row.oid,'UPDATE')
+       or has_table_privilege('anon',table_row.oid,'DELETE')
+       or has_table_privilege('anon',table_row.oid,'TRUNCATE')
+       or has_table_privilege('anon',table_row.oid,'REFERENCES')
+       or has_table_privilege('anon',table_row.oid,'TRIGGER') then
+      raise exception 'ANON_TABLE_PRIVILEGE_REMAINS:%',table_row.relname;
+    end if;
+
+    if has_table_privilege('authenticated',table_row.oid,'TRUNCATE')
+       or has_table_privilege('authenticated',table_row.oid,'REFERENCES')
+       or has_table_privilege('authenticated',table_row.oid,'TRIGGER') then
+      raise exception 'AUTHENTICATED_DANGEROUS_TABLE_PRIVILEGE_REMAINS:%',table_row.relname;
+    end if;
+
+    if has_table_privilege('authenticated',table_row.oid,'DELETE')
+       and table_row.relname not in ('logistics_quotes','operation_cost_items') then
+      raise exception 'AUTHENTICATED_DELETE_WITHOUT_DELETE_POLICY:%',table_row.relname;
+    end if;
+  end loop;
+
+  if not has_table_privilege('authenticated','public.logistics_quotes','DELETE')
+     or not has_table_privilege('authenticated','public.operation_cost_items','DELETE') then
+    raise exception 'LEGITIMATE_QUOTE_OR_COST_DELETE_PERMISSION_REMOVED';
+  end if;
+
+  if exists (
+    select 1
+    from pg_default_acl d
+    cross join lateral aclexplode(d.defaclacl) a
+    where d.defaclobjtype='r'
+      and d.defaclnamespace='public'::regnamespace
+      and (
+        a.grantee='anon'::regrole
+        or (
+          a.grantee='authenticated'::regrole
+          and a.privilege_type in ('DELETE','TRUNCATE','REFERENCES','TRIGGER')
+        )
+      )
+  ) then
+    raise exception 'UNSAFE_PUBLIC_TABLE_DEFAULT_PRIVILEGES_REMAIN';
+  end if;
+end
+$least_privilege_table_grants$;
+
 select 'FULL MIGRATION CHAIN + INCIDENT + TRUST + PRIVATE PROFILE TESTS: PASS' as result;
