@@ -281,7 +281,7 @@ alter function public.transition_operation(uuid,text,integer,uuid) set search_pa
 -- have no row policies in this schema.
 revoke all on all tables in schema public from anon;
 revoke all on all sequences in schema public from anon;
-revoke delete, truncate, references, trigger, maintain on all tables in schema public from authenticated;
+revoke delete, truncate, references, trigger on all tables in schema public from authenticated;
 
 -- Keep only the two existing delete flows that have matching RLS policies.
 grant delete on table public.logistics_quotes, public.operation_cost_items to authenticated;
@@ -292,14 +292,14 @@ alter default privileges for role postgres in schema public
 alter default privileges for role postgres in schema public
   revoke all on sequences from anon;
 alter default privileges for role postgres in schema public
-  revoke delete, truncate, references, trigger, maintain on tables from authenticated;
+  revoke delete, truncate, references, trigger on tables from authenticated;
 
 do $default_privileges_supabase_admin$
 begin
   if exists (select 1 from pg_roles where rolname = 'supabase_admin') then
     execute 'alter default privileges for role supabase_admin in schema public revoke all on tables from anon';
     execute 'alter default privileges for role supabase_admin in schema public revoke all on sequences from anon';
-    execute 'alter default privileges for role supabase_admin in schema public revoke delete, truncate, references, trigger, maintain on tables from authenticated';
+    execute 'alter default privileges for role supabase_admin in schema public revoke delete, truncate, references, trigger on tables from authenticated';
   end if;
 end
 $default_privileges_supabase_admin$;
