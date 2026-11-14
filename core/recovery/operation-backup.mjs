@@ -28,12 +28,36 @@ export async function restoreOperationBackup(backup, { repository } = {}) {
 
   const target = repository || createMemoryOperationRepository();
   assertOperationRepository(target);
+  if (typeof target.remove !== 'function') throw new Error('RESTORE_REQUIRES_ROLLBACK_CAPABILITY');
 
+  const seen = new Set();
   for (const operation of backup.operations) {
+    if (!operation || typeof operation.id !== 'string' || !operation.id) throw new Error('INVALID_BACKUP_OPERATION');
+    if (seen.has(operation.id)) throw new Error('BACKUP_DUPLICATE_OPERATION');
+    seen.add(operation.id);
     if (backup.organizationId !== null && operation.organizationId !== backup.organizationId) {
       throw new Error('BACKUP_ORGANIZATION_MISMATCH');
     }
-    await target.save(operation, { expectedVersion: 0 });
+    if (await target.getById(operation.id)) throw new Error('BACKUP_TARGET_CONFLICT');
+  }
+
+  const saved = [];
+  try {
+    for (const operation of backup.operations) {
+      const restored = await target.save(operation, { expectedVersion: 0 });
+      saved.push({ id: operation.id, version: restored.version });
+    }
+  } catch (error) {
+    const rollbackErrors = [];
+    for (const item of saved.reverse()) {
+      try { await target.remove(item.id, { expectedVersion: item.version }); }
+      catch (rollbackError) { rollbackErrors.push(rollbackError); }
+    }
+    if (rollbackErrors.length) {
+      error.rollbackErrors = rollbackErrors;
+      throw new AggregateError([error, ...rollbackErrors], 'BACKUP_RESTORE_ROLLBACK_FAILED');
+    }
+    throw error;
   }
 
   return target;
@@ -51,7 +75,7 @@ export async function exportVerifiedOperationBackup(repository, options = {}) {
 }
 
 export async function restoreVerifiedOperationBackup(backup, options = {}) {
-  if (!backup || !backup.integrityDigest) throw new Error('BACKUP_INTEGRITY_REQUIRED');
+  if (!backup || backup.integrityVersion !== 1 || !backup.integrityDigest) throw new Error('BACKUP_INTEGRITY_REQUIRED');
   const { integrityDigest, ...body } = backup;
   if (backupDigest(body) !== integrityDigest) throw new Error('BACKUP_INTEGRITY_FAILED');
   const compatible = { version: body.version, organizationId: body.organizationId, operations: body.operations };
