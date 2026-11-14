@@ -557,7 +557,7 @@ begin
     if has_table_privilege('authenticated',table_row.oid,'TRUNCATE')
        or has_table_privilege('authenticated',table_row.oid,'REFERENCES')
        or has_table_privilege('authenticated',table_row.oid,'TRIGGER')
-       or has_table_privilege('authenticated',table_row.oid,'MAINTAIN') then
+ then
       raise exception 'AUTHENTICATED_DANGEROUS_TABLE_PRIVILEGE_REMAINS:%',table_row.relname;
     end if;
 
@@ -607,7 +607,7 @@ begin
         a.grantee='anon'::regrole
         or (
           a.grantee='authenticated'::regrole
-          and a.privilege_type in ('DELETE','TRUNCATE','REFERENCES','TRIGGER','MAINTAIN')
+          and a.privilege_type in ('DELETE','TRUNCATE','REFERENCES','TRIGGER')
         )
       )
   ) then
