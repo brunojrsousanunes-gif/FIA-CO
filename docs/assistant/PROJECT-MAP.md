@@ -192,6 +192,16 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Estrategia de reserva de equity](../EQUITY-RESERVE-STRATEGY.md)
 - [Data room](../DATA-ROOM-INDEX.md)
 
+### L. Documentos complementarios y material especializado
+- [Preparación de seguridad empresarial Fortinet](../ENTERPRISE-SECURITY-FORTINET-READY.md)
+- [Brief para revisión jurídica externa](../FIA-COUNSEL-REVIEW-BRIEF-V1.md)
+- [Demostradores fundadores](../FIA-FOUNDING-DEMONSTRATORS-V1.md)
+- [Plantilla de paquete de evidencias](../FIA-PROOF-PACK-TEMPLATE-V1.md)
+- [Transparencia de búsqueda de compra](../FIA-PURCHASE-SEARCH-TRANSPARENCY-V1.md)
+- [Lista de verificación de entrada segura](../FIA-SECURE-INTAKE-CHECKLIST-V1.md)
+- [Lista de preparación de lanzamiento](../LAUNCH-READINESS-CHECKLIST.md)
+- [MVP: etapa 2](../step-2-mvp.md)
+
 ## 4. Código: dónde vive cada capacidad
 
 ### Interfaz y experiencia
