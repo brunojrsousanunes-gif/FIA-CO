@@ -34,7 +34,7 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
  const backendList=$('[data-backend-list]');
  const backendCreateForm=$('[data-backend-create]');
  const backendOwnerSelect=$('[data-backend-owner]');
- let backendSession=null;
+ let backendSession=null,backendRefreshPromise=null;
  let backendBusy=false;
  let activeMemberships=[];
  function backendStatus(text,kind=''){backendMessage.textContent=text;backendMessage.className=`backend-message ${kind}`;}
@@ -46,11 +46,20 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   return data;
  }
  async function ensureBackendSession(){
-  if(!backendSession)throw new Error('Inicia sesión para consultar tus operaciones.');
-  if(backendSession.expiresAt-Date.now()/1000<60){
-   const refreshed=await authCall('token?grant_type=refresh_token',{refresh_token:backendSession.refreshToken});
-   backendSession={accessToken:refreshed.access_token,refreshToken:refreshed.refresh_token,expiresAt:Date.now()/1000+Number(refreshed.expires_in||3600),user:refreshed.user};
+  const session=backendSession;
+  if(!session)throw new Error('Inicia sesión para consultar tus operaciones.');
+  if(session.expiresAt-Date.now()/1000<60){
+   if(!backendRefreshPromise){
+    backendRefreshPromise=(async()=>{
+     const refreshed=await authCall('token?grant_type=refresh_token',{refresh_token:session.refreshToken});
+     if(backendSession!==session)throw new Error('La sesión se ha cerrado.');
+     backendSession={accessToken:refreshed.access_token,refreshToken:refreshed.refresh_token,expiresAt:Date.now()/1000+Number(refreshed.expires_in||3600),user:refreshed.user};
+    })();
+   }
+   const pending=backendRefreshPromise;
+   try{await pending;}finally{if(backendRefreshPromise===pending)backendRefreshPromise=null;}
   }
+  if(!backendSession)throw new Error('La sesión se ha cerrado.');
   return backendSession;
  }
  async function backendGet(path){
@@ -108,7 +117,7 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   }finally{backendBusy=false;}
  }
  function logoutBackend(notify=true){
-  backendSession=null;activeMemberships=[];backendResults.hidden=true;backendActions.hidden=true;backendCreateForm.hidden=true;loginForm.hidden=false;
+  backendSession=null;backendRefreshPromise=null;activeMemberships=[];backendResults.hidden=true;backendActions.hidden=true;backendCreateForm.hidden=true;loginForm.hidden=false;
   loginForm.reset();backendCreateForm.reset();backendOwnerSelect.replaceChildren();backendList.replaceChildren();backendStateText('DESCONECTADO');
   if(notify)backendStatus('Sesión cerrada. No se ha guardado la contraseña ni la sesión.');
  }
@@ -124,7 +133,7 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
    loginForm.reset();loginForm.hidden=true;backendActions.hidden=false;
    $('[data-backend-user]').textContent='Cuenta autenticada · sesión solo en memoria';
    backendBusy=false;await loadBackend();
-  }catch(error){backendStateText('DESCONECTADO');backendStatus(error.message||'No se pudo iniciar sesión.','error');}
+  }catch(error){loginForm.elements.password.value='';backendStateText('DESCONECTADO');backendStatus(error.message||'No se pudo iniciar sesión.','error');}
   finally{backendBusy=false;}
  });
 
@@ -153,12 +162,12 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
  });
 
  $('[data-backend-refresh]').addEventListener('click',loadBackend);
- $('[data-backend-logout]').addEventListener('click',async()=>{
+ $('[data-backend-logout]').addEventListener('click',()=>{
   const current=backendSession;
-  if(current){try{await fetch(`${SB_URL}/auth/v1/logout`,{method:'POST',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`},cache:'no-store',credentials:'omit'});}catch(_error){}}
   logoutBackend();
+  if(current)fetch(`${SB_URL}/auth/v1/logout`,{method:'POST',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`},cache:'no-store',credentials:'omit'}).catch(()=>{});
  });
- window.addEventListener('pagehide',()=>{backendSession=null;});
+ window.addEventListener('pagehide',()=>{backendSession=null;backendRefreshPromise=null;});
 
 window.addEventListener('pagehide',()=>{state.events=[];});show(0);
 })();
