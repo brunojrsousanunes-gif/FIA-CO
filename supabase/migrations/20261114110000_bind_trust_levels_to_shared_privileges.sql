@@ -29,7 +29,7 @@ end
 $grant_service_role$;
 create or replace function private.organization_has_trust_level(target_organization uuid, required_level text)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public as $$
+set search_path = '' as $$
  select exists (
   select 1 from private.organization_security_profiles p
   where p.organization_id=target_organization and p.verification_status='verified'
@@ -86,7 +86,7 @@ $$;
 -- but does not require the invited users to have accepted yet.
 create or replace function private.operation_participants_have_shared_trust(target_operation uuid)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public, private
+set search_path = ''
 as $operation_participants_have_shared_trust$
  select count(*)=3
   and count(*) filter (where private.organization_has_trust_level(op.organization_id,'L3_SHARED'))=3
@@ -99,7 +99,7 @@ revoke all on function private.operation_participants_have_shared_trust(uuid) fr
 
 create or replace function private.operation_has_shared_trust(target_operation uuid)
 returns boolean language sql stable security definer
-set search_path = pg_catalog, public, private
+set search_path = ''
 as $operation_has_shared_trust$
  select count(*)=3
   and count(*) filter (where private.organization_has_trust_level(op.organization_id,'L3_SHARED'))=3
@@ -117,7 +117,7 @@ create or replace function private.can_submit_operation_confirmation(
   target_role text
 ) returns boolean
 language sql stable security definer
-set search_path = pg_catalog, public, private
+set search_path = ''
 as $can_submit_operation_confirmation$
   select (select auth.uid()) is not null
     and exists (
@@ -148,7 +148,7 @@ create policy confirmations_bound_account_insert
 
 -- A pending invitation is not an accepted operational role.
 create or replace function private.has_operation_role(target_operation uuid, target_role text) returns boolean language sql stable security definer
-set search_path = pg_catalog, public as $$
+set search_path = '' as $$
   select (select auth.uid()) is not null and exists (
     select 1 from public.operation_participants op
     join public.organization_members om on om.organization_id = op.organization_id
@@ -170,7 +170,7 @@ create or replace function public.transition_operation(
   request_key uuid
 ) returns public.operations
 language plpgsql security definer
-set search_path = pg_catalog, public, private, extensions
+set search_path = ''
 as $$
 declare
   caller uuid := (select auth.uid());
@@ -268,5 +268,31 @@ begin
   return current_row;
 end;
 $$;
+
+
+-- Remove table privileges that browser users do not need. RLS does not
+-- protect TRUNCATE, REFERENCES or TRIGGER privileges, and anonymous users
+-- have no row policies in this schema.
+revoke all on all tables in schema public from anon;
+revoke truncate, references, trigger on all tables in schema public from authenticated;
+revoke delete on all tables in schema public from authenticated;
+
+-- Keep only the two existing delete flows that have matching RLS policies.
+grant delete on table public.logistics_quotes, public.operation_cost_items to authenticated;
+
+-- Prevent the same excessive defaults from returning on future tables.
+alter default privileges for role postgres in schema public
+  revoke all on tables from anon;
+alter default privileges for role postgres in schema public
+  revoke delete, truncate, references, trigger on tables from authenticated;
+
+do $default_privileges_supabase_admin$
+begin
+  if exists (select 1 from pg_roles where rolname = 'supabase_admin') then
+    execute 'alter default privileges for role supabase_admin in schema public revoke all on tables from anon';
+    execute 'alter default privileges for role supabase_admin in schema public revoke delete, truncate, references, trigger on tables from authenticated';
+  end if;
+end
+$default_privileges_supabase_admin$;
 
 commit;
