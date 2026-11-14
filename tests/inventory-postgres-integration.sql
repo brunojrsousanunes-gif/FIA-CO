@@ -382,19 +382,19 @@ reset role;
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
 select public.transition_operation(
- '30000000-0000-0000-0000-000000000001','in_transit',
+ '30000000-0000-0000-0000-000000000001','delivered',
  (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
  '50000000-0000-0000-0000-000000000014');
 do $accepted_carrier_can_advance$
 begin
- if (select status from public.operations where id='30000000-0000-0000-0000-000000000001') <> 'in_transit' then
+ if (select status from public.operations where id='30000000-0000-0000-0000-000000000001') <> 'delivered' then
    raise exception 'ACCEPTED_CARRIER_ACCOUNT_COULD_NOT_ADVANCE';
  end if;
 end $accepted_carrier_can_advance$;
 
 -- Replaying the same request returns without advancing the operation twice.
 select public.transition_operation(
- '30000000-0000-0000-0000-000000000001','in_transit',
+ '30000000-0000-0000-0000-000000000001','delivered',
  (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
  '50000000-0000-0000-0000-000000000014');
 do $transition_idempotency_replay$
@@ -408,7 +408,7 @@ do $transition_idempotency_reuse$
 begin
   begin
     perform public.transition_operation(
-      '30000000-0000-0000-0000-000000000001','delivered',
+      '30000000-0000-0000-0000-000000000001','completed',
       (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
       '50000000-0000-0000-0000-000000000014');
     raise exception 'TRANSITION_IDEMPOTENCY_KEY_REUSE_ACCEPTED';
