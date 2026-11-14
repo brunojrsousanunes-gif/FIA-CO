@@ -24,3 +24,11 @@
 .backend-results .backend-empty{grid-column:1/-1;color:var(--muted)}
 .backend-note{margin:12px 0 0;color:var(--muted);font-size:.75rem}
 @media(max-width:760px){.backend-login{grid-template-columns:1fr}.backend-heading{display:block}.backend-state{display:inline-block;margin-top:12px}.backend-actions{align-items:stretch}.backend-actions button{width:100%}}
+
+.backend-create{margin-top:18px;padding:18px;border:1px solid #cfe0e7;border-radius:14px;background:#f8fbfc}
+.backend-create h3{margin:0 0 4px;font-family:Georgia,serif}
+.backend-create>p{margin:0 0 12px;color:var(--muted);font-size:.82rem}
+.backend-create label{margin-top:12px}
+.backend-org-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.backend-create button{min-height:46px;margin-top:14px;padding:0 18px;border:1px solid var(--cyan2);border-radius:10px;background:var(--cyan2);color:#fff;font:inherit;font-weight:850;cursor:pointer}
+@media(max-width:760px){.backend-org-grid{grid-template-columns:1fr}}
