@@ -84,7 +84,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Guía de marketing](../MARKETING-GUIDANCE-V1.md)
 - [Parcel Enterprise](../PARCEL-ENTERPRISE.md)
 - [Acciones del fundador](../FOUNDER-ACTIONS-V1.md)
-- [Modelos de formulario y cobertura](../../config/form-coverage.json)
+- [Modelos de formulario y cobertura](../../config/form-coverage.v1.json)
 
 ### C. Confianza, identidad y acceso
 - [Entrada con primer contacto controlado](../FIA-FIRST-CONTACT-GATED-V1.md)
@@ -104,7 +104,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Agente de transacciones premium](../PREMIUM-TRANSACTION-AGENT.md)
 - [Adaptadores de pago V1](../PAYMENT-ADAPTERS-V1.md)
 - [Arquitectura wallet/crypto/banco](../architecture/wallet-crypto-bank.md)
-- [Frontera financiera](../../config/financial-boundary.json)
+- [Frontera financiera](../../config/financial-boundary.v1.json)
 - [Flujo de transacción](../../config/tx-flow.json)
 - [Operación de piloto TX](../pilot/TX-PILOT-OPS.md)
 
