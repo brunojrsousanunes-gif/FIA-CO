@@ -121,7 +121,7 @@ assert.match(operationCenterJs, /rpc\/create_operation_draft/);
 assert.match(operationCenterJs, /new Set\(\[sellerOrg,carrierOrg,buyerOrg\]\)\.size!==3/);
 assert.match(operationCenterJs, /crypto\.randomUUID\(\)/);
 assert.match(operationCenterJs, /authCall\('token\?grant_type=password'/);
-assert.match(operationCenterJs, /\\/auth\\/v1\\/\\$\\{path\\}/);
+assert.ok(operationCenterJs.includes('/auth/v1/${path}'));
 assert.match(operationCenterJs, /organization_members\?select=organization_id,member_role/);
 assert.match(operationCenterJs, /operations\?select=id,reference,title,status,operation_type,version,created_at/);
 assert.doesNotMatch(operationCenterJs, /service_role|localStorage|sessionStorage|amount_cents|calculated_margin_cents|total_cost_cents/i,
