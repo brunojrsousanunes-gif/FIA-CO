@@ -48,9 +48,9 @@ const migration = fs.readFileSync(
   'supabase/migrations/20261113212739_company_inventory_mvp.sql', 'utf8'
 );
 for (const table of ['inventory_items','inventory_movements','inventory_reservations']) {
-  assert.match(migration, new RegExp('create table public\.' + table, 'i'));
-  assert.match(migration, new RegExp('alter table public\.' + table + ' enable row level security', 'i'));
-  assert.match(migration, new RegExp('revoke all on public\.inventory_items, public\.inventory_movements, public\.inventory_reservations from anon, authenticated', 'i'));
+  assert.match(migration, new RegExp('create table public\\.' + table, 'i'));
+  assert.match(migration, new RegExp('alter table public\\.' + table + ' enable row level security', 'i'));
+  assert.match(migration, new RegExp('revoke all on public\\.inventory_items, public\.inventory_movements, public\.inventory_reservations from anon, authenticated', 'i'));
 }
 assert.match(migration, /private\.is_org_member\(organization_id\)/);
 assert.match(migration, /private\.is_inventory_manager\(organization_id\)/);
