@@ -106,3 +106,30 @@ Por tanto, la separación financiera y los nuevos permisos están validados en e
 - No se han modificado secretos, usuarios, datos ni ajustes de Auth.
 - No se han borrado ramas ni PR.
 - Los resultados de CI usan una base aislada y datos sintéticos; no certifican producción ni sustituyen pruebas con usuarios reales.
+
+
+## 9. Auditoría individual de la PR #177 — historial de migraciones
+
+**Revisión:** 2026-11-14  
+**Estado de la PR:** abierta, no borrador, 13 archivos modificados, 117 adiciones y 4 eliminaciones.  
+**Rama:** `fix/supabase-migration-history-sync`.
+
+### Resultado
+
+- **COMPROBADO:** la PR #177 contiene el traslado de los dos scripts históricos a `supabase/baseline/`, la alineación de las versiones de migraciones con el historial remoto y la recuperación del endurecimiento de la vista `inventory_stock`.
+- **COMPROBADO:** la rama de snapshot de #185 contiene las rutas renombradas de esas migraciones y los dos archivos baseline; el diff entre ambas líneas muestra los renombrados con cero adiciones y cero eliminaciones, y añade las migraciones posteriores, pruebas y documentación de la consolidación.
+- **COMPROBADO:** la comparación entre la rama #177 y la rama de snapshot #185 indica que son líneas divergentes, no una relación de ancestro directo. Por tanto, no se debe fusionar #177 sobre #185 ni #185 sobre #177.
+- **COMPROBADO:** la CI asociada al HEAD de la rama snapshot #185 (`a85d3ff44409b1549dd3c537e1e79f320d85f91b`) terminó con resultado `success` en el workflow `MVP tests`.
+- **PENDIENTE:** la CI debe repetirse si la matriz se modifica en #185, porque el nuevo commit tendrá otro SHA.
+
+### Decisión arquitectónica
+
+**Conservar el contenido útil de #177 a través de #185; no hacer merge de #177.** Mantener #177 abierta temporalmente como referencia auditable hasta que #185 complete su revisión e integración. No cerrar ni borrar la rama en esta fase.
+
+### Riesgos y controles
+
+- No volver a introducir los scripts baseline en `supabase/migrations/`.
+- No renombrar versiones ya registradas en Supabase sin una reconciliación explícita.
+- No ejecutar `db push` ni aplicar migraciones remotas como parte de esta auditoría.
+- Antes de integrar #185, volver a verificar que el conjunto de migraciones ejecutables coincide con el historial real de Supabase.
+
