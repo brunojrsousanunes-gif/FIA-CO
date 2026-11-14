@@ -137,3 +137,103 @@ body.portal-ready{overflow-x:hidden}.portal-ready main>.flow-section,.portal-rea
  .demo-stage-track{grid-template-columns:repeat(3,1fr);row-gap:10px}
  .demo-case-top b{margin-left:0}
 }
+
+
+/* FIA&CO — integración visual del expediente de ejemplo con el lenguaje de portada */
+.demo-expedient{
+ padding:84px 0;
+ background:linear-gradient(180deg,#f5f7f8 0%,#fff 100%);
+ border-top:1px solid #e1e7eb;
+ border-bottom:1px solid #e1e7eb;
+}
+.demo-expedient .public-kicker{color:#0786ad}
+.demo-expedient .public-heading{margin-bottom:30px}
+.demo-expedient .public-heading h2 span{color:#0786ad;font-weight:650}
+.demo-metrics{
+ display:flex;
+ flex-wrap:wrap;
+ gap:0;
+ margin:0 0 22px;
+ padding:14px 20px;
+ border:1px solid #d9e2e7;
+ border-radius:14px;
+ background:#fff;
+}
+.demo-metrics article{
+ flex:1 1 150px;
+ display:flex;
+ align-items:center;
+ gap:10px;
+ padding:5px 18px;
+ border:0;
+ border-right:1px solid #e3e9ed;
+ border-radius:0;
+ background:transparent;
+}
+.demo-metrics article:last-child{border-right:0}
+.demo-metrics strong{color:#0786ad;font-size:1.55rem;line-height:1}
+.demo-metrics span{margin:0;color:#52606a;font-size:.76rem}
+.demo-case{
+ grid-template-columns:minmax(0,1.8fr) minmax(260px,.72fr);
+ border:1px solid #d5e0e6;
+ border-radius:18px;
+ box-shadow:0 18px 42px rgba(16,32,43,.09);
+}
+.demo-case-main{padding:clamp(22px,3.5vw,38px)}
+.demo-case-top span,.demo-side-label{color:#0786ad}
+.demo-case-top strong{color:#101820}
+.demo-case-top b{
+ background:#e1f6fc;
+ color:#006e91;
+ border:1px solid #b9e8f3;
+}
+.demo-case-main h3{
+ font-family:Inter,system-ui,sans-serif;
+ font-size:clamp(1.35rem,2.7vw,2rem);
+ letter-spacing:-.045em;
+}
+.demo-case-main>p{color:#52606a;line-height:1.65}
+.demo-company-flow article{
+ border-color:#d9e2e7;
+ border-radius:12px;
+ background:#f5f8fa;
+}
+.demo-company-flow small{color:#0786ad}
+.demo-company-flow strong{color:#101820}
+.demo-company-flow span{color:#52606a}
+.demo-company-flow i{color:#0786ad}
+.demo-stage-track span{border-color:#d9e2e7;color:#687780}
+.demo-stage-track b{background:#e9eef1;color:#52606a}
+.demo-stage-track .complete{border-color:#0786ad;color:#006e91}
+.demo-stage-track .complete b{background:#0786ad;color:#fff}
+.demo-stage-track .active{border-color:#d2a43a;color:#76530b}
+.demo-stage-track .active b{background:#d2a43a;color:#101820}
+.demo-case-side{
+ padding:clamp(22px,3vw,34px);
+ background:linear-gradient(155deg,#10232d 0%,#0b0a12 100%);
+}
+.demo-case-side ul{gap:16px}
+.demo-case-side li{position:relative;padding-left:19px}
+.demo-case-side li:before{
+ content:"";
+ position:absolute;left:0;top:.42em;
+ width:7px;height:7px;border-radius:50%;
+ background:#23b5d5;
+ box-shadow:0 0 0 3px rgba(35,181,213,.13);
+}
+.demo-case-side li b{color:#fff}
+.demo-case-side li small{color:#c4d0d6}
+.demo-case-side>a{color:#bceefa}
+.demo-disclaimer{color:#687780}
+@media(max-width:760px){
+ .demo-expedient{padding:58px 0}
+ .demo-metrics{padding:10px 12px}
+ .demo-metrics article{flex-basis:calc(50% - 1px);padding:10px 8px;border-right:0}
+ .demo-metrics article:nth-child(odd){border-right:1px solid #e3e9ed}
+ .demo-case{grid-template-columns:1fr}
+ .demo-case-top{gap:8px}
+ .demo-case-top b{margin-left:0}
+ .demo-company-flow{grid-template-columns:1fr;gap:7px}
+ .demo-company-flow i{transform:rotate(90deg);justify-self:center}
+ .demo-stage-track{grid-template-columns:repeat(3,1fr);row-gap:8px}
+}
