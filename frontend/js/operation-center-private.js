@@ -26,7 +26,7 @@ api(`/rest/v1/operation_participants?select=id,organization_id,participant_role,
 api(`/rest/v1/logistics_quotes?select=id,label,amount_cents,eta_days,status,provider_organization_id,organizations(name,demo_code)&operation_id=eq.${encoded}&order=amount_cents`),
 api(`/rest/v1/operation_cost_items?select=id,category,label,amount_cents&operation_id=eq.${encoded}&order=created_at`),
 api(`/rest/v1/operation_incidents?select=id,incident_type,description,status,blocks_progress,created_at,resolved_at&operation_id=eq.${encoded}&order=created_at.desc`),
-api(`/rest/v1/operation_audit_events?select=id,event_type,created_at&operation_id=eq.${encoded}&order=id.desc&limit=40`),
+api(`/rest/v1/operation_audit_timeline?select=id,event_type,created_at&operation_id=eq.${encoded}&order=id.desc&limit=40`),
 api(`/rest/v1/operations?select=id,reference,title,status&parent_operation_id=eq.${encoded}&order=created_at.desc`),
 api('/rest/v1/organization_members?select=organization_id,status,member_role&status=eq.active'),
 api(`/rest/v1/operation_financials?select=amount_cents,total_cost_cents,margin_floor_cents,calculated_margin_cents,margin_status,updated_at&operation_id=eq.${encoded}`)

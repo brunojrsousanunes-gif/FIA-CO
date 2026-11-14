@@ -463,7 +463,7 @@ begin
     raise exception 'TRANSITION_REPLAY_CHANGED_CURRENT_OPERATION_STATE';
   end if;
 
-  select count(id) into audit_count from public.operation_audit_events
+  select count(id) into audit_count from public.operation_audit_timeline
   where operation_id=v_operation_id and request_id=v_request_key;
 
   if audit_count <> 1 then

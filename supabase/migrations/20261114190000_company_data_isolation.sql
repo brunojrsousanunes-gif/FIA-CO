@@ -133,6 +133,14 @@ is_synthetic,operation_type,parent_operation_id,item_description,origin_label,de
 on public.operations to authenticated;
 revoke select on public.operation_audit_events from authenticated;
 grant select(id,operation_id,event_type,actor_id,created_at) on public.operation_audit_events to authenticated;
+create or replace view public.operation_audit_timeline
+with (security_barrier=true)
+as
+select id,operation_id,event_type,created_at
+from public.operation_audit_events
+where private.can_access_operation(operation_id);
+revoke all on public.operation_audit_timeline from public,anon;
+grant select on public.operation_audit_timeline to authenticated;
 revoke select on public.operation_confirmations from authenticated;
 grant select(id,operation_id,participant_role,confirmation_type,confirmed_by,idempotency_key,confirmed_at)
 on public.operation_confirmations to authenticated;

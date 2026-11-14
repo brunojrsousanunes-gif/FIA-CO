@@ -451,22 +451,22 @@ begin
       where id='73000000-0000-0000-0000-000000000001') <> 6 then
     raise exception 'THREE_COMPANY_PILOT_VERSION_SEQUENCE_INVALID_EXPECTED_6';
   end if;
-  if (select count(id) from public.operation_audit_events
+  if (select count(*) from public.operation_audit_timeline
       where operation_id='73000000-0000-0000-0000-000000000001'
         and event_type='operation.transition') <> 3 then
     raise exception 'THREE_COMPANY_PILOT_TRANSITION_AUDIT_INCOMPLETE';
   end if;
-  if (select count(id) from public.operation_audit_events
+  if (select count(*) from public.operation_audit_timeline
       where operation_id='73000000-0000-0000-0000-000000000001'
         and event_type='participant.accepted') <> 3 then
     raise exception 'THREE_COMPANY_PILOT_ACCEPTANCE_AUDIT_INCOMPLETE';
   end if;
-  if (select count(id) from public.operation_audit_events
+  if (select count(*) from public.operation_audit_timeline
       where operation_id='73000000-0000-0000-0000-000000000001'
         and event_type='operation.accepted') <> 1 then
     raise exception 'THREE_COMPANY_PILOT_AUTOMATIC_ACCEPTANCE_AUDIT_INCOMPLETE';
   end if;
-  if (select count(id) from public.operation_audit_events
+  if (select count(*) from public.operation_audit_timeline
       where operation_id='73000000-0000-0000-0000-000000000001'
         and event_type='confirmation.receipt') <> 1 then
     raise exception 'THREE_COMPANY_PILOT_RECEIPT_AUDIT_INCOMPLETE';
