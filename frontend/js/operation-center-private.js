@@ -3,37 +3,84 @@ import { createSupabaseBrowserClient } from './supabase-browser-client.js';
 
 const $=(selector,root=document)=>root.querySelector(selector);
 const $$=(selector,root=document)=>[...root.querySelectorAll(selector)];
-const state={accessToken:'',user:null,operations:[],selected:null,detail:null,memberships:[],accessRequests:[]};
+const state={accessToken:'',refreshToken:'',expiresAt:0,user:null,operations:[],selected:null,detail:null,memberships:[],accessRequests:[]};
 const ui={auth:$('[data-auth]'),app:$('[data-private-app]'),form:$('[data-login-form]'),email:$('[data-email]'),password:$('[data-password]'),registerForm:$('[data-register-form]'),registerName:$('[data-register-name]'),registerEmail:$('[data-register-email]'),registerPassword:$('[data-register-password]'),registerCompany:$('[data-register-company]'),accessRequest:$('[data-access-request]'),accessRequestForm:$('[data-access-request-form]'),accessName:$('[data-access-name]'),accessCompany:$('[data-access-company]'),accessState:$('[data-access-state]'),message:$('[data-private-message]'),identity:$('[data-identity]'),list:$('[data-operation-list]'),refresh:$('[data-refresh]'),logout:$('[data-logout]'),detail:$('[data-operation-detail]')};
 const supabase=createSupabaseBrowserClient({url:SUPABASE_URL,publishableKey:SUPABASE_PUBLISHABLE_KEY,getAccessToken:()=>state.accessToken});
+let refreshPromise=null;
 
 function setMessage(text,type=''){ui.message.textContent=text;ui.message.className=type;}
 const api=(path,options={})=>supabase.request(path,options);
 const money=cents=>cents==null?'Pendiente':new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(cents)/100);
 const line=(strong,small='')=>{const p=document.createElement('p'),b=document.createElement('strong');b.textContent=strong;p.append(b);if(small){const span=document.createElement('span');span.className='muted';span.textContent=` · ${small}`;p.append(span);}return p;};
 
-function clearSession(){state.accessToken='';state.user=null;state.operations=[];state.selected=null;state.detail=null;state.memberships=[];state.accessRequests=[];inventory.items=[];inventory.reservations=[];if(inventoryHost)inventoryHost.hidden=true;ui.password.value='';render();}
-function saveSession(payload){state.accessToken=payload.access_token;state.user=payload.user;}
+function clearSession(){state.accessToken='';state.refreshToken='';state.expiresAt=0;refreshPromise=null;state.user=null;state.operations=[];state.selected=null;state.detail=null;state.memberships=[];state.accessRequests=[];inventory.items=[];inventory.reservations=[];if(inventoryHost)inventoryHost.hidden=true;ui.password.value='';render();}
+function saveSession(payload){
+ if(!payload?.access_token||!payload?.refresh_token||!payload?.user?.id)throw new Error('AUTH_SESSION_INCOMPLETE');
+ state.accessToken=payload.access_token;state.refreshToken=payload.refresh_token;
+ state.expiresAt=Date.now()/1000+Number(payload.expires_in||3600);state.user=payload.user;
+}
+async function refreshSession(){
+ const oldRefreshToken=state.refreshToken;
+ if(!oldRefreshToken)throw new Error('SESSION_REFRESH_UNAVAILABLE');
+ if(!refreshPromise){
+  refreshPromise=(async()=>{
+   const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{
+    method:'POST',headers:{apikey:SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({refresh_token:oldRefreshToken}),cache:'no-store',credentials:'omit'
+   });
+   const payload=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(payload.msg||payload.message||payload.error_description||'SESSION_REFRESH_FAILED');
+   if(state.refreshToken!==oldRefreshToken)throw new Error('SESSION_CLOSED');
+   saveSession(payload);
+  })();
+ }
+ const pending=refreshPromise;
+ try{await pending;}finally{if(refreshPromise===pending)refreshPromise=null;}
+}
+async function api(path,options={}){
+ if(!state.accessToken)throw new Error('AUTH_REQUIRED');
+ if(state.expiresAt-Date.now()/1000<60)await refreshSession();
+ try{return await supabase.request(path,options);}
+ catch(error){
+  if(error.status===401&&state.refreshToken){await refreshSession();return supabase.request(path,options);}
+  throw error;
+ }
+}
 
 function renderOperations(){ui.list.replaceChildren();if(!state.operations.length){ui.list.append(line('No hay operaciones visibles','Las cuentas ficticias todavía deben asignarse a usuarios autorizados.'));return;}for(const operation of state.operations){const item=document.createElement('li');item.tabIndex=0;item.append(line(operation.reference,`${operation.title} · ${operation.status} · versión ${operation.version}`));item.addEventListener('click',()=>loadDetail(operation));item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();loadDetail(operation);}});ui.list.append(item);}}
 function renderAccessState(){ui.accessState.replaceChildren();const active=state.memberships.some(item=>item.status==='active'),latest=state.accessRequests[0];ui.accessRequest.hidden=active||latest?.status==='pending';if(active){ui.accessState.append(line('Acceso empresarial activo','Las operaciones quedan limitadas por RLS y por el rol de tu empresa.'));return;}if(latest?.status==='pending'){ui.accessState.append(line('Solicitud pendiente de revisión',`${latest.organizations?.name||'Empresa piloto'} · no concede acceso hasta su aprobación.`));return;}if(latest?.status==='rejected')ui.accessState.append(line('Solicitud no aprobada','Puedes enviar una nueva solicitud con los datos correctos.'));}
 function render(){const signedIn=Boolean(state.accessToken&&state.user);ui.auth.hidden=signedIn;ui.app.hidden=!signedIn;ui.identity.textContent=signedIn?state.user.email||state.user.id:'';if(!signedIn){ui.detail.hidden=true;ui.accessRequest.hidden=true;}else renderAccessState();renderOperations();}
 
-async function loadOperations(){setMessage('Actualizando operaciones…');try{const [operations,memberships,accessRequests]=await Promise.all([api('/rest/v1/operations?select=id,reference,title,status,version,amount_cents,operation_type,parent_operation_id,item_description,updated_at&order=updated_at.desc&limit=50'),api('/rest/v1/organization_members?select=organization_id,status,member_role&order=created_at.desc'),api('/rest/v1/pilot_access_requests?select=id,status,created_at,updated_at,organizations(name,demo_code)&order=created_at.desc&limit=5')]);state.operations=operations;state.memberships=memberships;state.accessRequests=accessRequests;render();const inventoryLoaded=await loadInventory();setMessage(inventoryLoaded?'Acceso, operaciones e inventario sincronizados.':'Operaciones cargadas; el inventario no se pudo actualizar.',inventoryLoaded?'success':'error');if(state.selected){const updated=state.operations.find(item=>item.id===state.selected.id);if(updated)await loadDetail(updated);}}catch(error){if(error.status===401)clearSession();setMessage('No se pudieron cargar las operaciones. Revisa la sesión.','error');}}
+async function loadOperations(){setMessage('Actualizando operaciones…');try{const [operations,memberships,accessRequests]=await Promise.all([api('/rest/v1/operations?select=id,reference,title,status,version,operation_type,parent_operation_id,item_description,updated_at&order=updated_at.desc&limit=50'),api('/rest/v1/organization_members?select=organization_id,status,member_role&order=created_at.desc'),api('/rest/v1/pilot_access_requests?select=id,status,created_at,updated_at,organizations(name,demo_code)&order=created_at.desc&limit=5')]);state.operations=operations;state.memberships=memberships;state.accessRequests=accessRequests;render();const inventoryLoaded=await loadInventory();setMessage(inventoryLoaded?'Acceso, operaciones e inventario sincronizados.':'Operaciones cargadas; el inventario no se pudo actualizar.',inventoryLoaded?'success':'error');if(state.selected){const updated=state.operations.find(item=>item.id===state.selected.id);if(updated)await loadDetail(updated);}}catch(error){if(error.status===401)clearSession();setMessage('No se pudieron cargar las operaciones. Revisa la sesión.','error');}}
 
-async function loadDetail(operation){state.selected=operation;setMessage(`Abriendo ${operation.reference}…`);try{const encoded=encodeURIComponent(operation.id);const [participants,quotes,costs,incidents,audit,recoveries,memberships,financials]=await Promise.all([
-api(`/rest/v1/operation_participants?select=id,organization_id,participant_role,status,responsibility,organizations(name,is_synthetic)&operation_id=eq.${encoded}&order=participant_role`),
-api(`/rest/v1/logistics_quotes?select=id,label,amount_cents,eta_days,status,provider_organization_id,organizations(name,demo_code)&operation_id=eq.${encoded}&order=amount_cents`),
-api(`/rest/v1/operation_cost_items?select=id,category,label,amount_cents&operation_id=eq.${encoded}&order=created_at`),
-api(`/rest/v1/operation_incidents?select=id,incident_type,description,status,blocks_progress,created_at,resolved_at&operation_id=eq.${encoded}&order=created_at.desc`),
-api(`/rest/v1/operation_audit_timeline?select=id,event_type,created_at&operation_id=eq.${encoded}&order=id.desc&limit=40`),
-api(`/rest/v1/operations?select=id,reference,title,status&parent_operation_id=eq.${encoded}&order=created_at.desc`),
-api('/rest/v1/organization_members?select=organization_id,status,member_role&status=eq.active'),
-api(`/rest/v1/operation_financials?select=amount_cents,total_cost_cents,margin_floor_cents,calculated_margin_cents,margin_status,updated_at&operation_id=eq.${encoded}`)
-]);state.memberships=memberships;state.detail={participants,quotes,costs,incidents,audit,recoveries,financials};renderDetail();setMessage('Expediente sincronizado.','success');}catch(error){setMessage(`No se pudo abrir el expediente (${error.code}).`,'error');}}
-
+async function loadDetail(operation){
+ state.selected=operation;setMessage(`Abriendo ${operation.reference}…`);
+ try{
+  const encoded=encodeURIComponent(operation.id);
+  const [participants,quotes,incidents,audit,recoveries,memberships]=await Promise.all([
+   api(`/rest/v1/operation_participants?select=id,organization_id,participant_role,status,responsibility,organizations(name,is_synthetic)&operation_id=eq.${encoded}&order=participant_role`),
+   api(`/rest/v1/logistics_quotes?select=id,label,amount_cents,eta_days,status,provider_organization_id,organizations(name,demo_code)&operation_id=eq.${encoded}&order=amount_cents`),
+   api(`/rest/v1/operation_incidents?select=id,incident_type,description,status,blocks_progress,created_at,resolved_at&operation_id=eq.${encoded}&order=created_at.desc`),
+   api(`/rest/v1/operation_audit_timeline?select=id,event_type,created_at&operation_id=eq.${encoded}&order=id.desc&limit=40`),
+   api(`/rest/v1/operations?select=id,reference,title,status&parent_operation_id=eq.${encoded}&order=created_at.desc`),
+   api('/rest/v1/organization_members?select=organization_id,status,member_role&status=eq.active')
+  ]);
+  const [costResult,financeResult]=await Promise.allSettled([
+   api(`/rest/v1/operation_cost_items?select=id,category,label,amount_cents&operation_id=eq.${encoded}&order=created_at`),
+   api(`/rest/v1/operation_financials?select=amount_cents,total_cost_cents,margin_floor_cents,calculated_margin_cents,margin_status,updated_at&operation_id=eq.${encoded}`)
+  ]);
+  const optionalFinance=result=>{
+   if(result.status==='fulfilled')return result.value;
+   if([401,403].includes(result.reason?.status))return [];
+   throw result.reason;
+  };
+  const costs=optionalFinance(costResult),financials=optionalFinance(financeResult);
+  state.memberships=memberships;state.detail={participants,quotes,costs,incidents,audit,recoveries,financials};
+  renderDetail();setMessage('Expediente sincronizado.','success');
+ }catch(error){if(error.status===401)clearSession();setMessage(`No se pudo abrir el expediente (${error.code||error.message}).`,'error');}
+}
 function fill(container,items,empty,renderer){container.replaceChildren();if(!items.length){container.append(line(empty));return;}items.forEach(item=>container.append(renderer(item)));}
-function renderDetail(){const op=state.selected,d=state.detail;if(!op||!d)return;ui.detail.hidden=false;$('[data-operation-title]').textContent=`${op.reference} · ${op.title}`;$('[data-operation-status]').textContent=op.status;$('[data-total]').textContent=money(op.amount_cents);const finance=d.financials[0];$('[data-costs]').textContent=finance?money(finance.total_cost_cents):'Solo visible para la empresa titular';$('[data-margin]').textContent=finance?`${money(finance.calculated_margin_cents)} · ${finance.margin_status}`:'Solo visible para la empresa titular';
+function renderDetail(){const op=state.selected,d=state.detail;if(!op||!d)return;ui.detail.hidden=false;$('[data-operation-title]').textContent=`${op.reference} · ${op.title}`;$('[data-operation-status]').textContent=op.status;$('[data-total]').textContent=finance?money(finance.amount_cents):'Solo visible para la empresa titular';const finance=d.financials[0];$('[data-costs]').textContent=finance?money(finance.total_cost_cents):'Solo visible para la empresa titular';$('[data-margin]').textContent=finance?`${money(finance.calculated_margin_cents)} · ${finance.margin_status}`:'Solo visible para la empresa titular';
 fill($('[data-participants]'),d.participants,'Sin participantes',item=>line(`${({seller:'Vendedor',carrier:'Transportista',buyer:'Comprador'})[item.participant_role]} · ${item.organizations?.name||'Organización'}`,`${item.responsibility} · ${item.status}`));
 fill($('[data-quotes]'),d.quotes,'Sin presupuestos logísticos',item=>{const wrap=document.createElement('div');wrap.append(line(item.organizations?.name||item.label,`${money(item.amount_cents)} · ${item.eta_days??'—'} días · ${item.status}`));if(item.status!=='selected'){const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='Seleccionar';button.addEventListener('click',()=>selectQuote(item.id));wrap.append(button);}return wrap;});
 fill($('[data-cost-items]'),d.costs,finance?'Sin partidas de coste':'Información interna solo visible para la empresa titular',item=>line(item.label,`${item.category} · ${money(item.amount_cents)}`));
@@ -71,4 +118,7 @@ async function closeInventoryReservation(id,status){const question=status==='ful
 $('[data-inventory-item-form]')?.addEventListener('submit',createInventoryItem);
 $('[data-inventory-movement-form]')?.addEventListener('submit',recordInventoryMovement);
 $('[data-inventory-reservation-form]')?.addEventListener('submit',reserveInventory);
-ui.form.addEventListener('submit',signIn);ui.registerForm.addEventListener('submit',signUp);ui.accessRequestForm.addEventListener('submit',submitAccessRequest);ui.refresh.addEventListener('click',loadOperations);ui.logout.addEventListener('click',clearSession);$('[data-open-incident]').addEventListener('click',openIncident);$('[data-resolve-incident]').addEventListener('click',resolveIncident);$$('[data-recovery]').forEach(button=>button.addEventListener('click',()=>createRecovery(button.dataset.recovery)));window.addEventListener('pagehide',clearSession);render();
+ui.form.addEventListener('submit',signIn);ui.registerForm.addEventListener('submit',signUp);ui.accessRequestForm.addEventListener('submit',submitAccessRequest);ui.refresh.addEventListener('click',loadOperations);ui.logout.addEventListener('click',()=>{
+ const token=state.accessToken;clearSession();
+ if(token)fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:'POST',headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${token}`},cache:'no-store',credentials:'omit'}).catch(()=>{});
+});$('[data-open-incident]').addEventListener('click',openIncident);$('[data-resolve-incident]').addEventListener('click',resolveIncident);$$('[data-recovery]').forEach(button=>button.addEventListener('click',()=>createRecovery(button.dataset.recovery)));window.addEventListener('pagehide',clearSession);render();
