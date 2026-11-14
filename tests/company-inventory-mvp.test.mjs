@@ -32,7 +32,8 @@ const expectedNewMigrations = [
   '20261114240000_create_three_party_operation_draft.sql',
   '20261115000000_owner_membership_access_hardening.sql',
   '20261115010000_make_l3_authorization_retry_idempotent.sql',
-  '20261115020000_harden_operation_rpc_idempotency.sql'
+  '20261115020000_harden_operation_rpc_idempotency.sql',
+  '20261115030000_empty_search_path_for_security_definer_helpers.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
@@ -47,6 +48,25 @@ assert.match(operationRpcHardening, /recovery\.created/i);
 assert.match(operationRpcHardening, /recovery\.linked/i);
 assert.match(operationRpcHardening, /three_distinct_synthetic_organizations_required/i);
 
+const helperSearchPathHardening = fs.readFileSync(
+  'supabase/migrations/20261115030000_empty_search_path_for_security_definer_helpers.sql', 'utf8'
+);
+for (const signature of [
+  'private.after_confirmation_insert()',
+  'private.after_incident_change()',
+  'private.after_participant_acceptance()',
+  'private.append_operation_audit(uuid,text,uuid,jsonb,uuid)',
+  'private.can_access_operation(uuid)',
+  'private.can_manage_operation(uuid)',
+  'private.enqueue_operation_notice(uuid,text,text)',
+  'private.is_org_member(uuid)',
+  'private.validate_evidence_role()'
+]) {
+  assert.match(
+    helperSearchPathHardening,
+    new RegExp('alter function ' + signature.replaceAll('.', '\\\\.') + ' set search_path =', 'i')
+  );
+}
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
   '20260916113200_server_validated_transitions.sql'
