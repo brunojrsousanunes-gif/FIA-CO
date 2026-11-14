@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
+const privateUi = fs.readFileSync('frontend/js/operation-center-private.js', 'utf8');
+assert.match(privateUi, /\['manager','admin','ceo'\]\.includes\(m\.member_role\)/,
+  'the CEO must see and use the inventory module for their own organization');
+
 const migration = fs.readFileSync(
   'supabase/migrations/20261113150000_company_inventory_mvp.sql', 'utf8'
 );
