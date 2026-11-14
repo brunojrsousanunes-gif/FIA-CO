@@ -103,6 +103,10 @@ set role authenticated;
 select public.release_inventory_reservation(
  (select id from public.inventory_reservations where request_key='50000000-0000-0000-0000-000000000002'),
  'fulfilled');
+-- Retrying the same terminal action is a no-op and must not create another stock movement.
+select public.release_inventory_reservation(
+ (select id from public.inventory_reservations where request_key='50000000-0000-0000-0000-000000000002'),
+ 'fulfilled');
 
 do $$
 declare s record;
