@@ -5,7 +5,7 @@ Plataforma B2B para coordinar y dejar evidencia de operaciones entre empresas (v
 ## Punto de entrada obligatorio para personas e IAs
 
 1. Lee [el estado y traspaso de trabajo vigente](docs/assistant/PROJECT-HANDOFF.md).
-2. Consulta el [catálogo documental](docs/assistant/DOCUMENTATION-CATALOG.md), el [registro de decisiones](docs/assistant/DECISION-LOG.md) y el [registro de trabajo](docs/assistant/WORK-REGISTER.md).
+2. Consulta el [catálogo documental](docs/assistant/DOCUMENTATION-CATALOG.md), las [notas técnicas mínimas para continuidad de la IA](docs/assistant/DECISION-LOG.md) y el [registro de trabajo](docs/assistant/WORK-REGISTER.md).
 3. Lee [las reglas maestras del proyecto](skills/fia-co-project/SKILL.md) y, antes de tocar código, [las reglas de operación](skills/fia-co-project/references/operating-rules.md).
 4. Para cambios de seguridad, lee también [la Skill de revisión de seguridad](skills/fia-co-security-review/SKILL.md).
 5. Consulta la documentación especializada del área afectada; no supongas que un plan está implementado.
