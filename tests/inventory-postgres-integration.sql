@@ -80,10 +80,21 @@ begin
  if (select count(*) from public.inventory_movements) <> 0 then
    raise exception 'CROSS_ORG_MOVEMENT_LEAK';
  end if;
+
  if (select count(*) from public.inventory_reservations) <> 0 then
    raise exception 'CROSS_ORG_RESERVATION_LEAK';
  end if;
-end $$;
+ begin
+  insert into public.inventory_items(id,organization_id,sku,description,created_by)
+  values ('40000000-0000-0000-0000-000000000099',
+          '20000000-0000-0000-0000-000000000001',
+          'SKU-CROSS-ORG-ATTACK','Intento de escritura entre empresas',
+          '10000000-0000-0000-0000-000000000002');
+  raise exception 'CROSS_ORG_ITEM_INSERT_WAS_ALLOWED';
+ exception when insufficient_privilege then
+  null;
+ end;
+end $;
 reset role;
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
