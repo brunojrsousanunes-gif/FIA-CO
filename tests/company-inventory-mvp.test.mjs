@@ -37,7 +37,7 @@ const availableBaselineFiles = fs.readdirSync('supabase/baseline').filter(file =
 assert.deepEqual(availableBaselineFiles, expectedBaselineFiles,
   'Historical bootstrap SQL must remain outside the executable Supabase migration directory');
 assert.deepEqual(availableMigrationFiles, [...expectedAppliedMigrations, ...expectedNewMigrations].sort(),
-  'Tracked migrations must match the remote history plus the six new additive migrations');
+  'Tracked migrations must match the remote history plus the seven new additive migrations');
 assert.deepEqual([...expectedAppliedMigrations].sort(), expectedAppliedMigrations,
   'Applied migration versions must remain chronological');
 
@@ -72,12 +72,8 @@ assert.match(viewHardening, /grant select on public\.inventory_stock to authenti
 const financeHardening = fs.readFileSync(
   'supabase/migrations/20261114210000_harden_finance_definer_search_paths.sql', 'utf8'
 );
-for (const signature of [
-  'private.is_org_finance_manager(uuid)',
-  'private.enforce_cost_item_company()',
-  'private.recalculate_operation_margin(uuid)'
-]) {
-  assert.match(financeHardening, new RegExp('alter function ' + signature.replace(/[.*+?^${}()|[\]\\]/g, '\\console.log('company inventory MVP security and migration history contract: ok');') + " set search_path = ''", 'i'));
-}
+assert.match(financeHardening, /alter function private\.is_org_finance_manager\(uuid\) set search_path = ''/i);
+assert.match(financeHardening, /alter function private\.enforce_cost_item_company\(\) set search_path = ''/i);
+assert.match(financeHardening, /alter function private\.recalculate_operation_margin\(uuid\) set search_path = ''/i);
 
 console.log('company inventory MVP security and migration history contract: ok');
