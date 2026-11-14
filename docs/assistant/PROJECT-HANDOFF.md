@@ -33,14 +33,14 @@ El producto gestiona estados, confirmaciones, evidencias, responsabilidades, cos
 - La PR #184 todavía requiere comparación con #185. No cerrarla hasta inspeccionar contenido exclusivo y presentar resultado.
 
 ### CI de aplicación
-- Workflow [43601816440](https://github.com/brunojrsousanunes-gif/FIA-CO/actions/runs/43601816440): completado con éxito.
-- Jobs PostgreSQL 16 y PostgreSQL 17.6: ambos success.
-- Ese workflow corresponde al commit `b17269fa3146ce6becabaa62fc14dbd1eddb502f`, anterior al último conjunto de commits documentales.
+- Workflow más reciente verificado: [43602202278](https://github.com/brunojrsousanunes-gif/FIA-CO/actions/runs/43602202278), completado con éxito en el commit `7a923d713a1f2d8cf6f4ae54fd5deae8910573d3`.
+- Jobs PostgreSQL 16 y PostgreSQL 17.6: ambos success. Pasaron sintaxis JS, contrato público Pages, batería automatizada y cadena completa de migraciones/prueba de inventario en CI.
+- Workflow anterior [43601816440](https://github.com/brunojrsousanunes-gif/FIA-CO/actions/runs/43601816440) también completó con éxito en ambos motores.
 - Workflow anterior [43601293253](https://github.com/brunojrsousanunes-gif/FIA-CO/actions/runs/43601293253) también pasó en PostgreSQL 16 y 17.6 para la validación de seguridad de #185.
 - No presentar esas pruebas como CI del último SHA si no se ha ejecutado sobre él. Consultar los checks de la PR y el commit actual.
 
 ### Vista previa Cloudflare
-- La integración de Cloudflare generó automáticamente una vista previa de rama para #185 y devolvió check `Cloudflare Pages: success` en el commit `3b4e083b056966512d48322d382e09b1652c365c`.
+- La integración de Cloudflare generó automáticamente una vista previa de rama para #185 y devolvió check `Cloudflare Pages: success` en el commit `7a923d713a1f2d8cf6f4ae54fd5deae8910573d3`. La URL de vista previa de rama comunicada por el check fue [integration-fia-co-verified.fia-co.pages.dev](https://integration-fia-co-verified.fia-co.pages.dev).
 - Esto es una vista previa de rama, no una fusión a `main` ni una publicación deliberada de producción.
 - No se cambió el plan ni se contrató un servicio desde esta actuación. No hay acceso a facturación para certificar el coste exacto de la vista previa.
 
