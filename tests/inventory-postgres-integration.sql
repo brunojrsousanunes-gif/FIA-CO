@@ -539,11 +539,15 @@ declare
   table_row record;
 begin
   for table_row in
-    select c.oid, c.relname
+    select c.oid, c.relname, c.relrowsecurity
     from pg_class c
     join pg_namespace n on n.oid=c.relnamespace
     where n.nspname='public' and c.relkind in ('r','p')
   loop
+    if not table_row.relrowsecurity then
+      raise exception 'PUBLIC_TABLE_WITHOUT_RLS:%',table_row.relname;
+    end if;
+
     if has_table_privilege('anon',table_row.oid,'SELECT')
        or has_table_privilege('anon',table_row.oid,'INSERT')
        or has_table_privilege('anon',table_row.oid,'UPDATE')
@@ -570,6 +574,28 @@ begin
   if not has_table_privilege('authenticated','public.logistics_quotes','DELETE')
      or not has_table_privilege('authenticated','public.operation_cost_items','DELETE') then
     raise exception 'LEGITIMATE_QUOTE_OR_COST_DELETE_PERMISSION_REMOVED';
+  end if;
+
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public'
+      and c.relkind='v'
+      and has_table_privilege('authenticated',c.oid,'SELECT')
+      and not coalesce('security_invoker=true'=any(c.reloptions),false)
+  ) then
+    raise exception 'PUBLIC_API_VIEW_WITHOUT_SECURITY_INVOKER';
+  end if;
+
+  if exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public'
+      and has_function_privilege('anon',p.oid,'EXECUTE')
+  ) then
+    raise exception 'PUBLIC_FUNCTION_EXECUTABLE_BY_ANON';
   end if;
 
   if exists (
