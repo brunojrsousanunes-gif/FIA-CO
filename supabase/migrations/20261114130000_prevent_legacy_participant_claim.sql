@@ -9,7 +9,7 @@ create or replace function public.accept_operation_invitation(
   request_key uuid
 ) returns public.operation_participants
 language plpgsql security definer
-set search_path = pg_catalog, public, private, extensions
+set search_path = ''
 as $$
 declare
   caller uuid := (select auth.uid());
