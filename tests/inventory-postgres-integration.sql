@@ -258,17 +258,17 @@ insert into public.organization_members(organization_id,user_id,member_role,stat
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','manager','active'),
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
 
--- Company-head / zone-manager verification and explicit L3 consent for
+-- CEO / zone-manager verification and explicit L3 consent for
 -- every organization participating in the shared-operation invitation test.
 insert into private.organization_l3_authority_verifications
  (organization_id,user_id,authority_type,verification_status,evidence_ref,verified_by,verified_at,valid_until)
 values
  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',
-  'company_head','verified','ci://inventory/company-head-1','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
+  'ceo','verified','ci://inventory/ceo-1','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002',
   'zone_manager','verified','ci://inventory/zone-manager-2','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days'),
  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003',
-  'company_head','verified','ci://inventory/company-head-3','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days');
+  'ceo','verified','ci://inventory/ceo-3','10000000-0000-0000-0000-000000000004',now(),now()+interval '90 days');
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
