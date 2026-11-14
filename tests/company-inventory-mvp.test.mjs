@@ -174,7 +174,7 @@ assert.match(operationCenterJs, /activeMemberships\.length===0/);
 assert.match(operationCenterJs, /operations\?select=id,reference,title,status,operation_type,version,created_at/);
 assert.doesNotMatch(operationCenterJs, /service_role|localStorage|sessionStorage|amount_cents|calculated_margin_cents|total_cost_cents/i,
   'browser integration must not use service credentials, persist sessions, or request financial columns');
-assert.match(operationCenterJs, /window\.addEventListener\('pagehide',\(\)=>\{backendSession=null;\}\)/);
+assert.match(operationCenterJs, /window\.addEventListener\('pagehide',\(\)=>\{backendSession=null;backendRefreshPromise=null;\}\)/);
 
 
 
