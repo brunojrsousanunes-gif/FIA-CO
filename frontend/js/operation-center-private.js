@@ -38,10 +38,16 @@ async function refreshSession(){
 }
 async function api(path,options={}){
  if(!state.accessToken)throw new Error('AUTH_REQUIRED');
- if(state.expiresAt-Date.now()/1000<60)await refreshSession();
- try{return await supabase.request(path,options);}
- catch(error){
-  if(error.status===401&&state.refreshToken){await refreshSession();return supabase.request(path,options);}
+ try{
+  if(state.expiresAt-Date.now()/1000<60)await refreshSession();
+  try{return await supabase.request(path,options);}
+  catch(error){
+   if(error.status!==401||!state.refreshToken)throw error;
+   await refreshSession();
+   return supabase.request(path,options);
+  }
+ }catch(error){
+  if(!state.accessToken||/SESSION_REFRESH|SESSION_CLOSED|AUTH_SESSION_INCOMPLETE/.test(error.message))clearSession();
   throw error;
  }
 }
