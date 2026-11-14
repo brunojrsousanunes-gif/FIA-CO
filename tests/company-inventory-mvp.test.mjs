@@ -123,6 +123,10 @@ assert.match(operationCenterJs, /crypto\.randomUUID\(\)/);
 assert.match(operationCenterJs, /authCall\('token\?grant_type=password'/);
 assert.ok(operationCenterJs.includes('/auth/v1/${path}'));
 assert.match(operationCenterJs, /organization_members\?select=organization_id,member_role/);
+assert.match(operationCenterJs, /organizations\?select=id,status,is_synthetic/);
+assert.match(operationCenterJs, /is_synthetic=eq\.false/);
+assert.match(operationCenterJs, /Empresas reales activas/);
+assert.match(operationCenterJs, /activeMemberships\.length===0/);
 assert.match(operationCenterJs, /operations\?select=id,reference,title,status,operation_type,version,created_at/);
 assert.doesNotMatch(operationCenterJs, /service_role|localStorage|sessionStorage|amount_cents|calculated_margin_cents|total_cost_cents/i,
   'browser integration must not use service credentials, persist sessions, or request financial columns');
