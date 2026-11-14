@@ -49,6 +49,7 @@ export function verifyAuditSnapshot(events = [], organizationId) {
   return true;
 }
 
+// Test/demo utility only: this in-memory chain is not durable and is not the production audit system.
 export function createMemoryAuditLog({ idFactory, clock } = {}) {
   const events = [];
   const makeId = idFactory || (() => `audit_${crypto.randomUUID()}`);
