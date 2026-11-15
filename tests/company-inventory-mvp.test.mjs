@@ -74,6 +74,14 @@ const l3RevocationHardening = fs.readFileSync(
 assert.match(l3RevocationHardening, /if not exists \([\s\S]*?om\.organization_id=target_organization[\s\S]*?om\.status='active'[\s\S]*?select o\.status into org_status[\s\S]*?for update/i,
   'L3 revocation membership must be checked before locking the organization');
 
+const l3AuthorizationHardening = fs.readFileSync(
+  'supabase/migrations/20261115010000_make_l3_authorization_retry_idempotent.sql', 'utf8'
+);
+assert.match(l3AuthorizationHardening, /if not exists \([\s\S]*?om\.organization_id=target_organization[\s\S]*?om\.status='active'[\s\S]*?select o\.status into org_status[\s\S]*?for update/i,
+  'L3 authorization membership must be checked before locking the organization');
+assert.match(l3AuthorizationHardening, /for update;[\s\S]*?if not exists \([\s\S]*?om\.organization_id=target_organization[\s\S]*?om\.status='active'/i,
+  'L3 authorization membership must be rechecked after locking the organization');
+
 const inventoryLockHardening = fs.readFileSync(
   'supabase/migrations/20261115090000_precheck_inventory_authorization_before_item_locks.sql', 'utf8'
 );
@@ -103,6 +111,8 @@ const l3AndReservationHardening = fs.readFileSync(
 );
 assert.match(l3AndReservationHardening, /create or replace function public\.revoke_organization_l3_authorization[\s\S]*?authority_verification_id is distinct from authority\.id/i);
 assert.match(l3AndReservationHardening, /create or replace function public\.release_inventory_reservation[\s\S]*?reservation_row\.status=final_status[\s\S]*?return reservation_row/i);
+assert.match(l3AndReservationHardening, /select \* into item_row[\s\S]*?for update;[\s\S]*?private\.is_inventory_manager\(expected_org_id\)[\s\S]*?select \* into reservation_row[\s\S]*?for update/i,
+  'reservation closure must recheck inventory authorization after locking the item');
 
 const logisticsQuoteDeletion = fs.readFileSync(
   'supabase/migrations/20261115060000_harden_logistics_quote_deletion.sql', 'utf8'
