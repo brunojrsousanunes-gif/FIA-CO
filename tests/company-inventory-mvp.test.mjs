@@ -33,7 +33,8 @@ const expectedNewMigrations = [
   '20261115000000_owner_membership_access_hardening.sql',
   '20261115010000_make_l3_authorization_retry_idempotent.sql',
   '20261115020000_harden_operation_rpc_idempotency.sql',
-  '20261115040000_harden_l3_revocation_and_reservation_retries.sql'
+  '20261115040000_harden_l3_revocation_and_reservation_retries.sql',
+  '20261115050000_harden_logistics_quote_selection.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
