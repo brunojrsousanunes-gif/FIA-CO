@@ -323,7 +323,7 @@ begin
     raise exception 'TRUST_LEVEL_REQUIRED:L3_SHARED' using errcode='42501';
   end if;
 
-  if current_row.status='draft' and target_status='invited' and current_row.created_by=caller then
+  if current_row.status='draft' and target_status='invited' and private.can_manage_operation(target_operation) then
     select count(*) into accepted_count
     from public.operation_participants
     where operation_id=target_operation;
@@ -352,7 +352,7 @@ begin
   elsif target_status='disputed' and current_row.status in ('invited','accepted','in_transit','delivered') then
     allowed := private.can_access_operation(target_operation);
   elsif target_status='cancelled' and current_row.status in ('draft','invited') then
-    allowed := current_row.created_by=caller;
+    allowed := private.can_manage_operation(target_operation);
   end if;
   if not allowed then
     raise exception 'TRANSITION_NOT_ALLOWED' using errcode='42501';
