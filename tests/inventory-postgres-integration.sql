@@ -37,6 +37,22 @@ values
   '20000000-0000-0000-0000-000000000001','Oferta dos',15000,'EUR',2,'offered',
   '10000000-0000-0000-0000-000000000001');
 
+do $logistics_quote_insert_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
+    values
+      ('41000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000001',
+       '20000000-0000-0000-0000-000000000001','Oferta no autorizada',18000,'EUR',1,'selected',
+       '10000000-0000-0000-0000-000000000001');
+    raise exception 'LOGISTICS_QUOTE_DIRECT_SELECTED_INSERT_WAS_ALLOWED';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_insert_guard$;
+
 select public.select_logistics_quote(
  '41000000-0000-0000-0000-000000000001',
  '51000000-0000-0000-0000-000000000001');
