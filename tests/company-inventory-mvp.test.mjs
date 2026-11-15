@@ -37,7 +37,8 @@ const expectedNewMigrations = [
   '20261115050000_harden_logistics_quote_selection.sql',
   '20261115060000_harden_logistics_quote_deletion.sql',
   '20261115070000_minimize_company_verification_column_visibility.sql',
-  '20261115080000_authorize_carrier_logistics_quote_submission.sql'
+  '20261115080000_authorize_carrier_logistics_quote_submission.sql',
+  '20261115090000_precheck_inventory_authorization_before_item_locks.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
@@ -51,6 +52,15 @@ assert.match(operationRpcHardening, /pg_advisory_xact_lock/i);
 assert.match(operationRpcHardening, /recovery\.created/i);
 assert.match(operationRpcHardening, /recovery\.linked/i);
 assert.match(operationRpcHardening, /three_distinct_synthetic_organizations_required/i);
+
+assert.match(operationRpcHardening, /if not private\.can_access_operation\(target_operation\)[\s\S]*?select \* into current_row[\s\S]*?for update/i,
+  'operation access must be checked before locking the operation row');
+
+const inventoryLockHardening = fs.readFileSync(
+  'supabase/migrations/20261115090000_precheck_inventory_authorization_before_item_locks.sql', 'utf8'
+);
+assert.match(inventoryLockHardening, /select \* into item_row[\s\S]*?private\.is_inventory_manager[\s\S]*?select \* into item_row[\s\S]*?for update/i);
+
 
 
 const postgresIntegration = fs.readFileSync('tests/inventory-postgres-integration.sql', 'utf8');
