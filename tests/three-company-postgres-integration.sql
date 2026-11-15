@@ -85,6 +85,31 @@ end
 $draft_creation_request_key_is_payload_bound$;
 reset role;
 
+insert into private.organization_security_profiles
+ (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
+values
+ ('72000000-0000-0000-0000-000000000001','L3_SHARED','verified',
+  '{"organizationIdentified":true,"termsAccepted":true,"tenantBoundaryReady":true,"auditReady":true,"incidentContactDefined":true,"identityVerified":true,"strongAuthenticationReady":true,"secretsManaged":true,"dataMinimizationReady":true,"retentionPolicyReady":true,"securityTestsPassed":true,"dataPermitsReady":true,"grantExpiryReady":true,"grantRevocationReady":true,"partnerIdentityVerified":true,"purposeLimitationReady":true,"crossOrgIsolationTestsPassed":true}'::jsonb,
+  now(),now()+interval '30 days','71000000-0000-0000-0000-000000000001'),
+ ('72000000-0000-0000-0000-000000000002','L3_SHARED','verified',
+  '{"organizationIdentified":true,"termsAccepted":true,"tenantBoundaryReady":true,"auditReady":true,"incidentContactDefined":true,"identityVerified":true,"strongAuthenticationReady":true,"secretsManaged":true,"dataMinimizationReady":true,"retentionPolicyReady":true,"securityTestsPassed":true,"dataPermitsReady":true,"grantExpiryReady":true,"grantRevocationReady":true,"partnerIdentityVerified":true,"purposeLimitationReady":true,"crossOrgIsolationTestsPassed":true}'::jsonb,
+  now(),now()+interval '30 days','71000000-0000-0000-0000-000000000001'),
+ ('72000000-0000-0000-0000-000000000003','L3_SHARED','verified',
+  '{"organizationIdentified":true,"termsAccepted":true,"tenantBoundaryReady":true,"auditReady":true,"incidentContactDefined":true,"identityVerified":true,"strongAuthenticationReady":true,"secretsManaged":true,"dataMinimizationReady":true,"retentionPolicyReady":true,"securityTestsPassed":true,"dataPermitsReady":true,"grantExpiryReady":true,"grantRevocationReady":true,"partnerIdentityVerified":true,"purposeLimitationReady":true,"crossOrgIsolationTestsPassed":true}'::jsonb,
+  now(),now()+interval '30 days','71000000-0000-0000-0000-000000000001');
+
+insert into public.operations(id,reference,title,status,amount_cents,currency,created_by,owner_organization_id)
+values ('73000000-0000-0000-0000-000000000001','FIA-PILOT-3ROLE-001',
+        'Pieza industrial ficticia — ensayo de tres empresas','draft',125000,'EUR',
+        '71000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001');
+
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by)
+values
+ ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001','seller','invited','71000000-0000-0000-0000-000000000001'),
+ ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000001'),
+ ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000001');
+
 -- A legacy collision across two operations must not silently replay one draft.
 select private.append_operation_audit(
  '73000000-0000-0000-0000-000000000001',
@@ -114,30 +139,6 @@ end
 $draft_request_key_rejects_multiple_audit_events$;
 reset role;
 
-insert into private.organization_security_profiles
- (organization_id,trust_level,verification_status,verified_controls,verified_at,valid_until,verified_by)
-values
- ('72000000-0000-0000-0000-000000000001','L3_SHARED','verified',
-  '{"organizationIdentified":true,"termsAccepted":true,"tenantBoundaryReady":true,"auditReady":true,"incidentContactDefined":true,"identityVerified":true,"strongAuthenticationReady":true,"secretsManaged":true,"dataMinimizationReady":true,"retentionPolicyReady":true,"securityTestsPassed":true,"dataPermitsReady":true,"grantExpiryReady":true,"grantRevocationReady":true,"partnerIdentityVerified":true,"purposeLimitationReady":true,"crossOrgIsolationTestsPassed":true}'::jsonb,
-  now(),now()+interval '30 days','71000000-0000-0000-0000-000000000001'),
- ('72000000-0000-0000-0000-000000000002','L3_SHARED','verified',
-  '{"organizationIdentified":true,"termsAccepted":true,"tenantBoundaryReady":true,"auditReady":true,"incidentContactDefined":true,"identityVerified":true,"strongAuthenticationReady":true,"secretsManaged":true,"dataMinimizationReady":true,"retentionPolicyReady":true,"securityTestsPassed":true,"dataPermitsReady":true,"grantExpiryReady":true,"grantRevocationReady":true,"partnerIdentityVerified":true,"purposeLimitationReady":true,"crossOrgIsolationTestsPassed":true}'::jsonb,
-  now(),now()+interval '30 days','71000000-0000-0000-0000-000000000001'),
- ('72000000-0000-0000-0000-000000000003','L3_SHARED','verified',
-  '{"organizationIdentified":true,"termsAccepted":true,"tenantBoundaryReady":true,"auditReady":true,"incidentContactDefined":true,"identityVerified":true,"strongAuthenticationReady":true,"secretsManaged":true,"dataMinimizationReady":true,"retentionPolicyReady":true,"securityTestsPassed":true,"dataPermitsReady":true,"grantExpiryReady":true,"grantRevocationReady":true,"partnerIdentityVerified":true,"purposeLimitationReady":true,"crossOrgIsolationTestsPassed":true}'::jsonb,
-  now(),now()+interval '30 days','71000000-0000-0000-0000-000000000001');
-
-insert into public.operations(id,reference,title,status,amount_cents,currency,created_by,owner_organization_id)
-values ('73000000-0000-0000-0000-000000000001','FIA-PILOT-3ROLE-001',
-        'Pieza industrial ficticia — ensayo de tres empresas','draft',125000,'EUR',
-        '71000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001');
-
-insert into public.operation_participants
- (operation_id,organization_id,participant_role,status,invited_by)
-values
- ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001','seller','invited','71000000-0000-0000-0000-000000000001'),
- ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000002','buyer','invited','71000000-0000-0000-0000-000000000001'),
- ('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000003','carrier','invited','71000000-0000-0000-0000-000000000001');
 
 do $financial_amount_columns_are_private$
 begin
