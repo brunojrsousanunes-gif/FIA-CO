@@ -1,0 +1,114 @@
+name: Encrypted Supabase backup
+
+on:
+  push:
+    branches:
+      - backup/supabase-encrypted-2026-11-15
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fia-co-supabase-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Export, encrypt and verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout isolated backup branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Check required repository secrets
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SUPABASE_DB_URL}" || -z "${BACKUP_PASSPHRASE}" ]]; then
+            echo "::error::Faltan los secretos SUPABASE_DB_URL y/o BACKUP_PASSPHRASE."
+            echo "Añádelos en Settings > Secrets and variables > Actions y vuelve a ejecutar este workflow."
+            exit 1
+          fi
+
+      - name: Install pinned Supabase CLI v2
+        uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3
+        with:
+          version: v2.stable
+
+      - name: Export database roles, schema, data and Auth identities
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          set +x
+          mkdir -m 700 -p backup-plain
+
+          supabase --version
+          supabase db dump --db-url "${SUPABASE_DB_URL}" --role-only --file backup-plain/roles.sql
+          supabase db dump --db-url "${SUPABASE_DB_URL}" --file backup-plain/schema.sql
+          supabase db dump --db-url "${SUPABASE_DB_URL}" --data-only --use-copy --file backup-plain/data.sql
+
+          supabase db dump --db-url "${SUPABASE_DB_URL}" --schema supabase_migrations --file backup-plain/migrations-schema.sql
+          supabase db dump --db-url "${SUPABASE_DB_URL}" --schema supabase_migrations --data-only --use-copy --file backup-plain/migrations-data.sql
+
+          docker run --rm --env SUPABASE_DB_URL postgres:17 sh -euc \
+            'pg_dump --dbname "$SUPABASE_DB_URL" --data-only --no-owner --no-privileges --column-inserts --table=auth.users --table=auth.identities' \
+            > backup-plain/auth-users-identities.sql
+
+          for f in backup-plain/roles.sql backup-plain/schema.sql backup-plain/data.sql backup-plain/migrations-schema.sql backup-plain/migrations-data.sql backup-plain/auth-users-identities.sql; do
+            test -s "$f" || { echo "::error::Dump vacío o ausente: $f"; exit 1; }
+          done
+
+          {
+            echo "backup_created_utc=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "repository=brunojrsousanunes-gif/FIA-CO"
+            echo "project_ref=etttredbkbcgqwciipls"
+            echo "postgres_dump_image=postgres:17"
+            echo "supabase_cli=$(supabase --version)"
+            echo
+            echo "sha256:"
+            sha256sum backup-plain/*.sql
+          } > backup-plain/MANIFEST.txt
+
+      - name: Create encrypted archive and verify decryption
+        shell: bash
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          set +x
+          tar -czf backup.tar.gz -C backup-plain .
+          archive_sha="$(sha256sum backup.tar.gz | awk '{print $1}')"
+
+          printf '%s' "${BACKUP_PASSPHRASE}" | \
+            gpg --batch --yes --symmetric --cipher-algo AES256 --pinentry-mode loopback \
+                --passphrase-fd 0 --output fia-co-supabase-backup.tar.gz.gpg backup.tar.gz
+
+          printf '%s' "${BACKUP_PASSPHRASE}" | \
+            gpg --batch --yes --decrypt --pinentry-mode loopback --passphrase-fd 0 \
+                --output verify.tar.gz fia-co-supabase-backup.tar.gz.gpg
+          test "$(sha256sum verify.tar.gz | awk '{print $1}')" = "${archive_sha}"
+          tar -tzf verify.tar.gz >/dev/null
+          sha256sum fia-co-supabase-backup.tar.gz.gpg > fia-co-supabase-backup.tar.gz.gpg.sha256
+
+          rm -rf backup-plain backup.tar.gz verify.tar.gz
+          test ! -e backup-plain
+          test ! -e backup.tar.gz
+          test ! -e verify.tar.gz
+
+      - name: Upload encrypted backup only (one-day retention)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: fia-co-supabase-encrypted-backup
+          path: |
+            fia-co-supabase-backup.tar.gz.gpg
+            fia-co-supabase-backup.tar.gz.gpg.sha256
+          if-no-files-found: error
+          retention-days: 1
