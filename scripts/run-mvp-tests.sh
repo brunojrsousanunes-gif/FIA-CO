@@ -22,6 +22,7 @@ node tests/fia-mobile-entry.test.mjs
 node tests/service-worker-cache.test.mjs
 node tests/homepage-role-visuals.test.mjs
 node tests/supabase-browser-config.test.mjs
+node tests/frontend-idempotency.test.mjs
 node tests/architecture-boundaries.test.mjs
 node tests/pilot-access.test.mjs
 node tests/pilot-security-hardening.test.mjs
