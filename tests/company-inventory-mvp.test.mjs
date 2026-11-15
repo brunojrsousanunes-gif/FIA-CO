@@ -119,6 +119,10 @@ const logisticsQuoteDeletion = fs.readFileSync(
 );
 assert.match(logisticsQuoteDeletion, /create or replace function public\.delete_logistics_quote[\s\S]*?security definer[\s\S]*?set search_path = ''/i);
 assert.match(logisticsQuoteDeletion, /pg_advisory_xact_lock/i);
+assert.match(logisticsQuoteDeletion, /select q\.operation_id into target_operation[\s\S]*?private\.can_manage_operation\(target_operation\)[\s\S]*?pg_catalog\.pg_advisory_xact_lock/i,
+  'quote deletion must reject unauthorized callers before acquiring the request-key lock');
+assert.match(logisticsQuoteDeletion, /pg_catalog\.pg_advisory_xact_lock[\s\S]*?select count\(\) into prior_count[\s\S]*?if prior_count > 0/i,
+  'quote deletion must recheck idempotency after acquiring the request-key lock');
 assert.match(logisticsQuoteDeletion, /QUOTE_SELECTED_CANNOT_DELETE/i);
 assert.match(logisticsQuoteDeletion, /revoke delete on public\.logistics_quotes from public, anon, authenticated/i);
 
