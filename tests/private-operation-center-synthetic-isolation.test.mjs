@@ -29,6 +29,9 @@ for (const action of [
   assert.ok(source.includes(`getPendingRequestKey('${action}'`),
     `the ${action} action must reuse its idempotency key after an uncertain response`);
 }
+assert.match(source, /async function confirmAction\([\s\S]*?resolution=ignore-duplicates,return=representation[\s\S]*?IDEMPOTENCY_KEY_REUSED[\s\S]*?clearPendingRequestKey\(pending\.storageKey\)/,
+  'a confirmation retry must verify the original row and return success without creating a duplicate');
+
 assert.match(source, /async function mutate\([\s\S]*?pendingStorageKey=null\)[\s\S]*?await api\([\s\S]*?clearPendingRequestKey\(pendingStorageKey\)/,
   'a pending key must only be cleared after the server confirms the mutation');
 
