@@ -138,6 +138,9 @@ begin
   if not found then
     raise exception 'QUOTE_NOT_FOUND' using errcode = 'P0002';
   end if;
+  if chosen.status <> 'offered' then
+    raise exception 'QUOTE_NOT_SELECTABLE' using errcode = '22023';
+  end if;
 
   update public.logistics_quotes
   set status = 'offered', updated_at = now()
