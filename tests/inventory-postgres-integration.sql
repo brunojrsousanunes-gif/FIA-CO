@@ -35,6 +35,9 @@ values
   '10000000-0000-0000-0000-000000000001'),
  ('41000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000001','Oferta dos',15000,'EUR',2,'offered',
+  '10000000-0000-0000-0000-000000000001'),
+ ('41000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000001','Oferta tres',17000,'EUR',4,'offered',
   '10000000-0000-0000-0000-000000000001');
 
 do $logistics_quote_insert_guard$
@@ -43,7 +46,7 @@ begin
     insert into public.logistics_quotes
       (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
     values
-      ('41000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000001',
+      ('41000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000001',
        '20000000-0000-0000-0000-000000000001','Oferta no autorizada',18000,'EUR',1,'selected',
        '10000000-0000-0000-0000-000000000001');
     raise exception 'LOGISTICS_QUOTE_DIRECT_SELECTED_INSERT_WAS_ALLOWED';
@@ -52,6 +55,23 @@ begin
   end;
 end
 $logistics_quote_insert_guard$;
+
+reset role;
+update public.logistics_quotes set status='rejected'
+where id='41000000-0000-0000-0000-000000000003';
+set role authenticated;
+do $logistics_quote_status_guard$
+begin
+  begin
+    perform public.select_logistics_quote(
+      '41000000-0000-0000-0000-000000000003',
+      '51000000-0000-0000-0000-000000000003');
+    raise exception 'LOGISTICS_QUOTE_REJECTED_STATE_WAS_SELECTABLE';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'QUOTE_NOT_SELECTABLE' then raise; end if;
+  end;
+end
+$logistics_quote_status_guard$;
 
 select public.select_logistics_quote(
  '41000000-0000-0000-0000-000000000001',
