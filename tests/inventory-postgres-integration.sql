@@ -57,9 +57,6 @@ where operation_id='30000000-0000-0000-0000-000000000001'
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
 set role authenticated;
 
-set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
-set role authenticated;
-
 -- Logistics quote selection is serialized and idempotent. The same key may
 -- replay only the same quote; reusing it for another quote must fail.
 insert into public.logistics_quotes
@@ -93,6 +90,30 @@ begin
   end;
 end
 $logistics_quote_insert_guard$;
+
+do $logistics_quote_carrier_identity_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000008','30000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001','Proveedor no transportista',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000003');
+    raise exception 'CARRIER_SUBMITTED_QUOTE_FOR_WRONG_ORGANIZATION';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000009','30000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000003','Identidad de creador falsificada',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000001');
+    raise exception 'CARRIER_FORGED_LOGISTICS_QUOTE_CREATOR';
+  exception when insufficient_privilege then null;
+  end;
+end
+$logistics_quote_carrier_identity_guard$;
 
 reset role;
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
@@ -128,6 +149,33 @@ end
 $logistics_quote_buyer_guard$;
 reset role;
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+do $logistics_quote_policy_contract$
+declare
+  fn_config text;
+begin
+  if not has_function_privilege('authenticated','private.can_submit_logistics_quote(uuid,uuid)','EXECUTE')
+     or has_function_privilege('anon','private.can_submit_logistics_quote(uuid,uuid)','EXECUTE') then
+    raise exception 'CARRIER_QUOTE_AUTHORIZATION_HELPER_GRANTS_INCORRECT';
+  end if;
+  if not has_table_privilege('authenticated','public.logistics_quotes','INSERT') then
+    raise exception 'CARRIER_QUOTE_INSERT_TABLE_GRANT_MISSING';
+  end if;
+  if exists (select 1 from pg_policies
+             where schemaname='public' and tablename='logistics_quotes'
+               and policyname='logistics_quotes_creator_insert')
+     or not exists (select 1 from pg_policies
+                    where schemaname='public' and tablename='logistics_quotes'
+                      and policyname='logistics_quotes_carrier_submit'
+                      and cmd='INSERT') then
+    raise exception 'LOGISTICS_QUOTE_CARRIER_POLICY_NOT_INSTALLED';
+  end if;
+  select array_to_string(proconfig,',') into fn_config
+  from pg_proc where oid='private.can_submit_logistics_quote(uuid,uuid)'::regprocedure;
+  if fn_config not like '%search_path=""%' then
+    raise exception 'CARRIER_QUOTE_AUTHORIZATION_SEARCH_PATH_NOT_EMPTY';
+  end if;
+end
+$logistics_quote_policy_contract$;
 
 reset role;
 update public.logistics_quotes set status='rejected'
