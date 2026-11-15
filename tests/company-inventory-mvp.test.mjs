@@ -56,6 +56,23 @@ assert.match(operationRpcHardening, /three_distinct_synthetic_organizations_requ
 assert.match(operationRpcHardening, /if not private\.can_access_operation\(target_operation\)[\s\S]*?select \* into current_row[\s\S]*?for update/i,
   'operation access must be checked before locking the operation row');
 
+assert.match(operationRpcHardening, /if not exists \([\s\S]*?op\.operation_id=target_operation[\s\S]*?om\.user_id=caller[\s\S]*?perform 1 from public\.operations[\s\S]*?for update/i,
+  'invitation membership must be checked before locking the operation row');
+assert.match(operationRpcHardening, /if not private\.can_manage_operation\(target_parent\)[\s\S]*?select o\.\* into parent[\s\S]*?for update/i,
+  'synthetic recovery management must be checked before locking the parent');
+
+const quoteSelectionHardening = fs.readFileSync(
+  'supabase/migrations/20261115050000_harden_logistics_quote_selection.sql', 'utf8'
+);
+assert.match(quoteSelectionHardening, /if not private\.can_manage_operation\(target_operation\)[\s\S]*?select o\.id into locked_operation[\s\S]*?for update/i,
+  'quote selection management must be checked before locking the operation');
+
+const l3RevocationHardening = fs.readFileSync(
+  'supabase/migrations/20261115040000_harden_l3_revocation_and_reservation_retries.sql', 'utf8'
+);
+assert.match(l3RevocationHardening, /if not exists \([\s\S]*?om\.organization_id=target_organization[\s\S]*?om\.status='active'[\s\S]*?select o\.status into org_status[\s\S]*?for update/i,
+  'L3 revocation membership must be checked before locking the organization');
+
 const inventoryLockHardening = fs.readFileSync(
   'supabase/migrations/20261115090000_precheck_inventory_authorization_before_item_locks.sql', 'utf8'
 );
