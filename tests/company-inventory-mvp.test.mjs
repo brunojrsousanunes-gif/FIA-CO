@@ -35,7 +35,8 @@ const expectedNewMigrations = [
   '20261115020000_harden_operation_rpc_idempotency.sql',
   '20261115040000_harden_l3_revocation_and_reservation_retries.sql',
   '20261115050000_harden_logistics_quote_selection.sql',
-  '20261115060000_harden_logistics_quote_deletion.sql'
+  '20261115060000_harden_logistics_quote_deletion.sql',
+  '20261115070000_minimize_company_verification_column_visibility.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
@@ -63,6 +64,14 @@ assert.match(logisticsQuoteDeletion, /create or replace function public\.delete_
 assert.match(logisticsQuoteDeletion, /pg_advisory_xact_lock/i);
 assert.match(logisticsQuoteDeletion, /QUOTE_SELECTED_CANNOT_DELETE/i);
 assert.match(logisticsQuoteDeletion, /revoke delete on public\.logistics_quotes from public, anon, authenticated/i);
+
+const verificationVisibility = fs.readFileSync(
+  'supabase/migrations/20261115070000_minimize_company_verification_column_visibility.sql', 'utf8'
+);
+assert.match(verificationVisibility, /revoke select on public\\.organization_verifications[\\s\\S]*?tax_id_last4/i);
+assert.match(verificationVisibility, /revoke select on public\\.organization_provider_qualifications[\\s\\S]*?evidence_ref/i);
+assert.match(verificationVisibility, /grant select \\([\\s\\S]*?verification_status[\\s\\S]*?\\) on public\\.organization_verifications to authenticated/i);
+assert.match(verificationVisibility, /grant select \\([\\s\\S]*?qualification_status[\\s\\S]*?\\) on public\\.organization_provider_qualifications to authenticated/i);
 
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
