@@ -10,12 +10,12 @@ insert into auth.users(id) values
 insert into public.organizations(id,name,status) values
  ('20000000-0000-0000-0000-000000000001','Empresa Uno','active'),
  ('20000000-0000-0000-0000-000000000002','Empresa Dos','active'),
- ('20000000-0000-0000-0000-000000000003','Empresa Transportista','active');
+ ('20000000-0000-0000-0000-000000000005','Empresa Transportista','active');
 
 insert into public.organization_members(organization_id,user_id,member_role,status) values
  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','ceo','active'),
  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active'),
- ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
+ ('20000000-0000-0000-0000-000000000005','10000000-0000-0000-0000-000000000003','manager','active');
 
 insert into public.operations(id,reference,title,status,created_by,owner_organization_id) values
  ('30000000-0000-0000-0000-000000000001','FIA-INV-0001','Operación inventario','accepted','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
@@ -26,7 +26,7 @@ values
   '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now()),
  ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002','buyer','accepted',
   '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000002',now()),
- ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000003','carrier','invited',
+ ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000005','carrier','invited',
   '10000000-0000-0000-0000-000000000001',null,null);
 
 -- An invited carrier cannot submit an offer until the invitation is accepted.
@@ -39,7 +39,7 @@ begin
       (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
     values
       ('41000000-0000-0000-0000-000000000099','30000000-0000-0000-0000-000000000001',
-       '20000000-0000-0000-0000-000000000003','Oferta antes de aceptar',10000,'EUR',2,'offered',
+       '20000000-0000-0000-0000-000000000005','Oferta antes de aceptar',10000,'EUR',2,'offered',
        '10000000-0000-0000-0000-000000000003');
     raise exception 'INVITED_CARRIER_SUBMITTED_LOGISTICS_QUOTE';
   exception when insufficient_privilege then
@@ -51,7 +51,7 @@ reset role;
 update public.operation_participants
 set status='accepted',accepted_by='10000000-0000-0000-0000-000000000003',accepted_at=now()
 where operation_id='30000000-0000-0000-0000-000000000001'
-  and organization_id='20000000-0000-0000-0000-000000000003'
+  and organization_id='20000000-0000-0000-0000-000000000005'
   and participant_role='carrier';
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
@@ -63,16 +63,16 @@ insert into public.logistics_quotes
  (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
 values
  ('41000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000003','Oferta uno',12000,'EUR',3,'offered',
+  '20000000-0000-0000-0000-000000000005','Oferta uno',12000,'EUR',3,'offered',
   '10000000-0000-0000-0000-000000000003'),
  ('41000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000003','Oferta dos',15000,'EUR',2,'offered',
+  '20000000-0000-0000-0000-000000000005','Oferta dos',15000,'EUR',2,'offered',
   '10000000-0000-0000-0000-000000000003'),
  ('41000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000003','Oferta tres',17000,'EUR',4,'offered',
+  '20000000-0000-0000-0000-000000000005','Oferta tres',17000,'EUR',4,'offered',
   '10000000-0000-0000-0000-000000000003'),
  ('41000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000003','Oferta cuatro',19000,'EUR',5,'offered',
+  '20000000-0000-0000-0000-000000000005','Oferta cuatro',19000,'EUR',5,'offered',
   '10000000-0000-0000-0000-000000000003');
 
 do $logistics_quote_insert_guard$
@@ -82,7 +82,7 @@ begin
       (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
     values
       ('41000000-0000-0000-0000-000000000005','30000000-0000-0000-0000-000000000001',
-       '20000000-0000-0000-0000-000000000003','Oferta no autorizada',18000,'EUR',1,'selected',
+       '20000000-0000-0000-0000-000000000005','Oferta no autorizada',18000,'EUR',1,'selected',
        '10000000-0000-0000-0000-000000000003');
     raise exception 'LOGISTICS_QUOTE_DIRECT_SELECTED_INSERT_WAS_ALLOWED';
   exception when insufficient_privilege then
@@ -107,7 +107,7 @@ begin
     insert into public.logistics_quotes
       (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
     values ('41000000-0000-0000-0000-000000000009','30000000-0000-0000-0000-000000000001',
-      '20000000-0000-0000-0000-000000000003','Identidad de creador falsificada',10000,'EUR','offered',
+      '20000000-0000-0000-0000-000000000005','Identidad de creador falsificada',10000,'EUR','offered',
       '10000000-0000-0000-0000-000000000001');
     raise exception 'CARRIER_FORGED_LOGISTICS_QUOTE_CREATOR';
   exception when insufficient_privilege then null;
@@ -124,7 +124,7 @@ begin
     insert into public.logistics_quotes
       (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
     values ('41000000-0000-0000-0000-000000000006','30000000-0000-0000-0000-000000000001',
-      '20000000-0000-0000-0000-000000000003','Oferta suplantada por vendedor',10000,'EUR','offered',
+      '20000000-0000-0000-0000-000000000005','Oferta suplantada por vendedor',10000,'EUR','offered',
       '10000000-0000-0000-0000-000000000001');
     raise exception 'SELLER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
   exception when insufficient_privilege then null;
@@ -140,7 +140,7 @@ begin
     insert into public.logistics_quotes
       (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
     values ('41000000-0000-0000-0000-000000000007','30000000-0000-0000-0000-000000000001',
-      '20000000-0000-0000-0000-000000000003','Oferta suplantada por comprador',10000,'EUR','offered',
+      '20000000-0000-0000-0000-000000000005','Oferta suplantada por comprador',10000,'EUR','offered',
       '10000000-0000-0000-0000-000000000002');
     raise exception 'BUYER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
   exception when insufficient_privilege then null;
