@@ -24,8 +24,6 @@ insert into public.operation_participants(operation_id,organization_id,participa
 values
  ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','seller','accepted',
   '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now()),
- ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002','buyer','accepted',
-  '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000002',now()),
  ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000005','carrier','invited',
   '10000000-0000-0000-0000-000000000001',null,null);
 
@@ -134,19 +132,19 @@ $logistics_quote_seller_guard$;
 reset role;
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
 set role authenticated;
-do $logistics_quote_buyer_guard$
+do $logistics_quote_noncarrier_member_guard$
 begin
   begin
     insert into public.logistics_quotes
       (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
     values ('41000000-0000-0000-0000-000000000007','30000000-0000-0000-0000-000000000001',
-      '20000000-0000-0000-0000-000000000005','Oferta suplantada por comprador',10000,'EUR','offered',
+      '20000000-0000-0000-0000-000000000005','Oferta suplantada por otra empresa',10000,'EUR','offered',
       '10000000-0000-0000-0000-000000000002');
-    raise exception 'BUYER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
+    raise exception 'NON_CARRIER_MEMBER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
   exception when insufficient_privilege then null;
   end;
 end
-$logistics_quote_buyer_guard$;
+$logistics_quote_noncarrier_member_guard$;
 reset role;
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 do $logistics_quote_policy_contract$
