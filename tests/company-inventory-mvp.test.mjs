@@ -207,6 +207,7 @@ assert.match(operationCenterJs, /is_synthetic=eq\.false/);
 assert.match(operationCenterJs, /Empresas reales activas/);
 assert.match(operationCenterJs, /activeMemberships\.length===0/);
 assert.match(operationCenterJs, /operations\?select=id,reference,title,status,operation_type,version,created_at/);
+assert.ok(operationCenterJs.includes('JSON.stringify({userId:backendSession?.user?.id||null,payload})'), 'pending draft keys must be isolated between authenticated accounts');
 assert.match(operationCenterJs, /async function pendingBackendRequestKey\(scope,payload\)[\s\S]*?crypto\.subtle\.digest[\s\S]*?sessionStorage\.setItem/i,
   'real operation creation must persist only a payload fingerprint and pending request key for safe retries');
 assert.match(operationCenterJs, /pendingBackendRequestKey\('create_operation_draft',payload\)/);
