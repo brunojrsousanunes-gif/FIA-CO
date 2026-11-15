@@ -38,6 +38,9 @@ values
   '10000000-0000-0000-0000-000000000001'),
  ('41000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000001','Oferta tres',17000,'EUR',4,'offered',
+  '10000000-0000-0000-0000-000000000001'),
+ ('41000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000001','Oferta cuatro',19000,'EUR',5,'offered',
   '10000000-0000-0000-0000-000000000001');
 
 do $logistics_quote_insert_guard$
@@ -46,7 +49,7 @@ begin
     insert into public.logistics_quotes
       (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
     values
-      ('41000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000001',
+      ('41000000-0000-0000-0000-000000000005','30000000-0000-0000-0000-000000000001',
        '20000000-0000-0000-0000-000000000001','Oferta no autorizada',18000,'EUR',1,'selected',
        '10000000-0000-0000-0000-000000000001');
     raise exception 'LOGISTICS_QUOTE_DIRECT_SELECTED_INSERT_WAS_ALLOWED';
@@ -128,6 +131,81 @@ begin
 end
 $logistics_quote_selection_idempotency$;
 reset role;
+
+-- Deletion is serialized before the quote row, audited and idempotent.
+set role authenticated;
+select public.delete_logistics_quote(
+ '41000000-0000-0000-0000-000000000001',
+ '52000000-0000-0000-0000-000000000001');
+select public.delete_logistics_quote(
+ '41000000-0000-0000-0000-000000000001',
+ '52000000-0000-0000-0000-000000000001');
+
+do $logistics_quote_delete_guards$
+begin
+  begin
+    perform public.delete_logistics_quote(
+      '41000000-0000-0000-0000-000000000004',
+      '52000000-0000-0000-0000-000000000001');
+    raise exception 'LOGISTICS_QUOTE_DELETE_KEY_REUSE_WAS_ALLOWED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_logistics_quote(
+      '41000000-0000-0000-0000-000000000002',
+      '52000000-0000-0000-0000-000000000002');
+    raise exception 'LOGISTICS_QUOTE_SELECTED_DELETE_WAS_ALLOWED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'QUOTE_SELECTED_CANNOT_DELETE' then raise; end if;
+  end;
+
+  begin
+    delete from public.logistics_quotes
+    where id='41000000-0000-0000-0000-000000000004';
+    raise exception 'LOGISTICS_QUOTE_DIRECT_DELETE_WAS_ALLOWED';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_delete_guards$;
+
+reset role;
+do $logistics_quote_delete_audit$
+begin
+  if exists (select 1 from public.logistics_quotes
+             where id='41000000-0000-0000-0000-000000000001') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_DID_NOT_REMOVE_TARGET';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where operation_id='30000000-0000-0000-0000-000000000001'
+        and request_id='52000000-0000-0000-0000-000000000001'
+        and event_type='logistics.quote.deleted') <> 1 then
+    raise exception 'LOGISTICS_QUOTE_DELETE_AUDIT_NOT_IDEMPOTENT';
+  end if;
+  if not exists (select 1 from public.logistics_quotes
+                 where id='41000000-0000-0000-0000-000000000004') then
+    raise exception 'LOGISTICS_QUOTE_REUSED_KEY_DELETED_OTHER_QUOTE';
+  end if;
+  if has_table_privilege('authenticated','public.logistics_quotes','DELETE') then
+    raise exception 'LOGISTICS_QUOTE_DIRECT_DELETE_PRIVILEGE_REMAINS';
+  end if;
+  if not has_table_privilege('authenticated','public.operation_cost_items','DELETE') then
+    raise exception 'OPERATION_COST_ITEM_DELETE_PERMISSION_REMOVED';
+  end if;
+  if not has_function_privilege('authenticated','public.delete_logistics_quote(uuid,uuid)','EXECUTE')
+     or has_function_privilege('anon','public.delete_logistics_quote(uuid,uuid)','EXECUTE') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_RPC_GRANTS_INCORRECT';
+  end if;
+  if not exists (select 1 from pg_policies
+                 where schemaname='public' and tablename='logistics_quotes'
+                   and cmd='DELETE' and policyname='logistics_quotes_creator_delete') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_RLS_POLICY_REMOVED';
+  end if;
+end
+$logistics_quote_delete_audit$;
+
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
 values ('40000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','SKU-1','Material de prueba','10000000-0000-0000-0000-000000000001');
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
@@ -740,14 +818,19 @@ begin
     end if;
 
     if has_table_privilege('authenticated',table_row.oid,'DELETE')
-       and table_row.relname not in ('logistics_quotes','operation_cost_items') then
+       and table_row.relname <> 'operation_cost_items' then
       raise exception 'AUTHENTICATED_DELETE_WITHOUT_DELETE_POLICY:%',table_row.relname;
     end if;
   end loop;
 
-  if not has_table_privilege('authenticated','public.logistics_quotes','DELETE')
+  if has_table_privilege('authenticated','public.logistics_quotes','DELETE')
      or not has_table_privilege('authenticated','public.operation_cost_items','DELETE') then
-    raise exception 'LEGITIMATE_QUOTE_OR_COST_DELETE_PERMISSION_REMOVED';
+    raise exception 'LOGISTICS_QUOTE_OR_COST_DELETE_PRIVILEGES_INCORRECT';
+  end if;
+  if not exists (select 1 from pg_policies
+                 where schemaname='public' and tablename='logistics_quotes'
+                   and cmd='DELETE' and policyname='logistics_quotes_creator_delete') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_RLS_POLICY_MISSING';
   end if;
 
   if exists (
