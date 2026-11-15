@@ -30,8 +30,15 @@ try{
   }),{ok:true});
   assert.equal(capturedRequest.options.cache,'no-store','authenticated API responses must not enter the browser HTTP cache');
   assert.equal(capturedRequest.options.credentials,'omit','Supabase requests must not attach ambient browser cookies');
-  assert.equal(capturedRequest.options.headers.Authorization,'Bearer test-access-token');
-  assert.equal(capturedRequest.options.headers.apikey,'sb_publishable_12345678901234567890');
+  assert.equal(capturedRequest.options.headers.get('authorization'),'Bearer test-access-token');
+  assert.equal(capturedRequest.options.headers.get('apikey'),'sb_publishable_12345678901234567890');
+
+  await client.request('/rest/v1/operations',{
+    headers:{Authorization:'Bearer attacker-token',authorization:'Bearer alternate-token',apikey:'attacker-key','X-Trace':'safe'}
+  });
+  assert.equal(capturedRequest.options.headers.get('authorization'),'Bearer test-access-token','caller headers must not override the authenticated session');
+  assert.equal(capturedRequest.options.headers.get('apikey'),'sb_publishable_12345678901234567890','caller headers must not override the publishable key');
+  assert.equal(capturedRequest.options.headers.get('x-trace'),'safe','non-credential custom headers must be preserved');
 }finally{
   globalThis.fetch=originalFetch;
 }
