@@ -37,6 +37,22 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
  let backendSession=null,backendRefreshPromise=null;
  let backendBusy=false;
  let activeMemberships=[];
+ const pendingBackendRequestKeys=new Map();
+ async function pendingBackendRequestKey(scope,payload){
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(payload)));
+  const fingerprint=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+  const storageKey=`fia_pending_request:${scope}:${fingerprint}`;
+  let key=pendingBackendRequestKeys.get(storageKey)||'';
+  if(!key){try{key=sessionStorage.getItem(storageKey)||'';}catch{}}
+  if(!key)key=crypto.randomUUID();
+  pendingBackendRequestKeys.set(storageKey,key);
+  try{sessionStorage.setItem(storageKey,key);}catch{}
+  return {key,storageKey};
+ }
+ function clearBackendRequestKey(storageKey){
+  pendingBackendRequestKeys.delete(storageKey);
+  try{sessionStorage.removeItem(storageKey);}catch{}
+ }
  function backendStatus(text,kind=''){backendMessage.textContent=text;backendMessage.className=`backend-message ${kind}`;}
  function backendStateText(text){backendState.textContent=text;}
  async function authCall(path,body){
@@ -148,11 +164,13 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
   if(!activeMemberships.some(member=>member.organization_id===ownerOrg)||![sellerOrg,carrierOrg,buyerOrg].includes(ownerOrg)){backendStatus('La empresa propietaria debe ser una de tus empresas activas y participar en la operación.','error');return;}
   backendBusy=true;backendStateText('CREANDO');backendStatus('Validando las tres empresas y creando el borrador…');
   try{
-   const result=await backendPost('rpc/create_operation_draft',{
+   const payload={
     target_title:title,target_operation_type:operationType,target_owner_organization:ownerOrg,
-    target_seller_organization:sellerOrg,target_carrier_organization:carrierOrg,target_buyer_organization:buyerOrg,
-    request_key:crypto.randomUUID()
-   });
+    target_seller_organization:sellerOrg,target_carrier_organization:carrierOrg,target_buyer_organization:buyerOrg
+   };
+   const pending=await pendingBackendRequestKey('create_operation_draft',payload);
+   const result=await backendPost('rpc/create_operation_draft',{...payload,request_key:pending.key});
+   clearBackendRequestKey(pending.storageKey);
    const operationId=Array.isArray(result)?result[0]:result;
    backendStatus(`Borrador creado correctamente · identificador ${String(operationId||'registrado')}. No se han enviado invitaciones por correo.`,'success');
    form.elements.title.value='';form.elements.sellerOrg.value='';form.elements.carrierOrg.value='';form.elements.buyerOrg.value='';
