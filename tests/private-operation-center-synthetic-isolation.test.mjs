@@ -16,6 +16,22 @@ assert.ok(
   'Las solicitudes del entorno privado deben limitarse a organizaciones sintéticas.'
 );
 
+assert.match(source, /async function getPendingRequestKey\(scope,payload\)[\s\S]*?crypto\.subtle\.digest[\s\S]*?sessionStorage\.setItem/i,
+  'retry keys must be persisted without storing request payloads or session credentials');
+for (const action of [
+  'accept_operation_invitation',
+  'select_logistics_quote',
+  'operation_confirmation',
+  'create_synthetic_part_recovery',
+  'record_inventory_movement',
+  'reserve_inventory_item'
+]) {
+  assert.ok(source.includes(`getPendingRequestKey('${action}'`),
+    `the ${action} action must reuse its idempotency key after an uncertain response`);
+}
+assert.match(source, /async function mutate\([\s\S]*?pendingStorageKey=null\)[\s\S]*?await api\([\s\S]*?clearPendingRequestKey\(pendingStorageKey\)/,
+  'a pending key must only be cleared after the server confirms the mutation');
+
 const detailStart = source.indexOf('function renderDetail()');
 const detailEnd = source.indexOf('function renderConfirmationActions()', detailStart);
 assert.ok(detailStart >= 0 && detailEnd > detailStart, 'Debe existir el renderizado del detalle.');
