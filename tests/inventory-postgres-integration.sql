@@ -1,6 +1,6 @@
 \set ON_ERROR_STOP on
--- Seed two real organizations and one accepted operation participant after
--- applying the complete repository migration chain.
+-- Seed seller, buyer and carrier organizations plus their authenticated members
+-- after applying the complete repository migration chain.
 insert into auth.users(id) values
  ('10000000-0000-0000-0000-000000000001'),
  ('10000000-0000-0000-0000-000000000002'),
@@ -9,20 +9,55 @@ insert into auth.users(id) values
 
 insert into public.organizations(id,name,status) values
  ('20000000-0000-0000-0000-000000000001','Empresa Uno','active'),
- ('20000000-0000-0000-0000-000000000002','Empresa Dos','active');
+ ('20000000-0000-0000-0000-000000000002','Empresa Dos','active'),
+ ('20000000-0000-0000-0000-000000000003','Empresa Transportista','active');
 
 insert into public.organization_members(organization_id,user_id,member_role,status) values
  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','ceo','active'),
- ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active');
+ ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active'),
+ ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000003','manager','active');
 
 insert into public.operations(id,reference,title,status,created_by,owner_organization_id) values
  ('30000000-0000-0000-0000-000000000001','FIA-INV-0001','Operación inventario','accepted','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
 
 insert into public.operation_participants(operation_id,organization_id,participant_role,status,invited_by,accepted_by,accepted_at)
-values ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','seller','accepted',
- '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now());
+values
+ ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','seller','accepted',
+  '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now()),
+ ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002','buyer','accepted',
+  '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000002',now()),
+ ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000003','carrier','invited',
+  '10000000-0000-0000-0000-000000000001',null,null);
 
-set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+-- An invited carrier cannot submit an offer until the invitation is accepted.
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+do $logistics_quote_invited_carrier_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
+    values
+      ('41000000-0000-0000-0000-000000000099','30000000-0000-0000-0000-000000000001',
+       '20000000-0000-0000-0000-000000000003','Oferta antes de aceptar',10000,'EUR',2,'offered',
+       '10000000-0000-0000-0000-000000000003');
+    raise exception 'INVITED_CARRIER_SUBMITTED_LOGISTICS_QUOTE';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_invited_carrier_guard$;
+reset role;
+update public.operation_participants
+set status='accepted',accepted_by='10000000-0000-0000-0000-000000000003',accepted_at=now()
+where operation_id='30000000-0000-0000-0000-000000000001'
+  and organization_id='20000000-0000-0000-0000-000000000003'
+  and participant_role='carrier';
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
 set role authenticated;
 
 -- Logistics quote selection is serialized and idempotent. The same key may
@@ -31,17 +66,17 @@ insert into public.logistics_quotes
  (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
 values
  ('41000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000001','Oferta uno',12000,'EUR',3,'offered',
-  '10000000-0000-0000-0000-000000000001'),
+  '20000000-0000-0000-0000-000000000003','Oferta uno',12000,'EUR',3,'offered',
+  '10000000-0000-0000-0000-000000000003'),
  ('41000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000001','Oferta dos',15000,'EUR',2,'offered',
-  '10000000-0000-0000-0000-000000000001'),
+  '20000000-0000-0000-0000-000000000003','Oferta dos',15000,'EUR',2,'offered',
+  '10000000-0000-0000-0000-000000000003'),
  ('41000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000001','Oferta tres',17000,'EUR',4,'offered',
-  '10000000-0000-0000-0000-000000000001'),
+  '20000000-0000-0000-0000-000000000003','Oferta tres',17000,'EUR',4,'offered',
+  '10000000-0000-0000-0000-000000000003'),
  ('41000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000001','Oferta cuatro',19000,'EUR',5,'offered',
-  '10000000-0000-0000-0000-000000000001');
+  '20000000-0000-0000-0000-000000000003','Oferta cuatro',19000,'EUR',5,'offered',
+  '10000000-0000-0000-0000-000000000003');
 
 do $logistics_quote_insert_guard$
 begin
@@ -50,14 +85,49 @@ begin
       (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
     values
       ('41000000-0000-0000-0000-000000000005','30000000-0000-0000-0000-000000000001',
-       '20000000-0000-0000-0000-000000000001','Oferta no autorizada',18000,'EUR',1,'selected',
-       '10000000-0000-0000-0000-000000000001');
+       '20000000-0000-0000-0000-000000000003','Oferta no autorizada',18000,'EUR',1,'selected',
+       '10000000-0000-0000-0000-000000000003');
     raise exception 'LOGISTICS_QUOTE_DIRECT_SELECTED_INSERT_WAS_ALLOWED';
   exception when insufficient_privilege then
     null;
   end;
 end
 $logistics_quote_insert_guard$;
+
+reset role;
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $logistics_quote_seller_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000006','30000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000003','Oferta suplantada por vendedor',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000001');
+    raise exception 'SELLER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
+  exception when insufficient_privilege then null;
+  end;
+end
+$logistics_quote_seller_guard$;
+reset role;
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $logistics_quote_buyer_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000007','30000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000003','Oferta suplantada por comprador',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000002');
+    raise exception 'BUYER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
+  exception when insufficient_privilege then null;
+  end;
+end
+$logistics_quote_buyer_guard$;
+reset role;
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 
 reset role;
 update public.logistics_quotes set status='rejected'
