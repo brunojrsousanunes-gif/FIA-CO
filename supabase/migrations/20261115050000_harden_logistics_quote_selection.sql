@@ -3,6 +3,62 @@
 -- applied only through the repository migration chain.
 begin;
 
+create or replace function private.append_operation_audit(
+  target_operation uuid,
+  target_event text,
+  target_actor uuid,
+  target_data jsonb default '{}'::jsonb,
+  target_request uuid default gen_random_uuid()
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  previous text;
+  happened_at timestamptz := clock_timestamp();
+  calculated text;
+begin
+  perform 1
+  from public.operations
+  where id = target_operation
+  for update;
+  if not found then
+    raise exception 'OPERATION_NOT_FOUND' using errcode = 'P0002';
+  end if;
+
+  select event_hash into previous
+  from public.operation_audit_events
+  where operation_id = target_operation
+  order by id desc
+  limit 1;
+
+  calculated := encode(
+    extensions.digest(
+      concat_ws(
+        '|',
+        target_operation::text,
+        target_event,
+        target_actor::text,
+        happened_at::text,
+        target_request::text,
+        coalesce(previous, ''),
+        target_data::text
+      ),
+      'sha256'
+    ),
+    'hex'
+  );
+
+  insert into public.operation_audit_events
+    (operation_id,event_type,actor_id,event_data,previous_hash,event_hash,created_at,request_id)
+  values
+    (target_operation,target_event,target_actor,target_data,previous,calculated,happened_at,target_request)
+  on conflict (operation_id,request_id) do nothing;
+end;
+$function$;
+
 create or replace function public.select_logistics_quote(
   target_quote uuid,
   request_key uuid
