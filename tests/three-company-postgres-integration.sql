@@ -477,9 +477,52 @@ where organization_id='72000000-0000-0000-0000-000000000002'
 -- Seller creates the invitation only when all three organizations are L3.
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000001';
 set role authenticated;
+do $transition_requires_expected_version$
+begin
+  begin
+    perform public.transition_operation(
+      '73000000-0000-0000-0000-000000000001','invited',null,
+      '74000000-0000-0000-0000-000000000013');
+    raise exception 'TRANSITION_ACCEPTED_NULL_EXPECTED_VERSION';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'EXPECTED_VERSION_REQUIRED' then raise; end if;
+  end;
+end
+$transition_requires_expected_version$;
+
 select public.transition_operation(
  '73000000-0000-0000-0000-000000000001','invited',1,
  '74000000-0000-0000-0000-000000000001');
+
+do $transition_request_key_binds_expected_version$
+begin
+  begin
+    perform public.transition_operation(
+      '73000000-0000-0000-0000-000000000001','invited',0,
+      '74000000-0000-0000-0000-000000000001');
+    raise exception 'TRANSITION_REQUEST_KEY_REUSED_WITH_DIFFERENT_VERSION';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$transition_request_key_binds_expected_version$;
+reset role;
+
+-- A different authenticated identity cannot replay another participant's transition.
+set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $transition_request_key_binds_actor$
+begin
+  begin
+    perform public.transition_operation(
+      '73000000-0000-0000-0000-000000000001','invited',1,
+      '74000000-0000-0000-0000-000000000001');
+    raise exception 'TRANSITION_REQUEST_KEY_REUSED_BY_DIFFERENT_ACTOR';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$transition_request_key_binds_actor$;
 reset role;
 
 -- Each role accepts through its own authenticated subject.
