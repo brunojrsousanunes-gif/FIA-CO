@@ -2,18 +2,33 @@
 
 Este flujo está aislado en la rama **backup/supabase-encrypted-2026-11-15**. No se ejecuta desde main, no modifica la base de datos y no contiene operaciones de escritura sobre Supabase.
 
-## Preparación única en GitHub
+## Los dos secretos obligatorios
 
-En el repositorio, abre **Settings → Secrets and variables → Actions → New repository secret** y crea:
+En GitHub: **Settings → Secrets and variables → Actions → New repository secret**. Crea exactamente estos dos registros:
 
-1. **SUPABASE_DB_URL**: cadena de conexión PostgreSQL de Supabase. Preferir la conexión directa si está habilitada; si la red/IPv6 no lo permite, usar el Session Pooler y copiar la cadena completa desde **Supabase Dashboard → Connect**. No usar la anon key ni la service-role key.
-2. **BACKUP_PASSPHRASE**: frase aleatoria larga y exclusiva para cifrar el archivo. Guárdala fuera de GitHub, en un gestor de contraseñas o soporte seguro. No la envíes por chat ni la guardes en el repositorio.
+### Secreto 1
 
-La conexión PostgreSQL debe tener permisos suficientes para leer el esquema y los datos. No se necesita SUPABASE_ACCESS_TOKEN, service_role ni permisos de escritura en Supabase.
+- **Name:** `SUPABASE_DB_URL`
+- **Secret:** pega la URI PostgreSQL REAL que muestra Supabase en **Dashboard → Connect → Connection string → URI**, preferiblemente el **Session pooler en modo Session** para evitar problemas de conectividad IPv4 del runner.
+
+La URI debe ser una dirección completa de conexión, normalmente con esta estructura orientativa:
+
+```text
+postgresql://postgres.[PROJECT-REF]:[DB-PASSWORD]@[POOLER-HOST]:5432/postgres
+```
+
+No copies el ejemplo ni el texto de estas instrucciones. Copia la URI generada por el panel. Si contiene el marcador `[YOUR-PASSWORD]`, sustitúyelo por la contraseña de la base de datos. Si la contraseña contiene caracteres reservados de URL, deben estar codificados como URL. Usa **Session**, no **Transaction** (normalmente puerto 6543). No uses la anon key ni la service-role key.
+
+### Secreto 2
+
+- **Name:** `BACKUP_PASSPHRASE`
+- **Secret:** una frase aleatoria, larga y exclusiva para cifrar el backup. Créala con un gestor de contraseñas (mínimo 32 caracteres) y guárdala también fuera de GitHub en un lugar seguro. No reutilices la contraseña de PostgreSQL y no la envíes por chat.
+
+No hacen falta más secretos: no se necesita `SUPABASE_ACCESS_TOKEN`, service_role ni permisos de escritura en Supabase.
 
 ## Ejecución
 
-El workflow se activa al hacer push a esta rama aislada. El primer intento puede quedar fallido si los secretos todavía no existen. Después de guardarlos, abre **Actions → Encrypted Supabase backup → el intento fallido → Re-run all jobs**.
+El workflow se activa al hacer push a esta rama aislada. Tras guardar los secretos, abre **Actions → Encrypted Supabase backup → el intento fallido → Re-run all jobs**.
 
 El flujo genera:
 - roles PostgreSQL;
