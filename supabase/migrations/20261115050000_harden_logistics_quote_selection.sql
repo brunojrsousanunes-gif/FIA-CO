@@ -94,6 +94,12 @@ begin
     raise exception 'QUOTE_NOT_FOUND' using errcode = 'P0002';
   end if;
 
+  -- Reject callers without management rights before taking the operation lock.
+  -- Recheck below after locking to account for permission changes.
+  if not private.can_manage_operation(target_operation) then
+    raise exception 'OPERATION_NOT_MANAGEABLE' using errcode = '42501';
+  end if;
+
   select o.id into locked_operation
   from public.operations o
   where o.id = target_operation
