@@ -864,6 +864,120 @@ begin
 end $completion_result$;
 reset role;
 
+
+-- Idempotency regression coverage for real three-party drafts and synthetic
+-- part recoveries. These are isolated fixtures; no remote production data.
+reset role;
+insert into public.operations
+ (id,reference,title,status,operation_type,is_synthetic,created_by,owner_organization_id)
+values
+ ('30000000-0000-0000-0000-000000000010','FIA-REC-PARENT-01','Tractor sintético para recuperación',
+  'accepted','machinery_purchase',true,
+  '10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by,responsibility)
+select '30000000-0000-0000-0000-000000000010',o.id,'buyer','accepted',
+       '10000000-0000-0000-0000-000000000001','Recibir la pieza de sustitución'
+from public.organizations o where o.demo_code='SYN-NARINO';
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+
+-- Draft retries must return the same row only for an identical payload.
+do $draft_idempotency_regression$
+declare first_id uuid; retry_id uuid;
+begin
+  first_id := public.create_operation_draft(
+    'Borrador idempotente de prueba','standard',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000005',
+    '20000000-0000-0000-0000-000000000002',
+    '53000000-0000-0000-0000-000000000002');
+  retry_id := public.create_operation_draft(
+    'Borrador idempotente de prueba','standard',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000005',
+    '20000000-0000-0000-0000-000000000002',
+    '53000000-0000-0000-0000-000000000002');
+  if retry_id is distinct from first_id then
+    raise exception 'DRAFT_IDEMPOTENT_RETRY_CREATED_ANOTHER_OPERATION';
+  end if;
+  begin
+    perform public.create_operation_draft(
+      'Título manipulado','standard',
+      '20000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000005',
+      '20000000-0000-0000-0000-000000000002',
+      '53000000-0000-0000-0000-000000000002');
+    raise exception 'DRAFT_IDEMPOTENCY_KEY_ACCEPTED_DIFFERENT_PAYLOAD';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$draft_idempotency_regression$;
+
+-- Opening the blocking incident moves the synthetic parent to blocked.
+insert into public.operation_incidents
+ (id,operation_id,incident_type,description,status,blocks_progress,opened_by)
+values
+ ('60000000-0000-0000-0000-000000000010',
+  '30000000-0000-0000-0000-000000000010',
+  'logistics','Fallo de una pieza del tractor','open',true,
+  '10000000-0000-0000-0000-000000000001');
+
+-- Recovery retries must reuse the same sub-operation and audit pair; changing
+-- the payload with the same key must fail rather than create a second recovery.
+do $synthetic_recovery_idempotency_regression$
+declare first_recovery public.operations; retry_recovery public.operations;
+begin
+  first_recovery := public.create_synthetic_part_recovery(
+    '30000000-0000-0000-0000-000000000010',
+    'SYN-FRAN','SYN-GSM','Bomba hidráulica',
+    '53000000-0000-0000-0000-000000000001');
+  retry_recovery := public.create_synthetic_part_recovery(
+    '30000000-0000-0000-0000-000000000010',
+    'SYN-FRAN','SYN-GSM','Bomba hidráulica',
+    '53000000-0000-0000-0000-000000000001');
+  if retry_recovery.id is distinct from first_recovery.id then
+    raise exception 'SYNTHETIC_RECOVERY_RETRY_CREATED_ANOTHER_OPERATION';
+  end if;
+  begin
+    perform public.create_synthetic_part_recovery(
+      '30000000-0000-0000-0000-000000000010',
+      'SYN-FRAN','SYN-GSM','Alternador',
+      '53000000-0000-0000-0000-000000000001');
+    raise exception 'SYNTHETIC_RECOVERY_IDEMPOTENCY_KEY_ACCEPTED_DIFFERENT_PAYLOAD';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$synthetic_recovery_idempotency_regression$;
+reset role;
+
+do $synthetic_recovery_idempotency_audit$
+begin
+  if (select count(*) from public.operations
+      where parent_operation_id='30000000-0000-0000-0000-000000000010'
+        and operation_type='repair_part_delivery') <> 1 then
+    raise exception 'SYNTHETIC_RECOVERY_RETRY_DUPLICATED_SUB_OPERATION';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where actor_id='10000000-0000-0000-0000-000000000001'
+        and request_id='53000000-0000-0000-0000-000000000001') <> 2 then
+    raise exception 'SYNTHETIC_RECOVERY_RETRY_DUPLICATED_OR_MISSED_AUDIT';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where operation_id='30000000-0000-0000-0000-000000000010'
+        and request_id='53000000-0000-0000-0000-000000000001'
+        and event_type='recovery.linked') <> 1 then
+    raise exception 'SYNTHETIC_RECOVERY_PARENT_LINK_NOT_IDEMPOTENT';
+  end if;
+end
+$synthetic_recovery_idempotency_audit$;
+
 -- Private role helper is an internal authorization primitive, not a client API.
 do $private_role_helper_boundary$
 begin
