@@ -29,7 +29,10 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
     // including case-variant header names.
     const result=new Headers(extra);
     result.set('apikey',config.publishableKey);
-    result.set('Authorization',`Bearer ${accessToken||config.publishableKey}`);
+    // Publishable keys are API keys, not user JWTs. Only a real Auth session
+    // may populate Authorization; unauthenticated Auth requests use apikey.
+    if(accessToken)result.set('Authorization',`Bearer ${accessToken}`);
+    else result.delete('Authorization');
     return result;
   }
   async function request(path,options={}){
