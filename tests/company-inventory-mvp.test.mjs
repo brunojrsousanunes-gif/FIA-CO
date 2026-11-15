@@ -79,12 +79,12 @@ assert.doesNotMatch(verificationVisibility, /revoke[^;]*service_role/i, 'trusted
 const carrierQuoteAuthorization = fs.readFileSync(
   'supabase/migrations/20261115080000_authorize_carrier_logistics_quote_submission.sql', 'utf8'
 );
-assert.match(carrierQuoteAuthorization, /create or replace function private\\.can_submit_logistics_quote[\\s\\S]*?security definer[\\s\\S]*?set search_path = ''/i);
-assert.match(carrierQuoteAuthorization, /participant_role = 'carrier'[\\s\\S]*?op\\.status = 'accepted'[\\s\\S]*?op\\.accepted_by = \\(select auth\\.uid\\(\\)\\)/i);
-assert.match(carrierQuoteAuthorization, /om\\.status = 'active'[\\s\\S]*?org\\.status = 'active'/i);
-assert.match(carrierQuoteAuthorization, /drop policy if exists logistics_quotes_creator_insert[\\s\\S]*?create policy logistics_quotes_carrier_submit/i);
-assert.match(carrierQuoteAuthorization, /created_by = \\(select auth\\.uid\\(\\)\\)[\\s\\S]*?status = 'offered'[\\s\\S]*?private\\.can_submit_logistics_quote/i);
-assert.match(carrierQuoteAuthorization, /revoke all on function private\\.can_submit_logistics_quote\\(uuid, uuid\\)[\\s\\S]*?from public, anon, authenticated/i);
+assert.match(carrierQuoteAuthorization, /create or replace function private\.can_submit_logistics_quote[\s\S]*?security definer[\s\S]*?set search_path = ''/i);
+assert.match(carrierQuoteAuthorization, /participant_role = 'carrier'[\s\S]*?op\.status = 'accepted'[\s\S]*?op\.accepted_by = \(select auth\.uid\(\)\)/i);
+assert.match(carrierQuoteAuthorization, /om\.status = 'active'[\s\S]*?org\.status = 'active'/i);
+assert.match(carrierQuoteAuthorization, /drop policy if exists logistics_quotes_creator_insert[\s\S]*?create policy logistics_quotes_carrier_submit/i);
+assert.match(carrierQuoteAuthorization, /created_by = \(select auth\.uid\(\)\)[\s\S]*?status = 'offered'[\s\S]*?private\.can_submit_logistics_quote/i);
+assert.match(carrierQuoteAuthorization, /revoke all on function private\.can_submit_logistics_quote\(uuid, uuid\)[\s\S]*?from public, anon, authenticated/i);
 
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
