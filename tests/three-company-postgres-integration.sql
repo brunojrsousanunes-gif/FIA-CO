@@ -198,29 +198,45 @@ set status='revoked'
 where organization_id='72000000-0000-0000-0000-000000000001'
   and user_id='71000000-0000-0000-0000-000000000007';
 
+-- The creator still belongs to a different participating company. Read access
+-- is legitimate through that participation, but owner-only management is not.
+insert into public.organization_members(organization_id,user_id,member_role,status)
+values ('72000000-0000-0000-0000-000000000002',
+        '71000000-0000-0000-0000-000000000007','member','active');
+
 set request.jwt.claim.sub = '71000000-0000-0000-0000-000000000007';
 set role authenticated;
-do $revoked_creator_cannot_retain_company_access$
+do $revoked_owner_creator_cannot_manage_via_other_participant$
 begin
-  if private.can_access_operation('73000000-0000-0000-0000-000000000003')
-     or private.can_manage_operation('73000000-0000-0000-0000-000000000003') then
-    raise exception 'REVOKED_CREATOR_RETAINED_COMPANY_ACCESS';
+  if not private.can_access_operation('73000000-0000-0000-0000-000000000003') then
+    raise exception 'ACTIVE_PARTICIPANT_READ_ACCESS_NOT_GRANTED';
   end if;
-  if exists(select 1 from public.operations where id='73000000-0000-0000-0000-000000000003') then
-    raise exception 'REVOKED_CREATOR_CAN_STILL_READ_OPERATION';
+  if private.can_manage_operation('73000000-0000-0000-0000-000000000003') then
+    raise exception 'REVOKED_OWNER_RETAINED_MANAGEMENT_ACCESS';
+  end if;
+  if not exists(select 1 from public.operations where id='73000000-0000-0000-0000-000000000003') then
+    raise exception 'ACTIVE_PARTICIPANT_CANNOT_READ_OPERATION';
   end if;
   begin
+    perform public.transition_operation(
+      '73000000-0000-0000-0000-000000000003','cancelled',1,
+      '74000000-0000-0000-0000-000000000121');
+    raise exception 'REVOKED_OWNER_CANCELLED_VIA_OTHER_PARTICIPANT';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'TRANSITION_NOT_ALLOWED' then raise; end if;
+  end;
+  begin
     update public.operations
-    set title='Unauthorized edit after membership revocation'
+    set title='Unauthorized edit after owner membership revocation'
     where id='73000000-0000-0000-0000-000000000003';
     if found then
-      raise exception 'REVOKED_CREATOR_UPDATED_DRAFT';
+      raise exception 'REVOKED_OWNER_UPDATED_DRAFT';
     end if;
   exception when insufficient_privilege then
     null;
   end;
 end
-$revoked_creator_cannot_retain_company_access$;
+$revoked_owner_creator_cannot_manage_via_other_participant$;
 reset role;
 
 
