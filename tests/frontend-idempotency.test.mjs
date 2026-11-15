@@ -48,6 +48,7 @@ assert.notEqual(otherUser.key,first.key,'different accounts must never share pen
 const changedPayload=await reloadedContext.getPendingRequestKey('reserve_inventory_item',{...payload,amount:250});
 assert.notEqual(changedPayload.key,otherUser.key,'changed payloads must receive different keys');
 
+reloadedContext.state.user.id='user-a';
 reloadedContext.clearPendingRequestKey(afterReload.storageKey);
 const afterSuccess=await reloadedContext.getPendingRequestKey('reserve_inventory_item',payload);
 assert.notEqual(afterSuccess.key,first.key,'a confirmed action must not reuse its completed key');
