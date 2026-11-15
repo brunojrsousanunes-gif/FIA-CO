@@ -1139,6 +1139,11 @@ begin
      or has_column_privilege('anon','public.organization_provider_qualifications','qualification_status','SELECT') then
     raise exception 'ANONYMOUS_COMPANY_VERIFICATION_READ_REMAINS';
   end if;
+
+  if not has_table_privilege('service_role','public.organization_verifications','SELECT')
+     or not has_table_privilege('service_role','public.organization_provider_qualifications','SELECT') then
+    raise exception 'SERVICE_ROLE_COMPANY_VERIFICATION_ACCESS_REMOVED';
+  end if;
 end
 $company_verification_column_visibility$;
 
