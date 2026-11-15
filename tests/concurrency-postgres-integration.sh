@@ -87,7 +87,7 @@ for _ in $(seq 1 100); do [[ -f "$ready_file" ]] && break; sleep 0.05; done
 set +e
 PGAPPNAME=fia-revocation-race-caller psql -X -v ON_ERROR_STOP=1 -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" >"$tmp_dir/revocation-caller.log" 2>&1 <<'SQL' &
 set role authenticated;
-set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
 select public.transition_operation(
  '30000000-0000-0000-0000-000000000001','disputed',
  (select version from public.operations where id='30000000-0000-0000-0000-000000000001'),
@@ -110,7 +110,7 @@ if [[ "$blocked" -ne 1 ]]; then
   holder_pid=""
   echo "FAIL: caller did not reach expected operation-row lock wait"; cat "$tmp_dir/revocation-caller.log"; exit 1
 fi
-psql_admin -v ON_ERROR_STOP=1 -c "delete from public.organization_members where organization_id='20000000-0000-0000-0000-000000000001' and user_id='10000000-0000-0000-0000-000000000001'"
+psql_admin -v ON_ERROR_STOP=1 -c "delete from public.organization_members where organization_id='20000000-0000-0000-0000-000000000002' and user_id='10000000-0000-0000-0000-000000000002'"
 wait "$holder_pid"; holder_pid=""
 set +e
 wait "$caller_pid"
