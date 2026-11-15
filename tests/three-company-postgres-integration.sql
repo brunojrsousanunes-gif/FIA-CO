@@ -1118,4 +1118,28 @@ $all_security_definer_functions_use_empty_search_path$;
 
 select 'SECURITY DEFINER SEARCH_PATH: EMPTY FOR ALL PROJECT FUNCTIONS' as security_result;
 
+do $company_verification_column_visibility$
+begin
+  if has_column_privilege('authenticated','public.organization_verifications','tax_id_last4','SELECT')
+     or has_column_privilege('authenticated','public.organization_verifications','evidence_ref','SELECT')
+     or has_column_privilege('authenticated','public.organization_verifications','verified_by','SELECT')
+     or not has_column_privilege('authenticated','public.organization_verifications','verification_status','SELECT')
+     or not has_column_privilege('authenticated','public.organization_verifications','legal_name','SELECT') then
+    raise exception 'ORGANIZATION_VERIFICATION_COLUMNS_NOT_MINIMIZED';
+  end if;
 
+  if has_column_privilege('authenticated','public.organization_provider_qualifications','evidence_ref','SELECT')
+     or has_column_privilege('authenticated','public.organization_provider_qualifications','verified_by','SELECT')
+     or not has_column_privilege('authenticated','public.organization_provider_qualifications','qualification_status','SELECT')
+     or not has_column_privilege('authenticated','public.organization_provider_qualifications','capability','SELECT') then
+    raise exception 'PROVIDER_QUALIFICATION_COLUMNS_NOT_MINIMIZED';
+  end if;
+
+  if has_column_privilege('anon','public.organization_verifications','verification_status','SELECT')
+     or has_column_privilege('anon','public.organization_provider_qualifications','qualification_status','SELECT') then
+    raise exception 'ANONYMOUS_COMPANY_VERIFICATION_READ_REMAINS';
+  end if;
+end
+$company_verification_column_visibility$;
+
+select 'COMPANY VERIFICATION DATA MINIMIZATION: PASS' as privacy_result;
