@@ -144,4 +144,14 @@ revoke update on public.operation_incidents from authenticated;
 grant update (status,resolved_by,resolved_at,resolution_note) on public.operation_incidents to authenticated;
 revoke all on function private.recalculate_operation_margin(uuid) from public, anon, authenticated;
 
+
+-- New functions created by the migration owner must not become RPC endpoints
+-- through PostgreSQL/Supabase default EXECUTE grants. Revoke the global
+-- PUBLIC default, then the Supabase schema-specific anon/authenticated grants.
+-- Intentional public RPCs must receive explicit grants in their own migrations.
+alter default privileges for role postgres
+  revoke execute on functions from public;
+alter default privileges for role postgres in schema public
+  revoke execute on functions from anon, authenticated;
+
 commit;
