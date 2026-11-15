@@ -10,7 +10,7 @@ create or replace function public.select_logistics_quote(
 returns public.logistics_quotes
 language plpgsql
 security definer
-set search_path = pg_catalog, public, private, extensions
+set search_path = ''
 as $function$
 declare
   caller uuid := auth.uid();
