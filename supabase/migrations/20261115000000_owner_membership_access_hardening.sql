@@ -63,6 +63,9 @@ alter function private.append_operation_audit(uuid,text,uuid,jsonb,uuid) set sea
 alter function private.enqueue_operation_notice(uuid,text,text) set search_path = '';
 alter function private.is_org_member(uuid) set search_path = '';
 alter function private.validate_evidence_role() set search_path = '';
+alter function private.is_org_finance_manager(uuid) set search_path = '';
+alter function private.enforce_cost_item_company() set search_path = '';
+alter function private.recalculate_operation_margin(uuid) set search_path = '';
 
 
 -- The draft UPDATE policy must enforce the same active-owner boundary in
