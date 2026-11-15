@@ -206,6 +206,24 @@ begin
 end
 $logistics_quote_delete_audit$;
 
+-- A different organization member cannot delete a quote from this operation.
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $logistics_quote_delete_authorization$
+begin
+  begin
+    perform public.delete_logistics_quote(
+      '41000000-0000-0000-0000-000000000004',
+      '52000000-0000-0000-0000-000000000003');
+    raise exception 'LOGISTICS_QUOTE_CROSS_ORGANIZATION_DELETE_WAS_ALLOWED';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_delete_authorization$;
+reset role;
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
 values ('40000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','SKU-1','Material de prueba','10000000-0000-0000-0000-000000000001');
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
