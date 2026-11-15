@@ -25,6 +25,15 @@ begin
     raise exception 'ORGANIZATION_AND_REQUEST_KEY_REQUIRED' using errcode='22023';
   end if;
 
+  -- Reject non-members before taking the organization row lock.
+  if not exists (
+    select 1 from public.organization_members om
+    where om.organization_id=target_organization
+      and om.user_id=caller and om.status='active'
+  ) then
+    raise exception 'ACTIVE_ORGANIZATION_MEMBERSHIP_REQUIRED' using errcode='42501';
+  end if;
+
   select o.status into org_status
   from public.organizations o
   where o.id=target_organization
@@ -33,6 +42,7 @@ begin
     raise exception 'ORGANIZATION_NOT_ACTIVE' using errcode='42501';
   end if;
 
+  -- Recheck after locking to close the authorization-change window.
   if not exists (
     select 1 from public.organization_members om
     where om.organization_id=target_organization
