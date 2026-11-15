@@ -47,6 +47,9 @@ select public.select_logistics_quote(
  '41000000-0000-0000-0000-000000000002',
  '51000000-0000-0000-0000-000000000002');
 
+-- Audit rows are intentionally not directly readable by authenticated. Inspect the
+-- internal event count as the database owner while checking explicit grants below.
+reset role;
 do $logistics_quote_selection_idempotency$
 begin
  if (select count(*) from public.operation_audit_events
