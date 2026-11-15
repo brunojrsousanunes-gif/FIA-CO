@@ -24,7 +24,13 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
   const config=validatePublicConfig(url,publishableKey);
   function headers(extra={}){
     const accessToken=getAccessToken();
-    return{apikey:config.publishableKey,Authorization:`Bearer ${accessToken||config.publishableKey}`,...extra};
+    // Normalize caller headers first, then enforce credentials. This prevents
+    // request options from replacing the publishable key or session token,
+    // including case-variant header names.
+    const result=new Headers(extra);
+    result.set('apikey',config.publishableKey);
+    result.set('Authorization',`Bearer ${accessToken||config.publishableKey}`);
+    return result;
   }
   async function request(path,options={}){
     if(typeof path!=='string'||!path.startsWith('/'))throw new Error('SUPABASE_PATH_INVALID');
