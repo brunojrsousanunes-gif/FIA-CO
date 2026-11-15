@@ -59,10 +59,10 @@ assert.match(l3AndReservationHardening, /create or replace function public\.rele
 const logisticsQuoteDeletion = fs.readFileSync(
   'supabase/migrations/20261115060000_harden_logistics_quote_deletion.sql', 'utf8'
 );
-assert.match(logisticsQuoteDeletion, /create or replace function public\\.delete_logistics_quote[\\s\\S]*?security definer[\\s\\S]*?set search_path = ''/i);
+assert.match(logisticsQuoteDeletion, /create or replace function public\.delete_logistics_quote[\s\S]*?security definer[\s\S]*?set search_path = ''/i);
 assert.match(logisticsQuoteDeletion, /pg_advisory_xact_lock/i);
 assert.match(logisticsQuoteDeletion, /QUOTE_SELECTED_CANNOT_DELETE/i);
-assert.match(logisticsQuoteDeletion, /revoke delete on public\\.logistics_quotes from public, anon, authenticated/i);
+assert.match(logisticsQuoteDeletion, /revoke delete on public\.logistics_quotes from public, anon, authenticated/i);
 
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
