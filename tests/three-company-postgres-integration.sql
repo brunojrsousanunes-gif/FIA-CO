@@ -1018,3 +1018,37 @@ end
 $operation_audit_chain_is_monotonic$;
 
 select 'OPERATION AUDIT HASH CHAIN AND TIMESTAMP ORDER: PASS' as audit_result;
+
+
+do $authenticated_write_privileges_are_minimal$
+begin
+  if has_any_column_privilege('authenticated','public.organization_members','INSERT')
+     or has_any_column_privilege('authenticated','public.organization_members','UPDATE')
+     or has_any_column_privilege('authenticated','public.organizations','INSERT')
+     or has_any_column_privilege('authenticated','public.organizations','UPDATE')
+     or has_any_column_privilege('authenticated','public.pilot_access_requests','UPDATE')
+     or has_any_column_privilege('authenticated','public.operation_confirmations','UPDATE')
+     or has_any_column_privilege('authenticated','public.operation_evidence','UPDATE')
+     or has_any_column_privilege('authenticated','public.operation_notifications','INSERT')
+     or has_any_column_privilege('authenticated','public.operation_audit_timeline','INSERT')
+     or has_any_column_privilege('authenticated','public.operation_audit_timeline','UPDATE') then
+    raise exception 'UNNECESSARY_AUTHENTICATED_WRITE_PRIVILEGE_REMAINS';
+  end if;
+
+  if has_table_privilege('authenticated','public.operation_notifications','UPDATE')
+     or not has_column_privilege('authenticated','public.operation_notifications','read_at','UPDATE')
+     or exists (
+       select 1
+       from information_schema.column_privileges
+       where table_schema='public'
+         and table_name='operation_notifications'
+         and grantee='authenticated'
+         and privilege_type='UPDATE'
+         and column_name <> 'read_at'
+     ) then
+    raise exception 'NOTIFICATION_UPDATE_NOT_RESTRICTED_TO_READ_AT';
+  end if;
+end
+$authenticated_write_privileges_are_minimal$;
+
+select 'AUTHENTICATED WRITE PRIVILEGES: LEAST PRIVILEGE PASS' as privilege_result;
