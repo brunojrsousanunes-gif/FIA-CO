@@ -1186,3 +1186,32 @@ end
 $least_privilege_table_grants$;
 
 select 'FULL MIGRATION CHAIN + INCIDENT + TRUST + PRIVATE PROFILE TESTS: PASS' as result;
+
+
+-- Authorization must be evaluated before acquiring inventory item row locks.
+-- This guards against avoidable lock contention from authenticated non-managers.
+do $inventory_authorization_precedes_item_locks$
+declare
+  movement_definition text;
+  reservation_definition text;
+begin
+  movement_definition := pg_get_functiondef(
+    'public.record_inventory_movement(uuid,text,numeric,text,uuid,uuid)'::regprocedure
+  );
+  reservation_definition := pg_get_functiondef(
+    'public.reserve_inventory_item(uuid,uuid,numeric,uuid)'::regprocedure
+  );
+
+  if position('private.is_inventory_manager' in movement_definition) = 0
+     or position('private.is_inventory_manager' in movement_definition)
+        > position('for update' in movement_definition) then
+    raise exception 'INVENTORY_MOVEMENT_LOCK_PRECEDES_AUTHORIZATION';
+  end if;
+
+  if position('private.is_inventory_manager' in reservation_definition) = 0
+     or position('private.is_inventory_manager' in reservation_definition)
+        > position('for update' in reservation_definition) then
+    raise exception 'INVENTORY_RESERVATION_LOCK_PRECEDES_AUTHORIZATION';
+  end if;
+end
+$inventory_authorization_precedes_item_locks$;
