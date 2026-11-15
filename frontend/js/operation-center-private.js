@@ -9,7 +9,7 @@ const supabase=createSupabaseBrowserClient({url:SUPABASE_URL,publishableKey:SUPA
 let refreshPromise=null;
 const pendingRequestKeys=new Map();
 async function getPendingRequestKey(scope,payload){
- const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(payload)));
+ const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({userId:state.user?.id||null,payload})));
  const fingerprint=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
  const storageKey=`fia_pending_request:${scope}:${fingerprint}`;
  let key=pendingRequestKeys.get(storageKey)||'';
