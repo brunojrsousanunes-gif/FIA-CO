@@ -71,7 +71,17 @@
 <div class="metrics"><span><small>Presupuesto total</small><b data-total></b></span><span><small>Costes + logística</small><b data-costs></b></span><span><small>Margen calculado</small><b data-margin></b></span></div>
 <div class="detail-grid">
 <article><h3>Participantes y responsabilidad</h3><div data-participants></div></article>
-<article><h3>Presupuestos logísticos</h3><div data-quotes></div></article>
+<article><h3>Presupuestos logísticos</h3>
+<form class="quote-submit" data-quote-submit hidden>
+<p>Enviar oferta como <strong data-quote-provider></strong>. Solo la cuenta transportista que aceptó la participación puede registrarla.</p>
+<label>Descripción del servicio<input name="label" minlength="2" maxlength="160" autocomplete="off" required></label>
+<div class="quote-fields">
+<label>Importe (€)<input name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>
+<label>Plazo (días, opcional)<input name="eta" type="number" min="0" max="365" step="1" inputmode="numeric"></label>
+</div>
+<button class="secondary" type="submit">Enviar oferta logística</button>
+</form>
+<div data-quotes></div></article>
 <article><h3>Coste desglosado</h3><div data-cost-items></div></article>
 <article><h3>Incidencias y recuperación</h3><div data-incidents></div><button class="danger" type="button" data-open-incident>Simular fallo de una pieza</button><div class="actions" data-recovery-actions><button type="button" data-recovery="SYN-FRAN|SYN-GSM">Fran + GSM</button><button type="button" data-recovery="SYN-INFA|SYN-AGRICOLA-MORENO">Infa + Agrícola Moreno</button></div><button class="secondary" type="button" data-resolve-incident>Resolver tras entregar la pieza</button></article>
 <article><h3>Confirmaciones automáticas</h3><div class="actions" data-confirmation-actions></div></article>
