@@ -208,6 +208,14 @@ assert.ok((ownerMembershipHardening.match(/and om\.status = 'active'/g) || []).l
 assert.match(ownerMembershipHardening, /revoke all on function private\.can_access_operation\(uuid\) from public, anon/i);
 assert.match(ownerMembershipHardening, /revoke all on function private\.can_manage_operation\(uuid\) from public, anon/i);
 
+
+assert.match(ownerMembershipHardening, /alter default privileges for role postgres\s+revoke execute on functions from public/i,
+  'new functions must not inherit PostgreSQL PUBLIC EXECUTE by default');
+assert.match(ownerMembershipHardening, /alter default privileges for role postgres in schema public\s+revoke execute on functions from anon, authenticated/i,
+  'new public functions must not inherit Supabase client EXECUTE grants');
+assert.ok(postgresIntegration.includes('UNSAFE_GLOBAL_FUNCTION_DEFAULT_PUBLIC_EXECUTE_REMAINS'));
+assert.ok(postgresIntegration.includes('UNSAFE_PUBLIC_FUNCTION_DEFAULT_CLIENT_EXECUTE_REMAINS'));
+
 const privateOperationCenterJs = fs.readFileSync('frontend/js/operation-center-private.js', 'utf8');
 assert.ok(privateOperationCenterJs.includes("ui.password.value='';saveSession(payload)"));
 assert.ok(privateOperationCenterJs.includes("ui.registerPassword.value='';sessionStorage.removeItem('fia_pending_pilot_access')"));
