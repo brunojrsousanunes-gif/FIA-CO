@@ -252,7 +252,7 @@ declare
   caller uuid := (select auth.uid());
   current_row public.operations;
   previous text;
-  happened_at timestamptz := clock_timestamp();
+  happened_at timestamptz;
   calculated text;
   accepted_count integer;
   allowed boolean := false;
@@ -282,6 +282,7 @@ begin
   if not found then
     raise exception 'OPERATION_NOT_FOUND' using errcode='P0002';
   end if;
+  happened_at := clock_timestamp();
   if not private.can_access_operation(target_operation) then
     raise exception 'OPERATION_NOT_ACCESSIBLE' using errcode='42501';
   end if;
@@ -386,6 +387,60 @@ begin
   on conflict (operation_id,request_id) do nothing;
 
   return current_row;
+end;
+$function$;
+
+-- Serialize audit timestamps with the per-operation hash-chain lock.
+-- Assign created_at only after obtaining the operation row lock so concurrent
+-- appenders cannot produce timestamps older than the event they follow.
+create or replace function private.append_operation_audit(
+  target_operation uuid,
+  target_event text,
+  target_actor uuid,
+  target_data jsonb default '{}'::jsonb,
+  target_request uuid default gen_random_uuid()
+)
+returns void
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+declare
+  previous text;
+  happened_at timestamptz;
+  calculated text;
+begin
+  perform 1
+  from public.operations
+  where id=target_operation
+  for update;
+  if not found then
+    raise exception 'OPERATION_NOT_FOUND' using errcode='P0002';
+  end if;
+
+  happened_at := clock_timestamp();
+
+  select event_hash into previous
+  from public.operation_audit_events
+  where operation_id=target_operation
+  order by id desc
+  limit 1;
+
+  calculated := encode(extensions.digest(concat_ws('|',
+    target_operation::text,
+    target_event,
+    target_actor::text,
+    happened_at::text,
+    target_request::text,
+    coalesce(previous,''),
+    target_data::text
+  ),'sha256'),'hex');
+
+  insert into public.operation_audit_events
+    (operation_id,event_type,actor_id,event_data,previous_hash,event_hash,created_at,request_id)
+  values
+    (target_operation,target_event,target_actor,target_data,previous,calculated,happened_at,target_request)
+  on conflict (operation_id,request_id) do nothing;
 end;
 $function$;
 
