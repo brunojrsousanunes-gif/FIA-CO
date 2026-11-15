@@ -114,6 +114,5 @@ grant execute on function public.select_logistics_quote(uuid, uuid) to authentic
 -- RLS-protected DELETE path, but do not allow clients to rewrite quote
 -- ownership, provider, price, currency, ETA or creator directly.
 revoke update on public.logistics_quotes from public, anon, authenticated;
-grant update (status, updated_at) on public.logistics_quotes to authenticated;
 
 commit;
