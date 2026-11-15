@@ -1064,3 +1064,21 @@ $internal_margin_helper_is_not_client_callable$;
 
 select 'INTERNAL MARGIN HELPER: PRIVATE EXECUTION ONLY' as privilege_result;
 
+do $all_security_definer_functions_use_empty_search_path$
+begin
+  if exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname in ('public','private')
+      and p.prosecdef
+      and not coalesce(p.proconfig,array[]::text[]) @> array['search_path=""']
+  ) then
+    raise exception 'SECURITY_DEFINER_SEARCH_PATH_NOT_EMPTY';
+  end if;
+end
+$all_security_definer_functions_use_empty_search_path$;
+
+select 'SECURITY DEFINER SEARCH_PATH: EMPTY FOR ALL PROJECT FUNCTIONS' as security_result;
+
+
