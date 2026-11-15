@@ -150,6 +150,10 @@ const privateHtml = fs.readFileSync('frontend/operation-center-private.html', 'u
 assert.match(privateHtml, /form class="quote-submit" data-quote-submit hidden/);
 assert.match(privateHtml, /name="amount" type="number" min="0\.01" step="0\.01"/);
 assert.match(privateUi, /function eligibleCarrier\(\)[\s\S]*?participant_role==='carrier'[\s\S]*?status==='accepted'/);
+assert.match(privateUi, /participant_role==='carrier'[\s\S]*?status==='accepted'[\s\S]*?accepted_by===state\.user\?\.id/,
+  'only the user who accepted the carrier invitation should see quote submission');
+assert.match(privateUi, /operation_participants\?select=id,organization_id,participant_role,status,accepted_by,responsibility/,
+  'the UI must load the accepted-by identity for client-side action gating');
 assert.match(privateUi, /function renderQuoteSubmission\(\)[\s\S]*?\['invited','accepted'\]/);
 assert.match(privateUi, /async function submitLogisticsQuote\([\s\S]*?getPendingRequestKey\('logistics_quote_submission'[\s\S]*?on_conflict=id[\s\S]*?IDEMPOTENCY_KEY_REUSED/);
 assert.match(privateUi, /provider_organization_id:carrier\.organization_id[\s\S]*?created_by:state\.user\.id/);
