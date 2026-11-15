@@ -137,5 +137,6 @@ revoke update on public.operation_evidence from authenticated;
 revoke insert, update on public.operation_notifications from authenticated;
 grant update (read_at) on public.operation_notifications to authenticated;
 revoke insert, update on public.operation_audit_timeline from authenticated;
+revoke all on function private.recalculate_operation_margin(uuid) from public, anon, authenticated;
 
 commit;
