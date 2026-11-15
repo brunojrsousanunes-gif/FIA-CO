@@ -24,6 +24,71 @@ values ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-00000000
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
+
+-- Logistics quote selection is serialized and idempotent. The same key may
+-- replay only the same quote; reusing it for another quote must fail.
+insert into public.logistics_quotes
+ (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
+values
+ ('41000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000001','Oferta uno',12000,'EUR',3,'offered',
+  '10000000-0000-0000-0000-000000000001'),
+ ('41000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000001','Oferta dos',15000,'EUR',2,'offered',
+  '10000000-0000-0000-0000-000000000001');
+
+select public.select_logistics_quote(
+ '41000000-0000-0000-0000-000000000001',
+ '51000000-0000-0000-0000-000000000001');
+select public.select_logistics_quote(
+ '41000000-0000-0000-0000-000000000002',
+ '51000000-0000-0000-0000-000000000002');
+select public.select_logistics_quote(
+ '41000000-0000-0000-0000-000000000002',
+ '51000000-0000-0000-0000-000000000002');
+
+do $logistics_quote_selection_idempotency$
+begin
+ if (select count(*) from public.operation_audit_events
+     where operation_id='30000000-0000-0000-0000-000000000001'
+       and request_id='51000000-0000-0000-0000-000000000002') <> 1 then
+   raise exception 'LOGISTICS_QUOTE_RETRY_DUPLICATED_AUDIT_EVENT';
+ end if;
+ if (select status from public.logistics_quotes
+     where id='41000000-0000-0000-0000-000000000002') <> 'selected'
+    or (select status from public.logistics_quotes
+     where id='41000000-0000-0000-0000-000000000001') <> 'offered' then
+   raise exception 'LOGISTICS_QUOTE_SELECTION_STATE_INCORRECT';
+ end if;
+
+ begin
+  perform public.select_logistics_quote(
+   '41000000-0000-0000-0000-000000000001',
+   '51000000-0000-0000-0000-000000000002');
+  raise exception 'LOGISTICS_QUOTE_IDEMPOTENCY_KEY_REUSED_FOR_OTHER_QUOTE';
+ exception when invalid_parameter_value then
+  if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+ end;
+
+ begin
+  perform public.select_logistics_quote(
+   '41000000-0000-0000-0000-000000000001',null);
+  raise exception 'LOGISTICS_QUOTE_ACCEPTED_NULL_REQUEST_KEY';
+ exception when sqlstate '22023' then
+  if sqlerrm <> 'REQUEST_KEY_REQUIRED' then raise; end if;
+ end;
+
+ if has_column_privilege('authenticated','public.logistics_quotes','amount_cents','UPDATE')
+    or has_column_privilege('authenticated','public.logistics_quotes','provider_organization_id','UPDATE')
+    or has_column_privilege('authenticated','public.logistics_quotes','operation_id','UPDATE') then
+   raise exception 'LOGISTICS_QUOTE_SENSITIVE_COLUMNS_DIRECTLY_UPDATABLE';
+ end if;
+ if not has_column_privilege('authenticated','public.logistics_quotes','status','UPDATE') then
+   raise exception 'LOGISTICS_QUOTE_STATUS_UPDATE_REQUIRED_BY_SELECTION_RPC';
+ end if;
+end
+$logistics_quote_selection_idempotency$;
+reset role;
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
 values ('40000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','SKU-1','Material de prueba','10000000-0000-0000-0000-000000000001');
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
