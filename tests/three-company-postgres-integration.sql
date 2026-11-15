@@ -1052,3 +1052,15 @@ end
 $authenticated_write_privileges_are_minimal$;
 
 select 'AUTHENTICATED WRITE PRIVILEGES: LEAST PRIVILEGE PASS' as privilege_result;
+
+do $internal_margin_helper_is_not_client_callable$
+begin
+  if has_function_privilege('anon','private.recalculate_operation_margin(uuid)','EXECUTE')
+     or has_function_privilege('authenticated','private.recalculate_operation_margin(uuid)','EXECUTE') then
+    raise exception 'INTERNAL_MARGIN_RECALCULATION_HELPER_EXPOSED';
+  end if;
+end
+$internal_margin_helper_is_not_client_callable$;
+
+select 'INTERNAL MARGIN HELPER: PRIVATE EXECUTION ONLY' as privilege_result;
+
