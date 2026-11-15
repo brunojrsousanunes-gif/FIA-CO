@@ -24,6 +24,16 @@ begin
     raise exception 'ORGANIZATION_AND_REQUEST_KEY_REQUIRED' using errcode='22023';
   end if;
 
+  -- Check membership before taking the organization lock to avoid lock
+  -- contention from authenticated users who do not belong to this company.
+  if not exists (
+    select 1 from public.organization_members om
+    where om.organization_id=target_organization
+      and om.user_id=caller and om.status='active'
+  ) then
+    raise exception 'ACTIVE_ORGANIZATION_MEMBERSHIP_REQUIRED' using errcode='42501';
+  end if;
+
   select o.status into org_status
   from public.organizations o
   where o.id=target_organization
