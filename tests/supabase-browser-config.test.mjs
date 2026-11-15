@@ -39,6 +39,18 @@ try{
   assert.equal(capturedRequest.options.headers.get('authorization'),'Bearer test-access-token','caller headers must not override the authenticated session');
   assert.equal(capturedRequest.options.headers.get('apikey'),'sb_publishable_12345678901234567890','caller headers must not override the publishable key');
   assert.equal(capturedRequest.options.headers.get('x-trace'),'safe','non-credential custom headers must be preserved');
+
+  const anonymousClient=createSupabaseBrowserClient({
+    url:'https://example.supabase.co',
+    publishableKey:'sb_publishable_12345678901234567890'
+  });
+  await anonymousClient.request('/auth/v1/signup',{
+    headers:{Authorization:'Bearer sb_publishable_attacker_override'}
+  });
+  assert.equal(capturedRequest.options.headers.get('authorization'),null,
+    'an unauthenticated request must not send the publishable API key or a caller-supplied value as a Bearer JWT');
+  assert.equal(capturedRequest.options.headers.get('apikey'),'sb_publishable_12345678901234567890',
+    'unauthenticated requests must still carry the publishable key in apikey');
 }finally{
   globalThis.fetch=originalFetch;
 }
