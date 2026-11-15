@@ -36,7 +36,8 @@ const expectedNewMigrations = [
   '20261115040000_harden_l3_revocation_and_reservation_retries.sql',
   '20261115050000_harden_logistics_quote_selection.sql',
   '20261115060000_harden_logistics_quote_deletion.sql',
-  '20261115070000_minimize_company_verification_column_visibility.sql'
+  '20261115070000_minimize_company_verification_column_visibility.sql',
+  '20261115080000_authorize_carrier_logistics_quote_submission.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
@@ -74,6 +75,16 @@ assert.doesNotMatch(verificationVisibility, /grant select \([\s\S]*?\b(?:tax_id_
 assert.match(verificationVisibility, /grant select \([\s\S]*?verification_status[\s\S]*?\) on public\.organization_verifications to authenticated/i);
 assert.match(verificationVisibility, /grant select \([\s\S]*?qualification_status[\s\S]*?\) on public\.organization_provider_qualifications to authenticated/i);
 assert.doesNotMatch(verificationVisibility, /revoke[^;]*service_role/i, 'trusted service-role grants must remain untouched');
+
+const carrierQuoteAuthorization = fs.readFileSync(
+  'supabase/migrations/20261115080000_authorize_carrier_logistics_quote_submission.sql', 'utf8'
+);
+assert.match(carrierQuoteAuthorization, /create or replace function private\\.can_submit_logistics_quote[\\s\\S]*?security definer[\\s\\S]*?set search_path = ''/i);
+assert.match(carrierQuoteAuthorization, /participant_role = 'carrier'[\\s\\S]*?op\\.status = 'accepted'[\\s\\S]*?op\\.accepted_by = \\(select auth\\.uid\\(\\)\\)/i);
+assert.match(carrierQuoteAuthorization, /om\\.status = 'active'[\\s\\S]*?org\\.status = 'active'/i);
+assert.match(carrierQuoteAuthorization, /drop policy if exists logistics_quotes_creator_insert[\\s\\S]*?create policy logistics_quotes_carrier_submit/i);
+assert.match(carrierQuoteAuthorization, /created_by = \\(select auth\\.uid\\(\\)\\)[\\s\\S]*?status = 'offered'[\\s\\S]*?private\\.can_submit_logistics_quote/i);
+assert.match(carrierQuoteAuthorization, /revoke all on function private\\.can_submit_logistics_quote\\(uuid, uuid\\)[\\s\\S]*?from public, anon, authenticated/i);
 
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
