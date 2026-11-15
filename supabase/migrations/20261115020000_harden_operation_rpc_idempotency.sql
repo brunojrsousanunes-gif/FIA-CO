@@ -235,6 +235,160 @@ begin
 end;
 $function$;
 
+-- A transition retry is idempotent only for the same actor, target and expected version.
+-- Legacy events derive the original expected version from their resulting version.
+create or replace function public.transition_operation(
+  target_operation uuid,
+  target_status text,
+  expected_version integer,
+  request_key uuid
+)
+returns public.operations
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+declare
+  caller uuid := (select auth.uid());
+  current_row public.operations;
+  previous text;
+  happened_at timestamptz := clock_timestamp();
+  calculated text;
+  accepted_count integer;
+  allowed boolean := false;
+  existing_event record;
+begin
+  if caller is null then
+    raise exception 'AUTH_REQUIRED' using errcode='42501';
+  end if;
+  if target_status is null
+     or target_status not in ('invited','accepted','in_transit','delivered','completed','disputed','cancelled') then
+    raise exception 'INVALID_TARGET_STATUS' using errcode='22023';
+  end if;
+  if target_operation is null then
+    raise exception 'OPERATION_REQUIRED' using errcode='22023';
+  end if;
+  if expected_version is null then
+    raise exception 'EXPECTED_VERSION_REQUIRED' using errcode='22023';
+  end if;
+  if request_key is null then
+    raise exception 'IDEMPOTENCY_KEY_REQUIRED' using errcode='22023';
+  end if;
+
+  select * into current_row
+  from public.operations
+  where id=target_operation
+  for update;
+  if not found then
+    raise exception 'OPERATION_NOT_FOUND' using errcode='P0002';
+  end if;
+  if not private.can_access_operation(target_operation) then
+    raise exception 'OPERATION_NOT_ACCESSIBLE' using errcode='42501';
+  end if;
+
+  select event_type,actor_id,event_data into existing_event
+  from public.operation_audit_events
+  where operation_id=target_operation and request_id=request_key;
+  if found then
+    if existing_event.event_type='operation.transition'
+       and existing_event.actor_id=caller
+       and existing_event.event_data->>'to'=target_status
+       and coalesce(
+         (existing_event.event_data->>'expected_version')::integer,
+         (existing_event.event_data->>'version')::integer - 1
+       ) is not distinct from expected_version then
+      -- Return the exact row produced by the original request, even if the
+      -- operation has advanced since then. Older events derive their version
+      -- from the resulting version for backward compatibility.
+      if existing_event.event_data ? 'result' then
+        return jsonb_populate_record(
+          null::public.operations,
+          existing_event.event_data->'result'
+        );
+      end if;
+      return current_row;
+    end if;
+    raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode='22023';
+  end if;
+
+  if current_row.version is distinct from expected_version then
+    raise exception 'VERSION_CONFLICT' using errcode='40001';
+  end if;
+  if current_row.status='draft' and target_status='invited' then
+    if not private.operation_participants_have_shared_trust(target_operation) then
+      raise exception 'TRUST_LEVEL_REQUIRED:L3_SHARED' using errcode='42501';
+    end if;
+  elsif target_status <> 'cancelled' and not private.operation_has_shared_trust(target_operation) then
+    raise exception 'TRUST_LEVEL_REQUIRED:L3_SHARED' using errcode='42501';
+  end if;
+
+  if current_row.status='draft' and target_status='invited' and current_row.created_by=caller then
+    select count(*) into accepted_count
+    from public.operation_participants
+    where operation_id=target_operation;
+    allowed := accepted_count=3
+      and exists(select 1 from public.operation_participants where operation_id=target_operation and participant_role='seller')
+      and exists(select 1 from public.operation_participants where operation_id=target_operation and participant_role='buyer')
+      and exists(select 1 from public.operation_participants where operation_id=target_operation and participant_role='carrier');
+  elsif current_row.status='invited' and target_status='accepted' then
+    select count(*) into accepted_count
+    from public.operation_participants
+    where operation_id=target_operation and status='accepted';
+    allowed := accepted_count=3;
+  elsif current_row.status='accepted' and target_status='in_transit' then
+    allowed := private.has_operation_role(target_operation,'carrier');
+  elsif current_row.status='in_transit' and target_status='delivered' then
+    allowed := private.has_operation_role(target_operation,'carrier');
+  elsif current_row.status='delivered' and target_status='completed' then
+    allowed := private.has_operation_role(target_operation,'buyer')
+      and exists (
+        select 1 from public.operation_confirmations c
+        where c.operation_id=target_operation
+          and c.participant_role='buyer'
+          and c.confirmation_type in ('receipt','completion')
+          and c.confirmed_by=caller
+      );
+  elsif target_status='disputed' and current_row.status in ('invited','accepted','in_transit','delivered') then
+    allowed := private.can_access_operation(target_operation);
+  elsif target_status='cancelled' and current_row.status in ('draft','invited') then
+    allowed := current_row.created_by=caller;
+  end if;
+  if not allowed then
+    raise exception 'TRANSITION_NOT_ALLOWED' using errcode='42501';
+  end if;
+
+  update public.operations
+  set status=target_status,version=version+1,updated_at=happened_at
+  where id=target_operation
+  returning * into current_row;
+
+  select event_hash into previous
+  from public.operation_audit_events
+  where operation_id=target_operation
+  order by id desc
+  limit 1;
+
+  calculated := encode(extensions.digest(concat_ws('|',target_operation::text,'operation.transition',
+    target_status,current_row.version::text,caller::text,happened_at::text,request_key::text,coalesce(previous,'')),'sha256'),'hex');
+
+  insert into public.operation_audit_events
+    (operation_id,event_type,actor_id,event_data,previous_hash,event_hash,created_at,request_id)
+  values (
+    target_operation,'operation.transition',caller,
+    jsonb_build_object(
+      'to',target_status,
+      'expected_version',expected_version,
+      'version',current_row.version,
+      'result',to_jsonb(current_row)
+    ),
+    previous,calculated,happened_at,request_key
+  )
+  on conflict (operation_id,request_id) do nothing;
+
+  return current_row;
+end;
+$function$;
+
 -- A repeated part-recovery request returns the same child operation only when
 -- both audit-chain records match the original parent, parties and part.
 create or replace function public.create_synthetic_part_recovery(
