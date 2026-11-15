@@ -995,3 +995,26 @@ begin
 end
 $synthetic_recovery_retry_is_idempotent$;
 reset role;
+
+
+-- Hash-chain sequence and visible timestamps must follow the same per-operation order.
+do $operation_audit_chain_is_monotonic$
+begin
+  if exists (
+    select 1
+    from (
+      select operation_id,id,previous_hash,event_hash,created_at,
+        lag(event_hash) over (partition by operation_id order by id) as prior_hash,
+        lag(created_at) over (partition by operation_id order by id) as prior_created_at
+      from public.operation_audit_events
+    ) chain
+    where (prior_hash is null and previous_hash is not null)
+       or (prior_hash is not null and previous_hash is distinct from prior_hash)
+       or (prior_created_at is not null and created_at < prior_created_at)
+  ) then
+    raise exception 'OPERATION_AUDIT_CHAIN_ORDER_INVALID';
+  end if;
+end
+$operation_audit_chain_is_monotonic$;
+
+select 'OPERATION AUDIT HASH CHAIN AND TIMESTAMP ORDER: PASS' as audit_result;
