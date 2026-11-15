@@ -39,7 +39,7 @@ $('[data-reset]').addEventListener('click',reset);download.addEventListener('cli
  let activeMemberships=[];
  const pendingBackendRequestKeys=new Map();
  async function pendingBackendRequestKey(scope,payload){
-  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(payload)));
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({userId:backendSession?.user?.id||null,payload})));
   const fingerprint=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
   const storageKey=`fia_pending_request:${scope}:${fingerprint}`;
   let key=pendingBackendRequestKeys.get(storageKey)||'';
