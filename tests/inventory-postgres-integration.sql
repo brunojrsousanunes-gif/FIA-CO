@@ -297,9 +297,9 @@ reset role;
 
 -- The creator can invite three L3 organizations before their users accept,
 -- and can still cancel an invitation if a trust check later expires.
-insert into public.operations(id,reference,title,status,created_by)
+insert into public.operations(id,reference,title,status,created_by,owner_organization_id)
 values ('30000000-0000-0000-0000-000000000002','FIA-INV-0002','Operación de invitación','draft',
-        '10000000-0000-0000-0000-000000000001');
+        '10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
 insert into public.operation_participants
  (operation_id,organization_id,participant_role,status,invited_by)
 values
