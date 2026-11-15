@@ -38,7 +38,8 @@ const expectedNewMigrations = [
   '20261115060000_harden_logistics_quote_deletion.sql',
   '20261115070000_minimize_company_verification_column_visibility.sql',
   '20261115080000_authorize_carrier_logistics_quote_submission.sql',
-  '20261115090000_precheck_inventory_authorization_before_item_locks.sql'
+  '20261115090000_precheck_inventory_authorization_before_item_locks.sql',
+  '20261115100000_restore_financial_recalculation_triggers.sql'
 ];
 const operationRpcHardening = fs.readFileSync(
   'supabase/migrations/20261115020000_harden_operation_rpc_idempotency.sql', 'utf8'
