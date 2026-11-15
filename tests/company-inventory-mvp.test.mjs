@@ -73,6 +73,7 @@ assert.match(verificationVisibility, /revoke select on public\.organization_prov
 assert.doesNotMatch(verificationVisibility, /grant select \([\s\S]*?\b(?:tax_id_last4|evidence_ref|verified_by)\b/i);
 assert.match(verificationVisibility, /grant select \([\s\S]*?verification_status[\s\S]*?\) on public\.organization_verifications to authenticated/i);
 assert.match(verificationVisibility, /grant select \([\s\S]*?qualification_status[\s\S]*?\) on public\.organization_provider_qualifications to authenticated/i);
+assert.doesNotMatch(verificationVisibility, /revoke[^;]*service_role/i, 'trusted service-role grants must remain untouched');
 
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
