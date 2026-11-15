@@ -83,8 +83,8 @@ begin
     or has_column_privilege('authenticated','public.logistics_quotes','operation_id','UPDATE') then
    raise exception 'LOGISTICS_QUOTE_SENSITIVE_COLUMNS_DIRECTLY_UPDATABLE';
  end if;
- if not has_column_privilege('authenticated','public.logistics_quotes','status','UPDATE') then
-   raise exception 'LOGISTICS_QUOTE_STATUS_UPDATE_REQUIRED_BY_SELECTION_RPC';
+ if has_any_column_privilege('authenticated','public.logistics_quotes','UPDATE') then
+   raise exception 'LOGISTICS_QUOTE_DIRECT_UPDATE_PRIVILEGE_REMAINS';
  end if;
 end
 $logistics_quote_selection_idempotency$;
