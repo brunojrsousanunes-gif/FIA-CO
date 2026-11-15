@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-: "\${PGHOST:=localhost}"
-: "\${PGPORT:=5432}"
-: "\${PGUSER:=postgres}"
-: "\${PGDATABASE:=fia_inventory_test}"
-: "\${PGPASSWORD:=postgres}"
+PGHOST="$(printenv PGHOST || printf localhost)"
+PGPORT="$(printenv PGPORT || printf 5432)"
+PGUSER="$(printenv PGUSER || printf postgres)"
+PGDATABASE="$(printenv PGDATABASE || printf fia_inventory_test)"
+PGPASSWORD="$(printenv PGPASSWORD || printf postgres)"
 export PGHOST PGPORT PGUSER PGDATABASE PGPASSWORD
 tmp_dir="$(mktemp -d)"
-cleanup() { if [[ -n "\${holder_pid:-}" ]]; then kill "$holder_pid" 2>/dev/null || true; fi; rm -rf "$tmp_dir"; }
+holder_pid=""
+cleanup() { if [[ -n "$holder_pid" ]]; then kill "$holder_pid" 2>/dev/null || true; fi; rm -rf "$tmp_dir"; }
 trap cleanup EXIT
 psql_admin() { psql -X -v ON_ERROR_STOP=1 -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" "$@"; }
 
@@ -33,7 +34,7 @@ ready_file="$tmp_dir/inventory-lock-ready"
   psql -X -v ON_ERROR_STOP=1 -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" >"$tmp_dir/reservation-a.log" 2>&1 <<SQL
 begin;
 select id from public.inventory_items where id='40000000-0000-0000-0000-000000000003' for update;
-\\! touch "$ready_file"
+\! touch "$ready_file"
 select pg_sleep(2);
 set local role authenticated;
 set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
@@ -74,7 +75,7 @@ ready_file="$tmp_dir/operation-lock-ready"
   psql -X -v ON_ERROR_STOP=1 -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" >"$tmp_dir/operation-holder.log" 2>&1 <<SQL
 begin;
 select id from public.operations where id='30000000-0000-0000-0000-000000000001' for update;
-\\! touch "$ready_file"
+\! touch "$ready_file"
 select pg_sleep(4);
 commit;
 SQL
