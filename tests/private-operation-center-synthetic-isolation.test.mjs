@@ -16,6 +16,7 @@ assert.ok(
   'Las solicitudes del entorno privado deben limitarse a organizaciones sintéticas.'
 );
 
+assert.ok(source.includes('JSON.stringify({userId:state.user?.id||null,payload})'), 'pending keys must be isolated between accounts using the same browser tab');
 assert.match(source, /async function getPendingRequestKey\(scope,payload\)[\s\S]*?crypto\.subtle\.digest[\s\S]*?sessionStorage\.setItem/i,
   'retry keys must be persisted without storing request payloads or session credentials');
 for (const action of [
