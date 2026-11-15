@@ -208,7 +208,7 @@ reset role;
 do $logistics_quote_selection_idempotency$
 begin
  if (select count(*) from public.operation_audit_events
-     where operation_id='30000000-0000-0000-0000-000000000001'
+     where operation_id='30000000-0000-0000-0000-000000000009'
        and request_id='51000000-0000-0000-0000-000000000002') <> 1 then
    raise exception 'LOGISTICS_QUOTE_RETRY_DUPLICATED_AUDIT_EVENT';
  end if;
@@ -295,7 +295,7 @@ begin
     raise exception 'LOGISTICS_QUOTE_DELETE_DID_NOT_REMOVE_TARGET';
   end if;
   if (select count(*) from public.operation_audit_events
-      where operation_id='30000000-0000-0000-0000-000000000001'
+      where operation_id='30000000-0000-0000-0000-000000000009'
         and request_id='52000000-0000-0000-0000-000000000001'
         and event_type='logistics.quote.deleted') <> 1 then
     raise exception 'LOGISTICS_QUOTE_DELETE_AUDIT_NOT_IDEMPOTENT';
