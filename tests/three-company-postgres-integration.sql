@@ -1053,6 +1053,27 @@ $authenticated_write_privileges_are_minimal$;
 
 select 'AUTHENTICATED WRITE PRIVILEGES: LEAST PRIVILEGE PASS' as privilege_result;
 
+do $incident_updates_are_column_scoped$
+begin
+  if has_table_privilege('authenticated','public.operation_incidents','UPDATE')
+     or not has_column_privilege('authenticated','public.operation_incidents','status','UPDATE')
+     or not has_column_privilege('authenticated','public.operation_incidents','resolved_by','UPDATE')
+     or not has_column_privilege('authenticated','public.operation_incidents','resolved_at','UPDATE')
+     or not has_column_privilege('authenticated','public.operation_incidents','resolution_note','UPDATE')
+     or has_column_privilege('authenticated','public.operation_incidents','operation_id','UPDATE')
+     or has_column_privilege('authenticated','public.operation_incidents','incident_type','UPDATE')
+     or has_column_privilege('authenticated','public.operation_incidents','description','UPDATE')
+     or has_column_privilege('authenticated','public.operation_incidents','blocks_progress','UPDATE')
+     or has_column_privilege('authenticated','public.operation_incidents','opened_by','UPDATE')
+     or has_column_privilege('authenticated','public.operation_incidents','created_at','UPDATE') then
+    raise exception 'INCIDENT_UPDATE_PRIVILEGES_NOT_COLUMN_SCOPED';
+  end if;
+end
+$incident_updates_are_column_scoped$;
+
+select 'INCIDENT UPDATE PRIVILEGES: RESOLUTION FIELDS ONLY' as privilege_result;
+
+
 do $internal_margin_helper_is_not_client_callable$
 begin
   if has_function_privilege('anon','private.recalculate_operation_margin(uuid)','EXECUTE')
