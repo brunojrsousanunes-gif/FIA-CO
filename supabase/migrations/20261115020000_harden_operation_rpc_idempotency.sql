@@ -27,6 +27,20 @@ begin
     raise exception 'INVALID_ROLE' using errcode='22023';
   end if;
 
+  -- Reject callers without the invited role before acquiring the operation lock.
+  -- Recheck below after locking to close the authorization-change window.
+  if not exists (
+    select 1
+    from public.operation_participants op
+    join public.organization_members om
+      on om.organization_id=op.organization_id
+    where op.operation_id=target_operation
+      and op.participant_role=target_role
+      and om.user_id=caller and om.status='active'
+  ) then
+    raise exception 'INVITATION_NOT_ACCESSIBLE' using errcode='42501';
+  end if;
+
   perform 1 from public.operations o
   where o.id=target_operation
   for update;
@@ -275,6 +289,12 @@ begin
     raise exception 'IDEMPOTENCY_KEY_REQUIRED' using errcode='22023';
   end if;
 
+  -- Avoid allowing a caller without operation access to hold a row lock.
+  -- Authorization is checked again immediately after the lock is acquired.
+  if not private.can_access_operation(target_operation) then
+    raise exception 'OPERATION_NOT_ACCESSIBLE' using errcode='42501';
+  end if;
+
   select * into current_row
   from public.operations
   where id=target_operation
@@ -486,6 +506,11 @@ begin
   end if;
   if part_description is null or char_length(btrim(part_description)) not between 3 and 180 then
     raise exception 'INVALID_PART_DESCRIPTION' using errcode='22023';
+  end if;
+
+  -- Reject non-managers before taking the parent-operation lock; recheck below.
+  if not private.can_manage_operation(target_parent) then
+    raise exception 'OPERATION_NOT_MANAGEABLE' using errcode='42501';
   end if;
 
   select o.* into parent
