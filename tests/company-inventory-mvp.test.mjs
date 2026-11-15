@@ -68,11 +68,11 @@ assert.match(logisticsQuoteDeletion, /revoke delete on public\.logistics_quotes 
 const verificationVisibility = fs.readFileSync(
   'supabase/migrations/20261115070000_minimize_company_verification_column_visibility.sql', 'utf8'
 );
-assert.match(verificationVisibility, /revoke select on public\\.organization_verifications\\s+from public, anon, authenticated/i);
-assert.match(verificationVisibility, /revoke select on public\\.organization_provider_qualifications\\s+from public, anon, authenticated/i);
-assert.doesNotMatch(verificationVisibility, /grant select \\([\\s\\S]*?\\b(?:tax_id_last4|evidence_ref|verified_by)\\b/i);
-assert.match(verificationVisibility, /grant select \\([\\s\\S]*?verification_status[\\s\\S]*?\\) on public\\.organization_verifications to authenticated/i);
-assert.match(verificationVisibility, /grant select \\([\\s\\S]*?qualification_status[\\s\\S]*?\\) on public\\.organization_provider_qualifications to authenticated/i);
+assert.match(verificationVisibility, /revoke select on public\.organization_verifications\s+from public, anon, authenticated/i);
+assert.match(verificationVisibility, /revoke select on public\.organization_provider_qualifications\s+from public, anon, authenticated/i);
+assert.doesNotMatch(verificationVisibility, /grant select \([\s\S]*?\b(?:tax_id_last4|evidence_ref|verified_by)\b/i);
+assert.match(verificationVisibility, /grant select \([\s\S]*?verification_status[\s\S]*?\) on public\.organization_verifications to authenticated/i);
+assert.match(verificationVisibility, /grant select \([\s\S]*?qualification_status[\s\S]*?\) on public\.organization_provider_qualifications to authenticated/i);
 
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
