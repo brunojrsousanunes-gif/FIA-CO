@@ -152,6 +152,12 @@ begin
     raise exception 'INVENTORY_ITEM_NOT_FOUND' using errcode='P0002';
   end if;
 
+  -- Recheck membership after waiting for the item lock. A membership revoked
+  -- while this request was blocked must not authorize reservation closure.
+  if not private.is_inventory_manager(expected_org_id) then
+    raise exception 'INVENTORY_FORBIDDEN' using errcode='42501';
+  end if;
+
   select * into reservation_row
   from public.inventory_reservations r
   where r.id=target_reservation
