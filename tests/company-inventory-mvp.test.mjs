@@ -52,6 +52,24 @@ assert.match(operationRpcHardening, /recovery\.created/i);
 assert.match(operationRpcHardening, /recovery\.linked/i);
 assert.match(operationRpcHardening, /three_distinct_synthetic_organizations_required/i);
 
+
+const postgresIntegration = fs.readFileSync('tests/inventory-postgres-integration.sql', 'utf8');
+for (const assertion of [
+  'DRAFT_IDEMPOTENT_RETRY_CREATED_ANOTHER_OPERATION',
+  'DRAFT_IDEMPOTENCY_KEY_ACCEPTED_DIFFERENT_PAYLOAD',
+  'SYNTHETIC_RECOVERY_RETRY_CREATED_ANOTHER_OPERATION',
+  'SYNTHETIC_RECOVERY_IDEMPOTENCY_KEY_ACCEPTED_DIFFERENT_PAYLOAD',
+  'SYNTHETIC_RECOVERY_RETRY_DUPLICATED_SUB_OPERATION',
+  'SYNTHETIC_RECOVERY_RETRY_DUPLICATED_OR_MISSED_AUDIT'
+]) {
+  assert.ok(postgresIntegration.includes(assertion),
+    `PostgreSQL integration must cover idempotency regression: ${assertion}`);
+}
+assert.match(postgresIntegration, /create_synthetic_part_recovery\([\s\S]*?SYN-FRAN[\s\S]*?SYN-GSM[\s\S]*?Bomba hidráulica[\s\S]*?53000000-0000-0000-0000-000000000001/i,
+  'synthetic recovery retry must be exercised against the complete migration chain');
+assert.match(postgresIntegration, /create_operation_draft\([\s\S]*?Borrador idempotente de prueba[\s\S]*?53000000-0000-0000-0000-000000000002/i,
+  'draft retry must be exercised against the complete migration chain');
+
 const l3AndReservationHardening = fs.readFileSync(
   'supabase/migrations/20261115040000_harden_l3_revocation_and_reservation_retries.sql', 'utf8'
 );
