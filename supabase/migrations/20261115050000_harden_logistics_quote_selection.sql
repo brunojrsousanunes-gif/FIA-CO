@@ -163,6 +163,19 @@ begin
 end;
 $function$;
 
+-- Quotes may be inserted directly only as offers. Selection is a state
+-- transition and must pass through the audited, idempotent RPC below.
+drop policy if exists logistics_quotes_creator_insert on public.logistics_quotes;
+create policy logistics_quotes_creator_insert
+on public.logistics_quotes
+for insert
+to authenticated
+with check (
+  (select private.can_manage_operation(logistics_quotes.operation_id))
+  and created_by = (select auth.uid())
+  and status = 'offered'
+);
+
 revoke all on function public.select_logistics_quote(uuid, uuid) from public, anon;
 grant execute on function public.select_logistics_quote(uuid, uuid) to authenticated;
 
