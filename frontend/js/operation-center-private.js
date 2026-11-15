@@ -107,11 +107,42 @@ fill($('[data-quotes]'),d.quotes,'Sin presupuestos logísticos',item=>{const wra
 fill($('[data-cost-items]'),d.costs,finance?'Sin partidas de coste':'Información interna solo visible para la empresa titular',item=>line(item.label,`${item.category} · ${money(item.amount_cents)}`));
 const incidents=[...d.incidents,...d.recoveries.map(item=>({description:`Suboperación ${item.reference}: ${item.title}`,status:item.status,incident_type:'recovery'}))];fill($('[data-incidents]'),incidents,'Sin incidencias abiertas',item=>line(item.description,`${item.incident_type} · ${item.status}`));
 fill($('[data-audit]'),d.audit,'Sin eventos',item=>{const row=line(item.event_type,new Date(item.created_at).toLocaleString('es-ES'));row.className='audit-row';return row;});
-const blocked=op.status==='blocked';$$('[data-recovery]',ui.detail).forEach(button=>button.disabled=!blocked);$('[data-resolve-incident]').disabled=!d.incidents.some(item=>item.status==='open');renderConfirmationActions();}
+const blocked=op.status==='blocked';$('[data-recovery]',ui.detail).forEach(button=>button.disabled=!blocked);$('[data-resolve-incident]').disabled=!d.incidents.some(item=>item.status==='open');renderQuoteSubmission();renderConfirmationActions();}
+
+function eligibleCarrier(){const activeOrgIds=new Set(state.memberships.filter(item=>item.status==='active').map(item=>item.organization_id));return state.detail?.participants.find(item=>item.participant_role==='carrier'&&item.status==='accepted'&&activeOrgIds.has(item.organization_id))||null;}
+function renderQuoteSubmission(){const form=$('[data-quote-submit]');if(!form)return;const carrier=eligibleCarrier(),allowed=Boolean(carrier&&['invited','accepted'].includes(state.selected?.status));form.hidden=!allowed;if(allowed)$('[data-quote-provider]').textContent=carrier.organizations?.name||'Transportista autorizado';}
 
 function renderConfirmationActions(){const host=$('[data-confirmation-actions]');host.replaceChildren();const ownOrganizations=new Set(state.memberships.map(item=>item.organization_id)),participant=state.detail.participants.find(item=>ownOrganizations.has(item.organization_id));if(!participant){host.append(line('Sin acciones disponibles','La política RLS determina el rol de la cuenta.'));return;}if(participant.status==='invited'){const accept=document.createElement('button');accept.type='button';accept.textContent='Aceptar participación';accept.addEventListener('click',()=>acceptParticipation(participant.participant_role));host.append(accept);return;}const role=participant.participant_role,actions=role==='seller'?[['dispatch','Confirmar expedición']]:role==='carrier'?[['pickup','Confirmar recogida'],['delivery','Confirmar entrega']]:role==='buyer'?[['receipt','Confirmar recepción']]:[];actions.forEach(([type,label])=>{const button=document.createElement('button');button.type='button';button.textContent=label;button.addEventListener('click',()=>confirmAction(role,type));host.append(button);});}
 async function acceptParticipation(role){const payload={target_operation:state.selected.id,target_role:role},pending=await getPendingRequestKey('accept_operation_invitation',payload);await mutate('/rest/v1/rpc/accept_operation_invitation',{...payload,request_key:pending.key},'Participación aceptada.',false,'POST',pending.storageKey);}
 async function selectQuote(id){const payload={target_quote:id},pending=await getPendingRequestKey('select_logistics_quote',payload);await mutate('/rest/v1/rpc/select_logistics_quote',{...payload,request_key:pending.key},'Presupuesto logístico seleccionado.',false,'POST',pending.storageKey);}
+async function submitLogisticsQuote(event){
+ event.preventDefault();
+ const form=event.currentTarget,carrier=eligibleCarrier();
+ if(!carrier||!state.selected||!['invited','accepted'].includes(state.selected.status)){
+  setMessage('Solo la cuenta transportista que aceptó la participación puede enviar ofertas.','error');return;
+ }
+ const label=form.elements.label.value.trim(),amount=Number(form.elements.amount.value),amountCents=Math.round(amount*100),etaRaw=form.elements.eta.value.trim(),etaDays=etaRaw===''?null:Number(etaRaw);
+ if(label.length<2||label.length>160||!Number.isFinite(amount)||amount<=0||!Number.isSafeInteger(amountCents)||Math.abs(amount*100-amountCents)>1e-7){
+  setMessage('Revisa la descripción y el importe: debe ser mayor que cero y tener como máximo dos decimales.','error');return;
+ }
+ if(etaDays!==null&&(!Number.isInteger(etaDays)||etaDays<0||etaDays>365)){
+  setMessage('El plazo debe ser un número entero entre 0 y 365 días.','error');return;
+ }
+ const payload={operation_id:state.selected.id,provider_organization_id:carrier.organization_id,label,amount_cents:amountCents,currency:'EUR',eta_days:etaDays,status:'offered',created_by:state.user.id};
+ const pending=await getPendingRequestKey('logistics_quote_submission',payload),row={id:pending.key,...payload};
+ setMessage('Enviando oferta logística…');
+ try{
+  const rows=await api('/rest/v1/logistics_quotes?on_conflict=id',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=representation'},body:JSON.stringify(row)});
+  if(!Array.isArray(rows)||rows.length===0){
+   const existing=await api('/rest/v1/logistics_quotes?select=id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by&id=eq.'+encodeURIComponent(pending.key));
+   const prior=existing[0],priorEta=prior?.eta_days==null?null:Number(prior.eta_days);
+   if(!prior||prior.operation_id!==payload.operation_id||prior.provider_organization_id!==payload.provider_organization_id||prior.label!==payload.label||Number(prior.amount_cents)!==payload.amount_cents||prior.currency!==payload.currency||priorEta!==payload.eta_days||prior.status!=='offered'||prior.created_by!==payload.created_by)throw new Error('IDEMPOTENCY_KEY_REUSED');
+  }
+  clearPendingRequestKey(pending.storageKey);form.reset();
+  setMessage('Oferta enviada. Queda pendiente de selección por la empresa responsable.','success');
+  await loadOperations();
+ }catch(error){setMessage('No se pudo enviar la oferta: '+(error.message||error.code)+'.','error');}
+}
 async function confirmAction(role,type){
  const payload={operation_id:state.selected.id,participant_role:role,confirmation_type:type,confirmed_by:state.user.id,metadata:{synthetic:true}},pending=await getPendingRequestKey('operation_confirmation',payload);
  setMessage('Procesando…');
@@ -153,7 +184,7 @@ async function closeInventoryReservation(id,status){const question=status==='ful
 $('[data-inventory-item-form]')?.addEventListener('submit',createInventoryItem);
 $('[data-inventory-movement-form]')?.addEventListener('submit',recordInventoryMovement);
 $('[data-inventory-reservation-form]')?.addEventListener('submit',reserveInventory);
-ui.form.addEventListener('submit',signIn);ui.registerForm.addEventListener('submit',signUp);ui.accessRequestForm.addEventListener('submit',submitAccessRequest);ui.refresh.addEventListener('click',loadOperations);ui.logout.addEventListener('click',()=>{
+$('[data-quote-submit]')?.addEventListener('submit',submitLogisticsQuote);ui.form.addEventListener('submit',signIn);ui.registerForm.addEventListener('submit',signUp);ui.accessRequestForm.addEventListener('submit',submitAccessRequest);ui.refresh.addEventListener('click',loadOperations);ui.logout.addEventListener('click',()=>{
  const token=state.accessToken;clearSession();
  if(token)fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:'POST',headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${token}`},cache:'no-store',credentials:'omit'}).catch(()=>{});
 });$('[data-open-incident]').addEventListener('click',openIncident);$('[data-resolve-incident]').addEventListener('click',resolveIncident);$$('[data-recovery]').forEach(button=>button.addEventListener('click',()=>createRecovery(button.dataset.recovery)));window.addEventListener('pagehide',clearSession);render();
