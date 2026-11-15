@@ -126,4 +126,16 @@ revoke all on function private.can_manage_operation(uuid) from public, anon;
 grant execute on function private.can_access_operation(uuid) to authenticated;
 grant execute on function private.can_manage_operation(uuid) to authenticated;
 
+
+-- Least-privilege cleanup: authenticated users only receive writes that have
+-- an explicit RLS policy and an application path.
+revoke insert, update on public.organization_members from authenticated;
+revoke insert, update on public.organizations from authenticated;
+revoke update on public.pilot_access_requests from authenticated;
+revoke update on public.operation_confirmations from authenticated;
+revoke update on public.operation_evidence from authenticated;
+revoke insert, update on public.operation_notifications from authenticated;
+grant update (read_at) on public.operation_notifications to authenticated;
+revoke insert, update on public.operation_audit_timeline from authenticated;
+
 commit;
