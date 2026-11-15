@@ -1,5 +1,5 @@
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './supabase-public-config.js';
-import { createSupabaseBrowserClient } from './supabase-browser-client.js';
+import { createSupabaseBrowserClient } from './supabase-browser-client.js?v=auth-header-v2';
 
 const $=(selector,root=document)=>root.querySelector(selector);
 const $$=(selector,root=document)=>[...root.querySelectorAll(selector)];
