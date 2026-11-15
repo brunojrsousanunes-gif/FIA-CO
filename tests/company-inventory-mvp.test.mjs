@@ -207,8 +207,15 @@ assert.match(operationCenterJs, /is_synthetic=eq\.false/);
 assert.match(operationCenterJs, /Empresas reales activas/);
 assert.match(operationCenterJs, /activeMemberships\.length===0/);
 assert.match(operationCenterJs, /operations\?select=id,reference,title,status,operation_type,version,created_at/);
-assert.doesNotMatch(operationCenterJs, /service_role|localStorage|sessionStorage|amount_cents|calculated_margin_cents|total_cost_cents/i,
-  'browser integration must not use service credentials, persist sessions, or request financial columns');
+assert.match(operationCenterJs, /async function pendingBackendRequestKey\(scope,payload\)[\s\S]*?crypto\.subtle\.digest[\s\S]*?sessionStorage\.setItem/i,
+  'real operation creation must persist only a payload fingerprint and pending request key for safe retries');
+assert.match(operationCenterJs, /pendingBackendRequestKey\('create_operation_draft',payload\)/);
+assert.match(operationCenterJs, /backendPost\('rpc\/create_operation_draft',\{\.\.\.payload,request_key:pending\.key\}\)/);
+assert.match(operationCenterJs, /clearBackendRequestKey\(pending\.storageKey\)/);
+assert.doesNotMatch(operationCenterJs, /service_role|localStorage|sessionStorage\.setItem\([^,]*(?:access_token|refresh_token|session)/i,
+  'browser integration must not use service credentials or persist authentication sessions');
+assert.doesNotMatch(operationCenterJs, /amount_cents|calculated_margin_cents|total_cost_cents/i,
+  'the public creation interface must not request financial columns');
 assert.match(operationCenterJs, /window\.addEventListener\('pagehide',\(\)=>\{backendSession=null;backendRefreshPromise=null;\}\)/);
 
 
