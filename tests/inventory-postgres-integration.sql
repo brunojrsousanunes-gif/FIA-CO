@@ -1147,6 +1147,28 @@ begin
   ) then
     raise exception 'UNSAFE_PUBLIC_TABLE_DEFAULT_PRIVILEGES_REMAIN';
   end if;
+
+  if exists (
+    select 1
+    from aclexplode(acldefault('f','postgres'::regrole)) a
+    where a.grantee=0 and a.privilege_type='EXECUTE'
+  ) then
+    raise exception 'UNSAFE_GLOBAL_FUNCTION_DEFAULT_PUBLIC_EXECUTE_REMAINS';
+  end if;
+
+  if exists (
+    select 1
+    from pg_default_acl d
+    cross join lateral aclexplode(d.defaclacl) a
+    where d.defaclrole='postgres'::regrole
+      and d.defaclobjtype='f'
+      and d.defaclnamespace='public'::regnamespace
+      and a.grantee in ('anon'::regrole,'authenticated'::regrole)
+      and a.privilege_type='EXECUTE'
+  ) then
+    raise exception 'UNSAFE_PUBLIC_FUNCTION_DEFAULT_CLIENT_EXECUTE_REMAINS';
+  end if;
+
 end
 $least_privilege_table_grants$;
 
