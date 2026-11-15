@@ -28,7 +28,12 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
   }
   async function request(path,options={}){
     if(typeof path!=='string'||!path.startsWith('/'))throw new Error('SUPABASE_PATH_INVALID');
-    const response=await fetch(`${config.url}${path}`,{...options,headers:headers(options.headers)});
+    const response=await fetch(`${config.url}${path}`,{
+      ...options,
+      cache:'no-store',
+      credentials:'omit',
+      headers:headers(options.headers)
+    });
     const body=response.status===204?null:await response.json().catch(()=>null);
     if(!response.ok){
       const error=new Error(body?.message||body?.error_description||'SUPABASE_REQUEST_FAILED');
