@@ -132,6 +132,14 @@ assert.match(carrierQuoteAuthorization, /drop policy if exists logistics_quotes_
 assert.match(carrierQuoteAuthorization, /created_by = \(select auth\.uid\(\)\)[\s\S]*?status = 'offered'[\s\S]*?private\.can_submit_logistics_quote/i);
 assert.match(carrierQuoteAuthorization, /revoke all on function private\.can_submit_logistics_quote\(uuid, uuid\)[\s\S]*?from public, anon, authenticated/i);
 
+const privateHtml = fs.readFileSync('frontend/operation-center-private.html', 'utf8');
+assert.match(privateHtml, /form class="quote-submit" data-quote-submit hidden/);
+assert.match(privateHtml, /name="amount" type="number" min="0\.01" step="0\.01"/);
+assert.match(privateUi, /function eligibleCarrier\(\)[\s\S]*?participant_role==='carrier'[\s\S]*?status==='accepted'/);
+assert.match(privateUi, /function renderQuoteSubmission\(\)[\s\S]*?\['invited','accepted'\]/);
+assert.match(privateUi, /async function submitLogisticsQuote\([\s\S]*?getPendingRequestKey\('logistics_quote_submission'[\s\S]*?on_conflict=id[\s\S]*?IDEMPOTENCY_KEY_REUSED/);
+assert.match(privateUi, /provider_organization_id:carrier\.organization_id[\s\S]*?created_by:state\.user\.id/);
+
 const expectedBaselineFiles = [
   '20260916112600_initial_multi_tenant_operations.sql',
   '20260916113200_server_validated_transitions.sql'
