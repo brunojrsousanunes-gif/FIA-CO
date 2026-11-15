@@ -30,12 +30,8 @@ begin
     raise exception 'QUOTE_REQUIRED' using errcode = '22023';
   end if;
 
-  -- Serialize reuse of one key even if a caller mistakenly targets two
-  -- different operations concurrently.
-  perform pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtextextended(request_key::text, 0)
-  );
-
+  -- Fast path for an exact retry of a completed deletion. This path is
+  -- read-only, so it remains safe even though the quote row no longer exists.
   select count(*) into prior_count
   from public.operation_audit_events
   where request_id = request_key;
@@ -56,8 +52,8 @@ begin
     return true;
   end if;
 
-  -- Resolve the parent without locking the quote. Every mutating path takes
-  -- the operation lock before the quote row to match the financial trigger.
+  -- Resolve the parent and reject unauthorized callers before taking the
+  -- request-key advisory lock. Recheck authorization after the row lock below.
   select q.operation_id into target_operation
   from public.logistics_quotes q
   where q.id = target_quote;
@@ -65,6 +61,39 @@ begin
     raise exception 'QUOTE_NOT_FOUND' using errcode = 'P0002';
   end if;
 
+  if not private.can_manage_operation(target_operation) then
+    raise exception 'OPERATION_NOT_MANAGEABLE' using errcode = '42501';
+  end if;
+
+  -- Serialize reuse of one key even if a caller mistakenly targets two
+  -- different operations concurrently.
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended(request_key::text, 0)
+  );
+
+  -- A concurrent request may have completed while this call waited.
+  select count(*) into prior_count
+  from public.operation_audit_events
+  where request_id = request_key;
+
+  if prior_count > 0 then
+    select e.* into prior_event
+    from public.operation_audit_events e
+    where e.request_id = request_key
+    order by e.id desc
+    limit 1;
+
+    if prior_count <> 1
+       or prior_event.event_type <> 'logistics.quote.deleted'
+       or prior_event.actor_id is distinct from caller
+       or prior_event.event_data->>'quote_id' is distinct from target_quote::text then
+      raise exception 'IDEMPOTENCY_KEY_REUSED' using errcode = '22023';
+    end if;
+    return true;
+  end if;
+
+  -- Every mutating path takes the operation lock before the quote row to
+  -- match the financial trigger.
   perform 1
   from public.operations o
   where o.id = target_operation
