@@ -13,7 +13,6 @@ const FIELD_RULES = Object.freeze({
     b2b_goods: Object.freeze({
       goods_description: 'Necesario para identificar los bienes objeto del servicio.',
       quantity: 'Necesario para preparar la operación.',
-      delivery_location: 'Necesario cuando el servicio incluye entrega.',
       operational_contact: 'Necesario para coordinar este servicio.'
     }),
     b2b_service: Object.freeze({
@@ -29,8 +28,7 @@ const FIELD_RULES = Object.freeze({
   organization_relationship: Object.freeze({
     organization_id: 'Identifica la organización a la que se solicita vincular la cuenta.',
     requested_role: 'Define la función solicitada dentro de esa organización.',
-    permission_scope: 'Delimita las acciones para las que se solicita autorización.',
-    approver_confirmation: 'Confirma la aprobación de un administrador autorizado de la organización.'
+    permission_scope: 'Delimita las acciones para las que se solicita autorización.'
   }),
   capability: Object.freeze({
     team_management: Object.freeze({
@@ -47,8 +45,18 @@ const FIELD_RULES = Object.freeze({
       data_categories: 'Identifica las categorías de datos personales estrictamente necesarias.',
       processing_purpose: 'Define la finalidad concreta del tratamiento.',
       recipient_scope: 'Delimita quién necesita acceder a esos datos.',
-      retention_rule: 'Define cuánto tiempo se necesitan conservar.',
-      legal_review_reference: 'Acredita que el flujo ha pasado la revisión jurídica y de privacidad requerida.'
+      retention_rule: 'Define cuánto tiempo se necesitan conservar.'
+    })
+  })
+});
+
+const STAGE_CONTROLS = Object.freeze({
+  organization_relationship: Object.freeze({
+    organization_admin_approval: 'La vinculación requiere aprobación de un administrador autorizado de la organización.'
+  }),
+  capability: Object.freeze({
+    personal_data_workflow: Object.freeze({
+      legal_privacy_review: 'El flujo requiere revisión jurídica y de privacidad antes de habilitarse.'
     })
   })
 });
@@ -65,21 +73,25 @@ function normalizeAvailable(fields) {
 
 /**
  * Builds a data request for one concrete onboarding step.
- * This function only determines which fields may be requested; it does not
+ * It only determines which fields and controls are needed; it does not
  * authenticate users, verify organizations, grant permissions, or persist data.
  * alreadySatisfiedFields must come from trusted server-side state, never directly
  * from browser-supplied claims.
  */
 export function buildProgressiveDataRequest(input = {}) {
-  const { stage, serviceType, capability, risk = 'STANDARD', alreadySatisfiedFields = [] } = input;
+  const { stage, serviceType, capability, risk = 'STANDARD', requiresDelivery = false, alreadySatisfiedFields = [] } = input;
   const available = normalizeAvailable(alreadySatisfiedFields);
   let rules;
+  let controls = [];
 
   if (stage === 'account') {
     rules = FIELD_RULES.account;
   } else if (stage === 'service') {
     rules = FIELD_RULES.service[serviceType];
     if (!rules) throw new Error('UNSUPPORTED_SERVICE_TYPE');
+    if (serviceType === 'b2b_goods' && requiresDelivery === true) {
+      rules = { ...rules, delivery_location: 'Necesario para organizar la entrega de los bienes.' };
+    }
   } else if (stage === 'organization_relationship') {
     if (!['STANDARD', 'HIGH'].includes(risk)) throw new Error('INVALID_RISK');
     rules = {
@@ -88,9 +100,15 @@ export function buildProgressiveDataRequest(input = {}) {
         authorization_evidence: 'Necesaria para revisar una autorización de representación de riesgo elevado.'
       } : {})
     };
+    controls = [
+      { key: 'organization_admin_approval', reason: STAGE_CONTROLS.organization_relationship.organization_admin_approval },
+      ...(risk === 'HIGH' ? [{ key: 'authorization_evidence_review', reason: 'La evidencia debe revisarse antes de habilitar facultades de riesgo elevado.' }] : [])
+    ];
   } else if (stage === 'capability') {
     rules = FIELD_RULES.capability[capability];
     if (!rules) throw new Error('UNSUPPORTED_CAPABILITY');
+    const control = STAGE_CONTROLS.capability[capability];
+    if (control) controls = Object.entries(control).map(([key, reason]) => ({ key, reason }));
   } else {
     throw new Error('UNSUPPORTED_INTAKE_STAGE');
   }
@@ -103,9 +121,10 @@ export function buildProgressiveDataRequest(input = {}) {
     schemaVersion: 'progressive-data-request.v1',
     stage,
     purpose: stage === 'service' ? serviceType : stage === 'capability' ? capability : stage,
-    status: fields.length ? 'DATA_REQUIRED' : 'NO_ADDITIONAL_DATA_REQUIRED',
+    status: fields.length || controls.length ? 'DATA_OR_CONTROL_REQUIRED' : 'NO_ADDITIONAL_DATA_REQUIRED',
     privacyNoticeRequired: fields.length > 0,
-    fields: Object.freeze(fields)
+    fields: Object.freeze(fields),
+    requiredControls: Object.freeze(controls.map(control => Object.freeze(control)))
   });
 }
 
