@@ -708,4 +708,4 @@ begin
 end
 $least_privilege_table_grants$;
 
-select 'FULL MIGRATION CHAIN + INCIDENT + TRUST + PRIVATE PROFILE TESTS: PASS' as result;
+select 'FULL MIGRATION CHAIN + THREE DISTINCT ROLE USERS + INCIDENT + TRUST TESTS: PASS' as result;
