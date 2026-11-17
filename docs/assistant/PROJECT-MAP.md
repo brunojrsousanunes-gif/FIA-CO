@@ -88,6 +88,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 
 ### C. Confianza, identidad y acceso
 - [Entrada con primer contacto controlado](../FIA-FIRST-CONTACT-GATED-V1.md)
+- [Incorporación progresiva de participantes V1](../PROGRESSIVE-PARTICIPANT-ONBOARDING-V1.md) — identidad común, solicitudes de datos por necesidad, relaciones empresariales y permisos progresivos.
 - [Entrada Trust V1](../FIA-TRUST-ENTRY-V1.md)
 - [Transacción Trust V1](../FIA-TRUST-TRANSACTION-V1.md)
 - [Niveles de presencia humana](../FIA-HUMAN-PRESENCE-CHECK-V1.md)
