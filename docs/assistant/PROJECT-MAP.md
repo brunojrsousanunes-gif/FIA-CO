@@ -77,6 +77,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 
 ### B. Producto, operaciones y experiencia
 - [Espacios empresariales y gestión móvil V1](../COMPANY-WORKSPACE-AND-MOBILE-MANAGEMENT-V1.md) — espacios por organización, equipos, permisos configurables, gestión móvil y circuito humano de IA Maestra.
+- [Seguridad de dispositivos Premium e IA Maestra V1](../AI-MASTER-PREMIUM-DEVICE-SECURITY-V1.md) — acceso cifrado desde dispositivos de responsables, credenciales, sesiones, revocación y controles de operaciones.
 - [Motor de operaciones](../OPERATION-ENGINE.md)
 - [Operaciones comerciales V1](../COMMERCIAL-OPS-V1.md)
 - [Kit comercial](../COMMERCIAL-KIT.md)
