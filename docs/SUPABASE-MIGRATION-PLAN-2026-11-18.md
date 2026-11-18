@@ -171,6 +171,7 @@ No se aplicaron migraciones ni se modificaron Auth, datos, grants, políticas, f
 5. `authenticated` conserva SELECT sobre `operations.amount_cents` y `operations.currency`, pese a que PR #192 revoca expresamente esas columnas heredadas.
 6. `authenticated` conserva INSERT/UPDATE sobre `organization_members` y `organizations`; PR #192 revoca esas escrituras directas para exigir flujos autorizados.
 7. `logistics_quotes` y `operation_cost_items` mantienen permisos de escritura a nivel de tabla, sujetos a RLS. Sus políticas llaman a `can_manage_operation`; por tanto, la debilidad de esa función también afecta a esas rutas.
+8. Los privilegios por defecto de `postgres` en el esquema `public` siguen concediendo EXECUTE de nuevas funciones a `anon` y `authenticated`; las nuevas tablas reciben INSERT/SELECT/UPDATE para `authenticated`, y las secuencias reciben USAGE/SELECT/UPDATE. El endurecimiento de PR #192 revoca estos defaults para objetos futuros en `public`. El esquema `storage` conserva defaults propios de Supabase y no se deben modificar dentro de esta migración.
 
 Estos son defectos estructurales de autorización/privilegios que deben cerrarse antes de datos reales. No se ha observado una extracción ni un acceso indebido; el proyecto está sin organizaciones/operaciones sintéticas tras la limpieza y no hay evidencia de actividad de usuarios que permita afirmar una brecha explotada.
 
