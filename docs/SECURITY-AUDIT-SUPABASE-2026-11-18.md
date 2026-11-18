@@ -186,3 +186,13 @@ La protección integrada contra contraseñas filtradas permanece desactivada por
 ### Dictamen actualizado
 
 **UNRESOLVED para datos reales.** F-01, F-08 y F-09 siguen presentes en el esquema remoto. Las correcciones relevantes están en PR #192 y la cadena ha pasado CI efímero, pero no se han aplicado al proyecto Supabase remoto. La correspondencia nominal de migraciones ya está mapeada; falta comparar efectos, verificar backup/restauración y ejecutar pruebas aisladas. No se ha aplicado ninguna migración ni cambiado Auth/RLS/grants en remoto durante esta revisión posterior.
+
+
+**F-11 — Tabla interna de mantenimiento con RLS desactivado**
+
+- **Severidad:** Baja como exposición actual; hardening pendiente.
+- **Evidencia:** `private.synthetic_cleanup_runs` tiene RLS desactivado. El inventario general de Supabase generó un aviso crítico genérico. La comprobación directa posterior confirmó `USAGE` de esquema denegado a `anon`, `USAGE` concedido a `authenticated`, y SELECT/INSERT/UPDATE/DELETE denegados a `anon`, `authenticated` y `service_role`. El script de creación también revoca privilegios a `PUBLIC`, `anon`, `authenticated` y `service_role`.
+- **Impacto actual:** no hay acceso directo desde roles cliente con los privilegios actuales; por tanto, el aviso no demuestra exposición de filas. El RLS desactivado elimina una capa de defensa y puede generar riesgo si en el futuro se conceden privilegios accidentalmente.
+- **Corrección preparada:** PR #194 modifica `scripts/maintenance/cleanup-synthetic-supabase.sql` para activar RLS sin crear políticas y añade una aserción estática. El usuario postgres ejecuta el mantenimiento y puede seguir insertando; los roles cliente permanecen sin acceso.
+- **Estado remoto:** NO MODIFICADO. La tabla existente continúa con RLS desactivado hasta autorización específica.
+- **SQL propuesto, no ejecutado:** `ALTER TABLE private.synthetic_cleanup_runs ENABLE ROW LEVEL SECURITY;` No crear políticas ni grants para clientes.
