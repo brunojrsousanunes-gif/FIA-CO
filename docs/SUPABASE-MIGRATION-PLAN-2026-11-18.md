@@ -119,6 +119,13 @@ Orden cronológico por archivo; no existe un archivo `20261115030000` en PR #192
 
 
 
+### F. Integridad
+- Recuentos de datos existentes preservados salvo fixtures de staging.
+- Sin huérfanos, referencias rotas, duplicados de auditoría ni reservas inconsistentes.
+- Políticas, grants, vistas y funciones coinciden con matriz aprobada.
+- CI completo correcto en PostgreSQL 16 y 17.6.
+- Restauración desde backup probada en entorno aislado.
+
 ### G. Alta, pertenencia y continuidad operativa
 
 - El alta de cuenta no puede crear por sí sola pertenencias o elevar roles.
@@ -126,13 +133,6 @@ Orden cronológico por archivo; no existe un archivo `20261115030000` en PR #192
 - Invitación, aceptación y revocación siguen funcionando por RPC/flujo autorizado, con actor autenticado y auditoría.
 - Verificar que el recorte de INSERT/UPDATE en `organizations`, `organization_members` y `pilot_access_requests` no rompe el flujo legítimo de alta/revisión; si lo rompe, corregir el flujo servidor antes de desplegar, nunca reabrir grants generales como atajo.
 - Confirmar que una persona con acceso a varias empresas cambia de contexto explícitamente y que los datos de la empresa anterior no quedan disponibles tras cambiar o revocar pertenencia.
-
-### F. Integridad
-- Recuentos de datos existentes preservados salvo fixtures de staging.
-- Sin huérfanos, referencias rotas, duplicados de auditoría ni reservas inconsistentes.
-- Políticas, grants, vistas y funciones coinciden con matriz aprobada.
-- CI completo correcto en PostgreSQL 16 y 17.6.
-- Restauración desde backup probada en entorno aislado.
 
 ## 5. Gates antes de autorizar remoto
 
