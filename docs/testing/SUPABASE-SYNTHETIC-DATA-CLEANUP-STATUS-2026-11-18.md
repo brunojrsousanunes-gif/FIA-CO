@@ -163,7 +163,7 @@ El inventario de tablas detectó que `private.synthetic_cleanup_runs` tiene RLS 
 |---|---|---|
 | anon | No | Ninguno |
 | authenticated | Sí | Ninguno |
-| service_role | No se concede por tabla | Ninguno |
+| service_role | Sí | Ninguno |
 | postgres (owner) | Sí | Control de mantenimiento |
 
 **Conclusión:** el aviso de RLS desactivado no se traduce en acceso directo para `anon`/`authenticated`, porque faltan los grants y `anon` tampoco tiene USAGE del esquema. Sigue siendo una brecha de defensa en profundidad.
