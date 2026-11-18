@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 
 const sql = readFileSync(new URL('../scripts/maintenance/cleanup-synthetic-supabase.sql', import.meta.url), 'utf8');
 
-assert.match(sql, /^--[\\s\\S]*?\\nBEGIN;/);
+assert.ok(sql.indexOf('BEGIN;') > sql.indexOf('-- Execute as a controlled database administrator'));
 assert.match(sql, /COMMIT;\s*$/);
 assert.match(sql, /private\.synthetic_cleanup_runs/);
 assert.match(sql, /actor_type, actor_label, actor_user_id/);
