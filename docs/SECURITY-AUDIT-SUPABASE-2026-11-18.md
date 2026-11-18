@@ -56,10 +56,12 @@ Este documento registra una revisión estática y de solo lectura. No es una pru
 ### F-04 — Revocación de sesión desde la interfaz no confirma el resultado remoto
 
 - **Severidad:** Media-baja.
-- **Confianza:** Alta; comprobado en el código revisado.
-- **Evidencia:** la interfaz borra el estado local y lanza `/auth/v1/logout` sin esperar su resultado; los errores de red se descartan.
-- **Impacto:** el usuario ve la sesión cerrada localmente, pero la interfaz no confirma que el servidor haya revocado la sesión/refresh token.
-- **Acción:** mejorar el flujo para confirmar la revocación remota y definir el comportamiento ante fallo. Verificar además la duración de JWT y los controles de sesión para acciones sensibles.
+- **Confianza:** Alta; el defecto original y su corrección se verificaron en código y CI.
+- **Estado:** CORREGIDO EN CÓDIGO EN PR #192; pendiente de despliegue y prueba runtime contra Auth.
+- **Evidencia:** la versión original borraba el estado local y lanzaba `/auth/v1/logout` sin esperar su resultado. La corrección centraliza la llamada en `supabase.signOut()`, inicia la revocación con el token activo, limpia la sesión local inmediatamente, espera el resultado remoto y comunica éxito o falta de confirmación. La solicitud tiene un límite de 10 segundos mediante `AbortController`.
+- **Validación:** CI #780 pasó en PostgreSQL 16 y 17.6 para el HEAD `0962ba6102ce341ef323d3c7a886d8ef82cbe000`; la batería automatizada comprueba el endpoint, token, no-cache, credenciales omitidas, señal de aborto y contrato de interfaz. No es prueba de runtime real contra Auth.
+- **Impacto residual:** si la red falla o expira el plazo, la sesión local queda cerrada y se informa de que la revocación remota no pudo confirmarse. No se declara revocación del servidor en ese caso.
+- **Acción pendiente:** probar en entorno aislado con cuenta sintética y verificar la revocación de refresh token/JWT. No usar la cuenta personal ni desplegar sin autorización.
 
 ### F-05 — Cabeceras de transporte
 
@@ -139,10 +141,11 @@ Este addendum actualiza los hechos que cambiaron después de la revisión inicia
 
 ### Estado actual de repositorio y CI
 
-- PR #192 sigue abierta y sin fusionar, HEAD `d58e72e5142fec2256e2675fe5066ccffe5884cc`.
-- CI #727 de PR #192 terminó `success` en PostgreSQL 16 y 17.6 efímero. No se ejecutó contra Supabase remoto.
-- PR #194 sigue abierta, en borrador y sin fusionar. HEAD documental actual: `df2f99bb622c1060b29c4187dc7709f81f505762`.
-- CI #765 de PR #194 terminó `success` para el commit `fe608e9cf27b49b0e2a458b0022fdcdf334a67d5` en PostgreSQL 16 y 17.6. Los commits posteriores hasta el HEAD actual solo modifican documentación; no consta una ejecución CI asociada al HEAD más reciente.
+- PR #192 sigue abierta y sin fusionar, HEAD `0962ba6102ce341ef323d3c7a886d8ef82cbe000`.
+- CI #727 de PR #192 terminó `success` en PostgreSQL 16 y 17.6 efímero para la versión anterior del trabajo.
+- CI #780 de PR #192 terminó `success` en PostgreSQL 16 y 17.6 para el HEAD actual, incluyendo la batería automatizada, la cadena de migraciones y las pruebas de inventario. No se ejecutó contra Supabase remoto.
+- PR #194 sigue abierta, en borrador y sin fusionar. HEAD documental actual: `600b3321ac1b80f1523aca7830f4fd4610c44b86`.
+- CI #770 de PR #194 terminó `success` para ese HEAD en PostgreSQL 16 y 17.6.
 
 ### Estado de datos después de la limpieza
 
