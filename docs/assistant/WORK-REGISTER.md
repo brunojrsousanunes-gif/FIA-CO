@@ -34,6 +34,8 @@ No marcar como VERIFICADO por haber editado un archivo o creado un commit.
 | W-013 | Alta | Diseñar la propuesta Premium basada en seguridad demostrable, automatización y ROI | EN REVISIÓN | Definir panel de confianza, catálogo y límites de automatización, línea base, fórmulas ROI y costes completos; validar con piloto sin promesas ni precios inventados |
 | W-014 | Crítica antes de piloto con datos reales | Reconciliar las migraciones de seguridad de PR #192 con Supabase remoto y cerrar la brecha de revocación de pertenencia | EN REVISIÓN | Plan de orden y aceptación preparado en `docs/SUPABASE-MIGRATION-PLAN-2026-11-18.md`; pendiente reconciliar historial de versiones, validar backup/restauración y ejecutar pruebas en entorno aislado. No aplicar cambios remotos sin autorización específica |
 
+| W-015 | Alta antes de futuras pruebas integradas | Mantener identidades y escenarios sintéticos versionados fuera de Supabase remoto | EN REVISIÓN | Fixture JSON y catálogo documental creados en PR #194; validar contra contratos/código existentes, incorporar a pruebas PostgreSQL aisladas y no sembrar producción |
+
 ## Reglas de ejecución
 
 1. Resolver primero tareas de alta prioridad y dependencias.
