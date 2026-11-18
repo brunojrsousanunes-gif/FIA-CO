@@ -28,6 +28,9 @@ node tests/pilot-negative-security-contracts.test.mjs
 # Compliance architecture
 node tests/compliance-gate.test.mjs
 node tests/party-classification.test.mjs
+node tests/progressive-intake.test.mjs
+node tests/synthetic-fixture-contract.test.mjs
+node tests/synthetic-supabase-cleanup-script.test.mjs
 node tests/sensitive-data-policy.test.mjs
 node tests/versioned-contract.test.mjs
 node tests/data-subject-rights.test.mjs

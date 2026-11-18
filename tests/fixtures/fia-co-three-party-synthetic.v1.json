@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_set_id": "fia-co-three-party-core-v1",
+  "classification": "SYNTHETIC_TEST_DATA",
+  "status": "DOCUMENTED_NOT_SEEDED",
+  "production_eligible": false,
+  "supabase_remote_seed_allowed": false,
+  "auth_account_creation_allowed": false,
+  "identity_namespace": "fixture:",
+  "notice": "DATOS SINTÉTICOS — ENTORNO DE PRUEBAS. No representa empresas ni actividad real.",
+  "organizations": [
+    {
+      "fixture_id": "fixture:org:seller:recambios-demo",
+      "display_name": "RECAMBIOS DEMO",
+      "business_role": "seller",
+      "scenario_responsibilities": [
+        "offer_goods",
+        "confirm_order",
+        "prepare_goods",
+        "handle_supply_incident"
+      ]
+    },
+    {
+      "fixture_id": "fixture:org:buyer:agrotest-norte",
+      "display_name": "AGROTEST NORTE",
+      "business_role": "buyer",
+      "scenario_responsibilities": [
+        "request_purchase",
+        "confirm_terms",
+        "confirm_receipt",
+        "report_incident"
+      ]
+    },
+    {
+      "fixture_id": "fixture:org:carrier:transportes-piloto",
+      "display_name": "TRANSPORTES PILOTO",
+      "business_role": "carrier",
+      "scenario_responsibilities": [
+        "submit_logistics_quote",
+        "accept_transport",
+        "confirm_pickup",
+        "confirm_delivery"
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "fixture_id": "fixture:actor:seller-operator",
+      "organization_fixture_id": "fixture:org:seller:recambios-demo",
+      "actor_type": "synthetic_test_actor",
+      "permissions_profile": "seller_operator"
+    },
+    {
+      "fixture_id": "fixture:actor:buyer-operator",
+      "organization_fixture_id": "fixture:org:buyer:agrotest-norte",
+      "actor_type": "synthetic_test_actor",
+      "permissions_profile": "buyer_operator"
+    },
+    {
+      "fixture_id": "fixture:actor:carrier-operator",
+      "organization_fixture_id": "fixture:org:carrier:transportes-piloto",
+      "actor_type": "synthetic_test_actor",
+      "permissions_profile": "carrier_operator"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "SYN-001",
+      "name": "Compra de maquinaria entre tres partes",
+      "participants": [
+        "fixture:org:seller:recambios-demo",
+        "fixture:org:buyer:agrotest-norte",
+        "fixture:org:carrier:transportes-piloto"
+      ],
+      "capabilities_to_verify": [
+        "invitation_acceptance",
+        "organization_isolation",
+        "logistics_quote",
+        "quote_selection",
+        "financial_recalculation",
+        "delivery_confirmation",
+        "operation_close"
+      ]
+    },
+    {
+      "scenario_id": "SYN-002",
+      "name": "Entrega de recambio e incidencia",
+      "participants": [
+        "fixture:org:seller:recambios-demo",
+        "fixture:org:buyer:agrotest-norte",
+        "fixture:org:carrier:transportes-piloto"
+      ],
+      "capabilities_to_verify": [
+        "order_preparation",
+        "pickup_confirmation",
+        "delivery_confirmation",
+        "incident_lifecycle",
+        "evidence_traceability"
+      ]
+    },
+    {
+      "scenario_id": "SYN-003",
+      "name": "Comparación y selección de oferta logística",
+      "participants": [
+        "fixture:org:buyer:agrotest-norte",
+        "fixture:org:carrier:transportes-piloto"
+      ],
+      "capabilities_to_verify": [
+        "quote_submission_authorization",
+        "single_selected_quote",
+        "idempotency",
+        "direct_mutation_denial"
+      ]
+    },
+    {
+      "scenario_id": "SYN-004",
+      "name": "Incidencia, responsabilidad y resolución",
+      "participants": [
+        "fixture:org:seller:recambios-demo",
+        "fixture:org:buyer:agrotest-norte",
+        "fixture:org:carrier:transportes-piloto"
+      ],
+      "capabilities_to_verify": [
+        "incident_registration",
+        "responsibility_assignment",
+        "evidence_review",
+        "resolution",
+        "audit_integrity"
+      ]
+    },
+    {
+      "scenario_id": "SYN-005",
+      "name": "Revocación y aislamiento multiempresa",
+      "participants": [
+        "fixture:org:seller:recambios-demo",
+        "fixture:org:buyer:agrotest-norte",
+        "fixture:org:carrier:transportes-piloto"
+      ],
+      "capabilities_to_verify": [
+        "active_membership_required",
+        "revocation_enforcement",
+        "cross_organization_denial",
+        "historical_creator_denial"
+      ]
+    },
+    {
+      "scenario_id": "SYN-006",
+      "name": "Reintentos e idempotencia bajo concurrencia",
+      "participants": [
+        "fixture:org:seller:recambios-demo",
+        "fixture:org:buyer:agrotest-norte",
+        "fixture:org:carrier:transportes-piloto"
+      ],
+      "capabilities_to_verify": [
+        "same_key_same_payload_single_effect",
+        "same_key_different_payload_rejection",
+        "concurrent_request_serialization",
+        "no_duplicate_audit_events"
+      ]
+    }
+  ],
+  "safety_constraints": [
+    "Never seed production or the remote Supabase project.",
+    "Never create real Auth users or credentials from fixture actors.",
+    "Resolve fixture IDs to ephemeral identifiers only inside an isolated test database.",
+    "Display a synthetic-data warning in any UI or report using these fixtures.",
+    "Do not infer runtime capability from fixture definitions."
+  ]
+}

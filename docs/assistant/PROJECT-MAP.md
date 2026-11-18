@@ -76,6 +76,9 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Estado CSP SEC3](../CSP-SEC3-STATUS.md)
 
 ### B. Producto, operaciones y experiencia
+- [Espacios empresariales y gestión móvil V1](../COMPANY-WORKSPACE-AND-MOBILE-MANAGEMENT-V1.md) — espacios por organización, equipos, permisos configurables, gestión móvil y circuito humano de IA Maestra.
+- [Seguridad de dispositivos Premium e IA Maestra V1](../AI-MASTER-PREMIUM-DEVICE-SECURITY-V1.md) — acceso cifrado desde dispositivos de responsables, credenciales, sesiones, revocación y controles de operaciones.
+- [Servicio Premium: confianza, automatización y ROI V1](../PREMIUM-TRUST-AUTOMATION-ROI-V1.md) — panel de seguridad, automatizaciones controladas, medición de ahorro/costes y retorno demostrable.
 - [Motor de operaciones](../OPERATION-ENGINE.md)
 - [Operaciones comerciales V1](../COMMERCIAL-OPS-V1.md)
 - [Kit comercial](../COMMERCIAL-KIT.md)
@@ -88,6 +91,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 
 ### C. Confianza, identidad y acceso
 - [Entrada con primer contacto controlado](../FIA-FIRST-CONTACT-GATED-V1.md)
+- [Incorporación progresiva de participantes V1](../PROGRESSIVE-PARTICIPANT-ONBOARDING-V1.md) — identidad común, solicitudes de datos por necesidad, relaciones empresariales y permisos progresivos.
 - [Entrada Trust V1](../FIA-TRUST-ENTRY-V1.md)
 - [Transacción Trust V1](../FIA-TRUST-TRANSACTION-V1.md)
 - [Niveles de presencia humana](../FIA-HUMAN-PRESENCE-CHECK-V1.md)
@@ -157,6 +161,8 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Observabilidad y recuperación P6](../PREPROD-P6-OBSERVABILITY-RECOVERY.md)
 
 ### H. Simulaciones y pruebas de resistencia
+- [Estado de limpieza de datos sintéticos en Supabase](../testing/SUPABASE-SYNTHETIC-DATA-CLEANUP-STATUS-2026-11-18.md) — evidencia de solo lectura, causa del trigger y gates de borrado.
+- [Datos sintéticos maestros de prueba](../testing/FIA-CO-SYNTHETIC-TEST-DATA-V1.md) — identidades ficticias y escenarios reproducibles; fixture JSON en `tests/fixtures/`. No son datos reales ni se cargan en Supabase remoto.
 - [Informe consolidado de simulación](../FIA-CONSOLIDATED-SIMULATION-REPORT-V1.md)
 - [Campaña adversarial sintética](../FIA-SYNTHETIC-ADVERSARIAL-CAMPAIGN-V1.md)
 - [Informe de aseguramiento sintético](../FIA-SYNTHETIC-ASSURANCE-REPORT-V1.md)
@@ -316,3 +322,13 @@ No asumir que dos archivos están relacionados por tener nombres parecidos. Conf
 ## 10. Mantenimiento del mapa
 
 Actualizar este documento solo cuando cambien rutas, módulos principales o relaciones entre áreas. Para el trabajo ordinario, actualizar el traspaso y el registro de tareas; no generar burocracia documental innecesaria.
+
+
+## K. Auditoría técnica actual
+
+- [Revisión técnica inicial de seguridad y Supabase remoto — 18-11-2026](../SECURITY-AUDIT-SUPABASE-2026-11-18.md) — diferencia entre PR #192 y el estado remoto, hallazgos, controles positivos, límites y próximos pasos.
+
+
+## L. Plan de migración y aceptación Supabase
+
+- [Plan de reconciliación y migración de seguridad Supabase — 18-11-2026](../SUPABASE-MIGRATION-PLAN-2026-11-18.md) — orden de diez migraciones, fotografía remota, riesgos, pruebas de aceptación y gates de autorización. No ejecutado.
