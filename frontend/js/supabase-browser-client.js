@@ -63,7 +63,10 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
     });
   }
   function signOut(){
-    return request('/auth/v1/logout',{method:'POST'});
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),10000);
+    return request('/auth/v1/logout',{method:'POST',signal:controller.signal})
+      .finally(()=>clearTimeout(timeout));
   }
   return Object.freeze({request,signInWithPassword,signUp,signOut});
 }
