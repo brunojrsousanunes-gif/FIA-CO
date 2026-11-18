@@ -161,6 +161,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Observabilidad y recuperación P6](../PREPROD-P6-OBSERVABILITY-RECOVERY.md)
 
 ### H. Simulaciones y pruebas de resistencia
+- [Datos sintéticos maestros de prueba](../testing/FIA-CO-SYNTHETIC-TEST-DATA-V1.md) — identidades ficticias y escenarios reproducibles; fixture JSON en `tests/fixtures/`. No son datos reales ni se cargan en Supabase remoto.
 - [Informe consolidado de simulación](../FIA-CONSOLIDATED-SIMULATION-REPORT-V1.md)
 - [Campaña adversarial sintética](../FIA-SYNTHETIC-ADVERSARIAL-CAMPAIGN-V1.md)
 - [Informe de aseguramiento sintético](../FIA-SYNTHETIC-ASSURANCE-REPORT-V1.md)
