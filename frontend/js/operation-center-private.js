@@ -29,6 +29,12 @@ const money=cents=>cents==null?'Pendiente':new Intl.NumberFormat('es-ES',{style:
 const line=(strong,small='')=>{const p=document.createElement('p'),b=document.createElement('strong');b.textContent=strong;p.append(b);if(small){const span=document.createElement('span');span.className='muted';span.textContent=` · ${small}`;p.append(span);}return p;};
 
 function clearSession(){state.accessToken='';state.refreshToken='';state.expiresAt=0;refreshPromise=null;state.user=null;state.operations=[];state.selected=null;state.detail=null;state.memberships=[];state.accessRequests=[];inventory.items=[];inventory.reservations=[];if(inventoryHost)inventoryHost.hidden=true;ui.password.value='';render();}
+async function logout(){
+ const hasSession=Boolean(state.accessToken);ui.logout.disabled=true;let remoteConfirmed=!hasSession;
+ try{if(hasSession){await supabase.signOut();remoteConfirmed=true;}}
+ catch{remoteConfirmed=false;}
+ finally{clearSession();ui.logout.disabled=false;setMessage(remoteConfirmed?'Sesión cerrada; revocación remota confirmada.':'Sesión cerrada en este dispositivo; no se pudo confirmar la revocación remota.',remoteConfirmed?'success':'error');}
+}
 function saveSession(payload){
  if(!payload?.access_token||!payload?.refresh_token||!payload?.user?.id)throw new Error('AUTH_SESSION_INCOMPLETE');
  state.accessToken=payload.access_token;state.refreshToken=payload.refresh_token;
@@ -184,7 +190,5 @@ async function closeInventoryReservation(id,status){const question=status==='ful
 $('[data-inventory-item-form]')?.addEventListener('submit',createInventoryItem);
 $('[data-inventory-movement-form]')?.addEventListener('submit',recordInventoryMovement);
 $('[data-inventory-reservation-form]')?.addEventListener('submit',reserveInventory);
-$('[data-quote-submit]')?.addEventListener('submit',submitLogisticsQuote);ui.form.addEventListener('submit',signIn);ui.registerForm.addEventListener('submit',signUp);ui.accessRequestForm.addEventListener('submit',submitAccessRequest);ui.refresh.addEventListener('click',loadOperations);ui.logout.addEventListener('click',()=>{
- const token=state.accessToken;clearSession();
- if(token)fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:'POST',headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${token}`},cache:'no-store',credentials:'omit'}).catch(()=>{});
+$('[data-quote-submit]')?.addEventListener('submit',submitLogisticsQuote);ui.form.addEventListener('submit',signIn);ui.registerForm.addEventListener('submit',signUp);ui.accessRequestForm.addEventListener('submit',submitAccessRequest);ui.refresh.addEventListener('click',loadOperations);ui.logout.addEventListener('click',logout);
 });$('[data-open-incident]').addEventListener('click',openIncident);$('[data-resolve-incident]').addEventListener('click',resolveIncident);$$('[data-recovery]').forEach(button=>button.addEventListener('click',()=>createRecovery(button.dataset.recovery)));window.addEventListener('pagehide',clearSession);render();
