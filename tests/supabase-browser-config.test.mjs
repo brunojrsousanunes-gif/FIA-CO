@@ -58,6 +58,7 @@ try{
   assert.equal(capturedRequest.options.headers.get('authorization'),'Bearer test-access-token','signOut must send the active session token');
   assert.equal(capturedRequest.options.cache,'no-store');
   assert.equal(capturedRequest.options.credentials,'omit');
+  assert.ok(capturedRequest.options.signal instanceof AbortSignal,'signOut must have an abort signal to bound remote logout waiting');
 }finally{
   globalThis.fetch=originalFetch;
 }
@@ -69,7 +70,7 @@ assert.match(privateClient,/createSupabaseBrowserClient/);
 assert.match(privateClient,/supabase\.signInWithPassword/);
 assert.match(privateClient,/supabase\.signUp/);
 assert.match(privateClient,/supabase\.signOut/);
-assert.match(privateClient,/async function logout\(\)[\s\S]*?await supabase\.signOut\(\)[\s\S]*?clearSession\(\)[\s\S]*?setMessage\(/);
+assert.match(privateClient,/async function logout\(\)[\s\S]*?const remoteRequest=hasSession\?supabase\.signOut\(\):null;[\s\S]*?clearSession\(\);[\s\S]*?await remoteRequest[\s\S]*?catch\{setMessage\(/);
 assert.match(privateClient,/ui\.logout\.addEventListener\('click',logout\)/);
 assert.doesNotMatch(privateClient,/fetch\(`\$\{SUPABASE_URL\}\/auth\/v1\/logout/);
 assert.match(privateClient,/supabase-browser-client\.js\?v=auth-logout-v1/);
