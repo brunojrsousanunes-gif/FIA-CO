@@ -6,6 +6,8 @@ const sql = readFileSync(new URL('../scripts/maintenance/cleanup-synthetic-supab
 assert.ok(sql.indexOf('BEGIN;') > sql.indexOf('-- Execute as a controlled database administrator'));
 assert.match(sql, /COMMIT;\s*$/);
 assert.match(sql, /private\.synthetic_cleanup_runs/);
+assert.match(sql, /ALTER TABLE private\.synthetic_cleanup_runs ENABLE ROW LEVEL SECURITY/i,
+  'the internal cleanup ledger must have RLS enabled with no client policies');
 assert.match(sql, /actor_type, actor_label, actor_user_id/);
 assert.match(sql, /'system', 'FIA&CO authorized maintenance', NULL/);
 assert.match(sql, /set_config\('fia_co\.migration_mode', 'company_data_isolation', true\)/);
