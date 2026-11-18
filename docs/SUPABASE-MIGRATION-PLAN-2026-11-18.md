@@ -117,6 +117,16 @@ Orden cronológico por archivo; no existe un archivo `20261115030000` en PR #192
 - Exactamente un trigger de recálculo por tabla y márgenes coherentes.
 - Grants por defecto no rompen nuevas tablas/RPC legítimas.
 
+
+
+### G. Alta, pertenencia y continuidad operativa
+
+- El alta de cuenta no puede crear por sí sola pertenencias o elevar roles.
+- Solicitud de acceso a organización sigue funcionando por el canal autorizado y no permite al cliente escribir directamente `organization_members` ni elevar `member_role`.
+- Invitación, aceptación y revocación siguen funcionando por RPC/flujo autorizado, con actor autenticado y auditoría.
+- Verificar que el recorte de INSERT/UPDATE en `organizations`, `organization_members` y `pilot_access_requests` no rompe el flujo legítimo de alta/revisión; si lo rompe, corregir el flujo servidor antes de desplegar, nunca reabrir grants generales como atajo.
+- Confirmar que una persona con acceso a varias empresas cambia de contexto explícitamente y que los datos de la empresa anterior no quedan disponibles tras cambiar o revocar pertenencia.
+
 ### F. Integridad
 - Recuentos de datos existentes preservados salvo fixtures de staging.
 - Sin huérfanos, referencias rotas, duplicados de auditoría ni reservas inconsistentes.
