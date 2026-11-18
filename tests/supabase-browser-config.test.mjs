@@ -70,7 +70,7 @@ assert.match(privateClient,/createSupabaseBrowserClient/);
 assert.match(privateClient,/supabase\.signInWithPassword/);
 assert.match(privateClient,/supabase\.signUp/);
 assert.match(privateClient,/supabase\.signOut/);
-assert.match(privateClient,/async function logout\(\)[\s\S]*?const remoteRequest=hasSession\?supabase\.signOut\(\):null;[\s\S]*?clearSession\(\);[\s\S]*?await remoteRequest[\s\S]*?catch\{setMessage\(/);
+assert.match(privateClient,/async function logout\(\)[\s\S]*?remoteRequest=hasSession\?supabase\.signOut\(\):null;[\s\S]*?clearSession\(\);[\s\S]*?await remoteRequest[\s\S]*?catch\{setMessage\(/);
 assert.match(privateClient,/ui\.logout\.addEventListener\('click',logout\)/);
 assert.doesNotMatch(privateClient,/fetch\(`\$\{SUPABASE_URL\}\/auth\/v1\/logout/);
 assert.match(privateClient,/supabase-browser-client\.js\?v=auth-logout-v1/);
