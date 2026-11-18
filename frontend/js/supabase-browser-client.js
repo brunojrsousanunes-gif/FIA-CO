@@ -62,7 +62,10 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,data})
     });
   }
-  return Object.freeze({request,signInWithPassword,signUp});
+  function signOut(){
+    return request('/auth/v1/logout',{method:'POST'});
+  }
+  return Object.freeze({request,signInWithPassword,signUp,signOut});
 }
 
 export{validatePublicConfig};
