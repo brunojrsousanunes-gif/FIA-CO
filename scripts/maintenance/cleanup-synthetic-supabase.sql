@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS private.synthetic_cleanup_runs (
   status text NOT NULL CHECK (status IN ('completed'))
 );
 
+-- Internal maintenance ledger: deny all client roles by RLS as well as grants.
+-- No policies are intentionally created; the cleanup routine runs as postgres.
+ALTER TABLE private.synthetic_cleanup_runs ENABLE ROW LEVEL SECURITY;
+
 REVOKE ALL ON private.synthetic_cleanup_runs FROM PUBLIC;
 REVOKE ALL ON private.synthetic_cleanup_runs FROM anon;
 REVOKE ALL ON private.synthetic_cleanup_runs FROM authenticated;
