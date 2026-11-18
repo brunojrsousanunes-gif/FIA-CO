@@ -41,7 +41,7 @@ Este documento registra una revisión estática y de solo lectura. No es una pru
 
 - **Severidad:** Media.
 - **Confianza:** Alta; aviso del asesor de seguridad de Supabase observado el 2026-11-18.
-- **Estado:** Pendiente de decisión y configuración.
+- **Estado:** APLAZADO por decisión expresa del usuario hasta la auditoría oficial/preparación para datos sensibles. No modificar en esta fase y no tratar como bloqueo actual.
 - **Impacto:** Auth no comprueba actualmente, mediante la protección integrada, si una contraseña elegida está comprometida.
 - **Acción:** valorar activación y probar el registro/cambio de contraseña antes de habilitarlo. No se modificó la configuración.
 
@@ -88,7 +88,7 @@ Este documento registra una revisión estática y de solo lectura. No es una pru
 ## Controles positivos comprobados
 
 1. Las tablas públicas examinadas tienen RLS habilitado.
-2. Las funciones RPC `SECURITY DEFINER` identificadas no permiten ejecución a `anon`; las nueve señaladas por el asesor están limitadas a `authenticated`. Su uso exige revisar sus controles internos y mantenerlas con privilegio mínimo.
+2. Las nueve funciones `SECURITY DEFINER` del esquema `public` consultadas no permiten ejecución a `anon` y sí a `authenticated`. En una revisión posterior se identificaron nueve helpers `SECURITY DEFINER` privados con `search_path` no vacío; se documentan en el addendum y están incluidos en el endurecimiento de PR #192.
 3. Las vistas `inventory_stock` y `operation_audit_timeline` tienen `security_invoker=true`; la segunda también usa `security_barrier=true`.
 4. Las tablas del esquema `private` examinadas no conceden acceso directo a `anon` ni a `authenticated`. RLS sin políticas en esas tablas produce denegación por defecto; no se interpreta como exposición.
 5. La clave del navegador es publishable, no una service-role key. El cliente rechaza patrones de claves secretas, fuerza `cache: no-store` y `credentials: omit`, y evita que cabeceras aportadas por el llamador sustituyan la clave o el JWT.
@@ -131,3 +131,55 @@ La base remota contiene datos y no está vacía. No se debe ejecutar una cadena 
 4. Cerrar el comportamiento de logout, MFA y sesiones privilegiadas.
 5. Verificar las cabeceras HTTPS efectivas.
 6. Mantener la alta de dispositivos y su integración con IA Maestra aplazadas hasta esa fase de arquitectura.
+
+
+## Addendum — revisión posterior y limpieza verificada (18-11-2026)
+
+Este addendum actualiza los hechos que cambiaron después de la revisión inicial. Las secciones anteriores conservan el contexto histórico de la primera inspección; cuando haya diferencias, prevalece este addendum para el estado actual.
+
+### Estado actual de repositorio y CI
+
+- PR #192 sigue abierta y sin fusionar, HEAD `d58e72e5142fec2256e2675fe5066ccffe5884cc`.
+- CI #727 de PR #192 terminó `success` en PostgreSQL 16 y 17.6 efímero. No se ejecutó contra Supabase remoto.
+- PR #194 sigue abierta, en borrador y sin fusionar. HEAD documental actual: `df2f99bb622c1060b29c4187dc7709f81f505762`.
+- CI #765 de PR #194 terminó `success` para el commit `fe608e9cf27b49b0e2a458b0022fdcdf334a67d5` en PostgreSQL 16 y 17.6. Los commits posteriores hasta el HEAD actual solo modifican documentación; no consta una ejecución CI asociada al HEAD más reciente.
+
+### Estado de datos después de la limpieza
+
+- Se eliminaron y verificaron las 6 organizaciones sintéticas, 3 operaciones y sus dependencias asociadas.
+- La cuenta secundaria identificada como Pepitogrillo se eliminó después, con autorización expresa y comprobación de dependencias. Verificación posterior: cuenta Auth 0, identidad 0, sesiones 0 y refresh tokens 0.
+- Queda una única cuenta Auth preservada. No se modificó. No se afirma aquí su titularidad a partir del mero recuento.
+- No se verificó backup restaurable ni PITR. No se ha creado branch de Supabase.
+- El proyecto no tiene organizaciones ni operaciones sintéticas restantes; conserva el registro privado de la limpieza y una cuenta Auth.
+
+### Hallazgos remotos adicionales confirmados
+
+**F-08 — Columnas financieras heredadas y escrituras directas de empresa/membresía**
+
+- `authenticated` conserva SELECT sobre `public.operations.amount_cents` y `public.operations.currency`.
+- `authenticated` conserva INSERT y UPDATE sobre `public.organization_members` y `public.organizations`.
+- Las políticas RLS están activadas en las tablas base públicas comprobadas y no se observaron grants de lectura/escritura a `anon`. Sin embargo, estos privilegios de `authenticated` deben limitarse según el flujo autorizado.
+- La migración `20261115000000_owner_membership_access_hardening.sql` de PR #192 revoca las columnas financieras heredadas y las escrituras directas sobre organizaciones/pertenencias.
+- **Severidad:** Alta antes de datos reales. No hay evidencia de explotación o extracción en esta revisión.
+
+**F-09 — Helpers SECURITY DEFINER privados con search_path no vacío**
+
+- Se identificaron nueve funciones privadas con `search_path` no vacío: `after_confirmation_insert`, `after_incident_change`, `after_participant_acceptance`, `append_operation_audit`, `can_access_operation`, `can_manage_operation`, `enqueue_operation_notice`, `is_org_member` y `validate_evidence_role`.
+- Las funciones `can_access_operation` y `can_manage_operation` son especialmente relevantes porque sus autorizaciones presentan la brecha F-01.
+- La migración 150000 de PR #192 fija `search_path` vacío en estos helpers y otros helpers financieros. Las nueve RPC `SECURITY DEFINER` del esquema `public` consultadas sí tenían `search_path` vacío; no confundir ambos conjuntos.
+- **Severidad:** Media como hardening; revisar dependencias y objetos cualificados antes de aplicar.
+
+**F-10 — Correspondencia de historial de migraciones precisada**
+
+- Se compararon los 32 archivos locales de `supabase/migrations` con las 22 entradas remotas.
+- Las 22 entradas remotas encuentran un archivo local por nombre. Doce coinciden también en el prefijo de versión; diez conservan el nombre de archivo pero tienen otra versión remota (`20261114183219` a `20261114184756`).
+- Los diez archivos de endurecimiento de PR #192 (`20261115000000` a `20261115100000`, sin archivo 15030000) son los diez archivos locales no presentes en el historial remoto.
+- La correspondencia nominal está resuelta; no está demostrada la equivalencia íntegra de todos los efectos SQL locales con el esquema remoto. No ejecutar `db push` ni `migration repair` por esta sola correspondencia.
+
+### Decisión de Auth filtrada
+
+La protección integrada contra contraseñas filtradas permanece desactivada por decisión expresa del usuario para la fase actual sin datos sensibles. Se aplaza hasta la auditoría oficial/preparación para datos reales. No cambiarla ahora; incluir su activación y prueba en el checklist de salida a producción.
+
+### Dictamen actualizado
+
+**UNRESOLVED para datos reales.** F-01, F-08 y F-09 siguen presentes en el esquema remoto. Las correcciones relevantes están en PR #192 y la cadena ha pasado CI efímero, pero no se han aplicado al proyecto Supabase remoto. La correspondencia nominal de migraciones ya está mapeada; falta comparar efectos, verificar backup/restauración y ejecutar pruebas aisladas. No se ha aplicado ninguna migración ni cambiado Auth/RLS/grants en remoto durante esta revisión posterior.
