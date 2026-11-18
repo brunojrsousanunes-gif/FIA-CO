@@ -36,6 +36,8 @@ No marcar como VERIFICADO por haber editado un archivo o creado un commit.
 
 | W-015 | Alta antes de futuras pruebas integradas | Mantener identidades y escenarios sintéticos versionados fuera de Supabase remoto | EN REVISIÓN | Fixture JSON y catálogo documental creados en PR #194; validar contra contratos/código existentes, incorporar a pruebas PostgreSQL aisladas y no sembrar producción |
 
+| W-016 | Retirada segura de registros sintéticos heredados en Supabase | Reconciliar dependencias y borrar solo tras backup restaurable y procedimiento auditable | BLOQUEADO | Trigger financiero requiere actor; FK de auditoría RESTRICT; hay 1 cuenta Auth vinculada que debe preservarse; no se verificó backup restaurable. Ver `docs/testing/SUPABASE-SYNTHETIC-DATA-CLEANUP-STATUS-2026-11-18.md` |
+
 ## Reglas de ejecución
 
 1. Resolver primero tareas de alta prioridad y dependencias.
