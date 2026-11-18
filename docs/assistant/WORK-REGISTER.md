@@ -40,6 +40,8 @@ No marcar como VERIFICADO por haber editado un archivo o creado un commit.
 
 | W-017 | Media-baja | Corregir el cierre de sesión y confirmar la revocación remota desde el Centro de Operaciones | EN REVISIÓN | Código actualizado en PR #192: el cliente común llama a Auth logout, la sesión local se limpia inmediatamente y la respuesta remota se informa; timeout de 10 s. CI #780 pasó en PostgreSQL 16 y 17.6 para HEAD `0962ba6102ce341ef323d3c7a886d8ef82cbe000`. Pendiente prueba runtime de revocación de refresh token con cuenta sintética en entorno aislado; no desplegado. Evidencia en `docs/SECURITY-AUDIT-SUPABASE-2026-11-18.md`, F-04 |
 
+| W-018 | Baja / defensa en profundidad | Activar RLS en el registro interno `private.synthetic_cleanup_runs` sin abrir acceso cliente | EN REVISIÓN | Asesor Supabase alerta RLS desactivado. Comprobación directa confirma cero grants SELECT/INSERT/UPDATE/DELETE a anon/authenticated/service_role y anon sin USAGE en private; no se observa acceso cliente actual. Script de mantenimiento y test estático actualizados en PR #194 para activar RLS sin políticas. Tabla remota NO modificada; requiere autorización específica para ejecutar `ALTER TABLE private.synthetic_cleanup_runs ENABLE ROW LEVEL SECURITY`. Evidencia: F-11 del informe de seguridad y sección 9 del estado de limpieza |
+
 ## Reglas de ejecución
 
 1. Resolver primero tareas de alta prioridad y dependencias.
