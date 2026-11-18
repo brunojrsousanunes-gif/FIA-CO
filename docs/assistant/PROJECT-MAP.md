@@ -76,6 +76,7 @@ docs/     ← especificaciones, decisiones de producto, legal, comercial y evide
 - [Estado CSP SEC3](../CSP-SEC3-STATUS.md)
 
 ### B. Producto, operaciones y experiencia
+- [Espacios empresariales y gestión móvil V1](../COMPANY-WORKSPACE-AND-MOBILE-MANAGEMENT-V1.md) — espacios por organización, equipos, permisos configurables, gestión móvil y circuito humano de IA Maestra.
 - [Motor de operaciones](../OPERATION-ENGINE.md)
 - [Operaciones comerciales V1](../COMMERCIAL-OPS-V1.md)
 - [Kit comercial](../COMMERCIAL-KIT.md)
