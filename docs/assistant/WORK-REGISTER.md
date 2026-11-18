@@ -31,6 +31,7 @@ No marcar como VERIFICADO por haber editado un archivo o creado un commit.
 | W-010 | Alta | Reconciliar espacios empresariales, departamentos, roles y permisos configurables con la estructura existente | EN REVISIÓN | Inventario de tablas, RLS, funciones, consumidores y pruebas; reutilizar organizaciones y pertenencias existentes; no crear duplicidades |
 | W-011 | Alta | Diseñar el circuito humano obligatorio entre asistentes FIA&CO y la IA Maestra | PENDIENTE | Probar que no existe canal IA-a-IA; envío iniciado por personal FIA&CO autenticado, con selección mínima, autorización y auditoría |
 | W-012 | Alta | Diseñar y reconciliar acceso Premium de responsables desde dispositivos seguros a FIA&CO/IA Maestra | EN REVISIÓN | Auditar Auth, sesiones, permisos, derecho Premium, registro/revocación de dispositivos, transporte cifrado y pasarela humana; pruebas negativas con dispositivos sintéticos |
+| W-013 | Alta | Diseñar la propuesta Premium basada en seguridad demostrable, automatización y ROI | EN REVISIÓN | Definir panel de confianza, catálogo y límites de automatización, línea base, fórmulas ROI y costes completos; validar con piloto sin promesas ni precios inventados |
 
 ## Reglas de ejecución
 
