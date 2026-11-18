@@ -69,3 +69,21 @@ Además, `operation_audit_events.operation_id` tiene FK `ON DELETE RESTRICT`; la
 ## 5. Referencia de pruebas futura
 
 Las identidades de prueba se conservan ahora en [FIA-CO-SYNTHETIC-TEST-DATA-V1.md](FIA-CO-SYNTHETIC-TEST-DATA-V1.md) y el fixture estructurado en `tests/fixtures/fia-co-three-party-synthetic.v1.json`. Son la fuente canónica para nuevas pruebas aisladas; no se deben recrear en Supabase remoto.
+
+
+## 6. Rutina administrativa preparada (no ejecutada)
+
+Se ha añadido `scripts/maintenance/cleanup-synthetic-supabase.sql` y su contrato estático `tests/synthetic-supabase-cleanup-script.test.mjs`.
+
+La rutina:
+- fija los seis UUID de organizaciones y tres UUID de operaciones observados;
+- exige que sigan marcados como sintéticos y que el grafo padre/hijos no haya cambiado;
+- aborta si aparecen operaciones adicionales, inventario o verificaciones L3 relacionadas;
+- fija recuentos observados de pertenencias, solicitud piloto, auditoría, costes, ofertas, participantes y finanzas;
+- registra en `private.synthetic_cleanup_runs` una actuación de sistema separada, con motivo e IDs, sin atribuirla falsamente a un usuario;
+- conserva todas las filas de `auth.users` y comprueba que sus IDs/recuento no cambien;
+- elimina primero auditoría, costes, ofertas, participantes y finanzas; elimina operaciones hijas antes de la operación padre; finalmente elimina las organizaciones;
+- usa el GUC de modo de migración solo dentro de esta transacción, para evitar que los triggers financieros intenten recalcular/auditar filas que se están retirando. La constancia independiente de la limpieza queda en la tabla privada de ejecuciones;
+- comprueba postcondiciones antes de confirmar la transacción; cualquier discrepancia provoca rollback.
+
+**No ejecutar todavía en Supabase remoto.** Sigue siendo obligatorio comprobar backup restaurable y ensayar el mismo script en una copia aislada. El archivo es un procedimiento de mantenimiento manual, no una migración automática ni una acción ejecutada. El test actual valida el contrato estático, no sustituye una prueba real de PostgreSQL.
