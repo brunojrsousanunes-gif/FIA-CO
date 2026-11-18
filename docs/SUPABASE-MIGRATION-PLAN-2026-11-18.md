@@ -149,3 +149,51 @@ Orden cronológico por archivo; no existe un archivo `20261115030000` en PR #192
 ## 6. Límites actuales
 
 No se aplicaron migraciones ni se modificaron Auth, datos, grants, políticas, funciones o triggers remotos. No se creó backup ni se probó restauración. CI usa PostgreSQL efímero, no una copia del proyecto remoto. No está verificado que Supabase CLI pueda reconciliar automáticamente el historial remoto. Dictamen **UNRESOLVED** para datos reales hasta cerrar todos los gates.
+
+
+## 7. Revisión remota posterior a la limpieza — 18-11-2026 (solo lectura)
+
+### Estado actual confirmado
+
+- Proyecto `etttredbkbcgqwciipls`: `ACTIVE_HEALTHY`, PostgreSQL 17.6.1, región `eu-west-1`.
+- Historial remoto: 22 migraciones; última versión `20261114184756`, cuyo nombre corresponde a `20261114240000_create_three_party_operation_draft`.
+- Las diez migraciones de endurecimiento de PR #192 (`20261115000000` a `20261115100000`, sin archivo `15030000`) siguen ausentes del historial remoto.
+- Las seis organizaciones y tres operaciones sintéticas se eliminaron y verificaron; las consultas posteriores muestran 0 organizaciones y operaciones sintéticas.
+- `auth.users` conserva una única cuenta tras la eliminación autorizada de la cuenta secundaria Pepitogrillo. No se ha modificado la cuenta restante.
+- No existen branches de desarrollo de Supabase en este proyecto. No se ha creado ninguna para evitar coste no confirmado.
+
+### Hallazgos de autorización y privilegios confirmados en remoto
+
+1. `private.can_access_operation(uuid)` permite acceso por `created_by` sin exigir que el creador siga siendo miembro activo de la organización propietaria. El acceso alternativo por participante sí comprueba pertenencia activa.
+2. `private.can_manage_operation(uuid)` permite gestión por `created_by` y estado de operación, sin exigir pertenencia activa al propietario.
+3. La política remota `operations_creator_draft_update` no exige pertenencia activa en `USING`; su `WITH CHECK` permite `owner_organization_id IS NULL` o pertenencia activa. Esto difiere de la política endurecida de PR #192.
+4. La política remota de visibilidad de organizaciones solo contempla organización sintética o pertenencia directa; no incorpora todavía la visibilidad limitada de contrapartes participantes preparada en PR #192.
+5. `authenticated` conserva SELECT sobre `operations.amount_cents` y `operations.currency`, pese a que PR #192 revoca expresamente esas columnas heredadas.
+6. `authenticated` conserva INSERT/UPDATE sobre `organization_members` y `organizations`; PR #192 revoca esas escrituras directas para exigir flujos autorizados.
+7. `logistics_quotes` y `operation_cost_items` mantienen permisos de escritura a nivel de tabla, sujetos a RLS. Sus políticas llaman a `can_manage_operation`; por tanto, la debilidad de esa función también afecta a esas rutas.
+
+Estos son defectos estructurales de autorización/privilegios que deben cerrarse antes de datos reales. No se ha observado una extracción ni un acceso indebido; el proyecto está sin organizaciones/operaciones sintéticas tras la limpieza y no hay evidencia de actividad de usuarios que permita afirmar una brecha explotada.
+
+### Elementos que no son bloqueos en esta fase
+
+- Protección de Auth contra contraseñas filtradas: permanece desactivada por decisión expresa del usuario para esta fase sin datos sensibles. No modificar ahora; añadirla al gate de auditoría oficial/preproducción.
+- El asesor de seguridad enumera nueve funciones `SECURITY DEFINER` ejecutables por `authenticated`; todas las consultadas usan `search_path` vacío y ninguna concede EXECUTE a `anon`. La mera presencia de nueve avisos no demuestra vulnerabilidad; se deben revisar autorizaciones individualmente.
+- Tres tablas privadas tienen RLS activado y no conceden SELECT/INSERT a `anon` ni `authenticated`; ese cierre de privilegios es intencionado y no debe abrirse para silenciar avisos.
+
+### Estado de CI y límites
+
+- PR #192 continúa abierta y sin fusionar, HEAD `d58e72e5142fec2256e2675fe5066ccffe5884cc`.
+- Workflow run #727 (`43756661322`) completado con `success`; la cadena y pruebas se ejecutaron en PostgreSQL efímero 16 y 17.6, no en Supabase remoto.
+- La PR #194 continúa abierta en borrador. Los documentos de limpieza se han actualizado en un commit documental posterior; no equivale a CI ni a despliegue.
+- El historial presenta correspondencias entre nombres locales y versiones remotas distintas. La documentación oficial de Supabase describe `migration repair` como una modificación del historial remoto, no como una comprobación inocua. No ejecutar `db push`, `migration repair`, ni aplicar migraciones hasta producir una tabla de correspondencia exacta y validar esquema/funciones/policies/grants contra cada archivo.
+- No se ha confirmado backup descargable, PITR ni restauración de ensayo. No crear branches/proyectos de Supabase porque pueden generar coste.
+
+### Próximo orden seguro
+
+1. Construir una tabla exhaustiva de correspondencia entre las 22 migraciones locales aplicadas y las 22 entradas remotas (versión, nombre y archivo exacto); comparar contenido y estado de objetos, no solo etiquetas.
+2. Revisar el SQL completo de las diez migraciones pendientes y su compatibilidad con el estado remoto actual; confirmar especialmente grants, columnas, policies, funciones y triggers.
+3. Preparar pruebas negativas de revocación/creador, lectura financiera y escrituras directas; ejecutar solo en PostgreSQL aislado gratuito/efímero ya disponible en CI.
+4. Verificar desde el panel el plan, la política de backups/PITR y la posibilidad real de restauración. No inferirlo de que el proyecto esté activo.
+5. Tras esos pasos, redactar un plan remoto final con precondiciones, orden, rollback y comprobación. La ejecución remota requerirá autorización específica separada.
+
+**Dictamen actualizado:** UNRESOLVED para uso con datos reales. Los hallazgos de autorización están confirmados en remoto; las correcciones existen en PR #192 y CI pasó en entorno efímero, pero no se han aplicado a Supabase remoto.
