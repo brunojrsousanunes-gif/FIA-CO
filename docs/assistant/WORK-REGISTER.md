@@ -30,6 +30,7 @@ No marcar como VERIFICADO por haber editado un archivo o creado un commit.
 | W-009 | Media | Crear navegación maestra y comprobar enlaces de continuidad documental | VERIFICADO | README, mapa maestro, catálogo, traspaso y registros revisados; 98 documentos Markdown de docs y 135 enlaces del mapa comprobados contra el árbol; cero documentos sin clasificar y cero enlaces rotos |
 | W-010 | Alta | Reconciliar espacios empresariales, departamentos, roles y permisos configurables con la estructura existente | EN REVISIÓN | Inventario de tablas, RLS, funciones, consumidores y pruebas; reutilizar organizaciones y pertenencias existentes; no crear duplicidades |
 | W-011 | Alta | Diseñar el circuito humano obligatorio entre asistentes FIA&CO y la IA Maestra | PENDIENTE | Probar que no existe canal IA-a-IA; envío iniciado por personal FIA&CO autenticado, con selección mínima, autorización y auditoría |
+| W-012 | Alta | Diseñar y reconciliar acceso Premium de responsables desde dispositivos seguros a FIA&CO/IA Maestra | EN REVISIÓN | Auditar Auth, sesiones, permisos, derecho Premium, registro/revocación de dispositivos, transporte cifrado y pasarela humana; pruebas negativas con dispositivos sintéticos |
 
 ## Reglas de ejecución
 
