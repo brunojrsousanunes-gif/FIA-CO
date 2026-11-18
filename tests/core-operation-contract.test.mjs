@@ -59,8 +59,63 @@ const copy = snapshotOperation(disputed);
 copy.state = 'MUTATED';
 assert.equal(disputed.state, 'DISPUTED');
 
+const releaseCandidate = {
+  state: 'ACCEPTED',
+  conditions: { sellerAccepted: true, courierVerified: true, delivered: true, buyerAccepted: true, noOpenDispute: true },
+  releaseRequested: false,
+  version: 4,
+  evidence: []
+};
+const releaseCandidateBefore = JSON.stringify(releaseCandidate);
+let releaseEvidenceCalls = 0;
+const failingReleaseDeps = {
+  idFactory: prefix => {
+    releaseEvidenceCalls += 1;
+    if (releaseEvidenceCalls === 2) throw new Error('ID_FACTORY_FAILURE');
+    return `${prefix}_FAIL_TEST`;
+  },
+  clock
+};
+assert.throws(() => requestRelease(releaseCandidate, 'system', failingReleaseDeps), /ID_FACTORY_FAILURE/);
+assert.equal(JSON.stringify(releaseCandidate), releaseCandidateBefore,
+  'a failed two-step release must leave the original operation untouched');
+
 assert.throws(() => createOperation({ amount: 0 }, deps), /INVALID_AMOUNT/);
 assert.throws(() => moveOperation(createOperation({ amount: 10 }, deps), 'CLOSED', 'system', {}, deps), /INVALID_TRANSITION/);
 assert.throws(() => setOperationCondition(createOperation({ amount: 10 }, deps), 'unknown', true, 'system', deps), /UNKNOWN_CONDITION/);
+
+const invalidDispute = createOperation({ amount: 20 }, deps);
+const beforeInvalidDispute = JSON.stringify(invalidDispute);
+assert.throws(() => disputeOperation(invalidDispute, 'buyer', 'not yet disputable', deps), /INVALID_TRANSITION/);
+assert.equal(JSON.stringify(invalidDispute), beforeInvalidDispute,
+  'a rejected dispute must not mutate the operation');
+
+const strictCondition = createOperation({ amount: 30 }, deps);
+const beforeInvalidCondition = JSON.stringify(strictCondition);
+assert.throws(() => setOperationCondition(strictCondition, 'delivered', 'false', 'courier', deps), /INVALID_CONDITION_VALUE/);
+assert.equal(JSON.stringify(strictCondition), beforeInvalidCondition,
+  'non-boolean condition input must not mutate the operation');
+
+const nestedMeta = { details: { note: 'original' }, tags: ['safe'] };
+const evidenceOperation = createOperation({ amount: 40 }, deps);
+moveOperation(evidenceOperation, 'AWAITING_ACCEPTANCE', 'buyer', nestedMeta, deps);
+nestedMeta.details.note = 'tampered';
+nestedMeta.tags.push('tampered');
+assert.equal(evidenceOperation.evidence.at(-1).meta.details.note, 'original');
+assert.deepEqual(evidenceOperation.evidence.at(-1).meta.tags, ['safe']);
+
+const terminalCondition = createOperation({ amount: 50 }, deps);
+moveOperation(terminalCondition, 'AWAITING_ACCEPTANCE', 'buyer', {}, deps);
+moveOperation(terminalCondition, 'CONDITIONED', 'seller', {}, deps);
+moveOperation(terminalCondition, 'IN_PROGRESS', 'courier', {}, deps);
+moveOperation(terminalCondition, 'DELIVERED', 'courier', {}, deps);
+moveOperation(terminalCondition, 'ACCEPTED', 'buyer', {}, deps);
+moveOperation(terminalCondition, 'READY_FOR_RELEASE', 'system', {}, deps);
+moveOperation(terminalCondition, 'RELEASE_REQUESTED', 'system', {}, deps);
+moveOperation(terminalCondition, 'CLOSED', 'system', {}, deps);
+const beforeTerminalCondition = JSON.stringify(terminalCondition);
+assert.throws(() => setOperationCondition(terminalCondition, 'buyerAccepted', false, 'buyer', deps), /TERMINAL_OPERATION/);
+assert.equal(JSON.stringify(terminalCondition), beforeTerminalCondition);
+
 
 console.log('Core operation contract OK');

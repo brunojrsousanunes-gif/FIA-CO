@@ -6,7 +6,17 @@ function validatePublicConfig(url,publishableKey){
   if(parsed.protocol!=='https:'||!parsed.hostname.endsWith('.supabase.co'))throw new Error('SUPABASE_URL_INVALID');
   if(typeof publishableKey!=='string'||publishableKey.length<20)throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
   if(SECRET_KEY_PATTERNS.some(pattern=>pattern.test(publishableKey)))throw new Error('SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER');
-  if(!publishableKey.startsWith('sb_publishable_')&&publishableKey.split('.').length!==3)throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
+  if(!publishableKey.startsWith('sb_publishable_')){
+    const parts=publishableKey.split('.');
+    if(parts.length!==3)throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
+    try{
+      const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+      if(payload.role!=='anon')throw new Error('SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER');
+    }catch(error){
+      if(error.message==='SUPABASE_SECRET_KEY_FORBIDDEN_IN_BROWSER')throw error;
+      throw new Error('SUPABASE_PUBLISHABLE_KEY_INVALID');
+    }
+  }
   return Object.freeze({url:parsed.origin,publishableKey});
 }
 
@@ -14,11 +24,25 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
   const config=validatePublicConfig(url,publishableKey);
   function headers(extra={}){
     const accessToken=getAccessToken();
-    return{apikey:config.publishableKey,Authorization:`Bearer ${accessToken||config.publishableKey}`,...extra};
+    // Normalize caller headers first, then enforce credentials. This prevents
+    // request options from replacing the publishable key or session token,
+    // including case-variant header names.
+    const result=new Headers(extra);
+    result.set('apikey',config.publishableKey);
+    // Publishable keys are API keys, not user JWTs. Only a real Auth session
+    // may populate Authorization; unauthenticated Auth requests use apikey.
+    if(accessToken)result.set('Authorization',`Bearer ${accessToken}`);
+    else result.delete('Authorization');
+    return result;
   }
   async function request(path,options={}){
     if(typeof path!=='string'||!path.startsWith('/'))throw new Error('SUPABASE_PATH_INVALID');
-    const response=await fetch(`${config.url}${path}`,{...options,headers:headers(options.headers)});
+    const response=await fetch(`${config.url}${path}`,{
+      ...options,
+      cache:'no-store',
+      credentials:'omit',
+      headers:headers(options.headers)
+    });
     const body=response.status===204?null:await response.json().catch(()=>null);
     if(!response.ok){
       const error=new Error(body?.message||body?.error_description||'SUPABASE_REQUEST_FAILED');
@@ -38,7 +62,13 @@ export function createSupabaseBrowserClient({url,publishableKey,getAccessToken=(
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,data})
     });
   }
-  return Object.freeze({request,signInWithPassword,signUp});
+  function signOut(){
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),10000);
+    return request('/auth/v1/logout',{method:'POST',signal:controller.signal})
+      .finally(()=>clearTimeout(timeout));
+  }
+  return Object.freeze({request,signInWithPassword,signUp,signOut});
 }
 
 export{validatePublicConfig};

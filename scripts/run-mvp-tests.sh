@@ -4,6 +4,7 @@ set -euo pipefail
 # Current public surface
 node tests/pages-public-private-boundary.test.mjs
 node tests/company-inventory-mvp.test.mjs
+node tests/private-operation-center-synthetic-isolation.test.mjs
 node tests/homepage-v2.test.mjs
 node tests/original-business-interface.test.mjs
 node tests/unified-app.test.js
@@ -18,8 +19,10 @@ node tests/contracts-provider-onboarding.test.mjs
 node tests/fia-chat-layout.test.mjs
 node tests/fia-piggy-interaction.test.mjs
 node tests/fia-mobile-entry.test.mjs
+node tests/service-worker-cache.test.mjs
 node tests/homepage-role-visuals.test.mjs
 node tests/supabase-browser-config.test.mjs
+node tests/frontend-idempotency.test.mjs
 node tests/architecture-boundaries.test.mjs
 node tests/pilot-access.test.mjs
 node tests/pilot-security-hardening.test.mjs

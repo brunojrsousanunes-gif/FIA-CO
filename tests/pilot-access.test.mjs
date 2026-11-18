@@ -16,5 +16,6 @@ assert.match(client,/function signUp/);
 assert.match(app,/request_pilot_access/);
 assert.match(app,/fia_pending_pilot_access/);
 assert.match(html,/Crear la cuenta no concede acceso operativo/);
-assert.match(html,/pilot-security-v3/);
+assert.match(html,/pilot-security-v6/);
+assert.match(app,/supabase-browser-client\.js\?v=auth-logout-v1/);
 console.log('pilot access request contract: ok');

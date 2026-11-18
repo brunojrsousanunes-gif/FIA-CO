@@ -42,13 +42,26 @@ function defaultClock() {
   return new Date().toISOString();
 }
 
+function freezeSnapshot(value) {
+  if (Array.isArray(value)) return Object.freeze(value.map(freezeSnapshot));
+  if (value && typeof value === 'object') {
+    return Object.freeze(Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, freezeSnapshot(item)])
+    ));
+  }
+  return value;
+}
+
 function makeEvidence(type, actor, meta, deps) {
+  const actorId = cleanText(actor, 80);
+  if (!actorId) throw new Error('INVALID_ACTOR');
+  const safeMeta = meta && typeof meta === 'object' ? meta : {};
   return Object.freeze({
     id: deps.idFactory('ev'),
     type: cleanText(type, 50),
-    actor: cleanText(actor, 80),
+    actor: actorId,
     at: deps.clock(),
-    meta: Object.freeze({ ...meta })
+    meta: freezeSnapshot(safeMeta)
   });
 }
 
@@ -95,18 +108,22 @@ export function moveOperation(operation, nextState, actor, meta = {}, options = 
   if (terminal.has(operation.state)) throw new Error('TERMINAL_OPERATION');
   if (!isTransitionAllowed(operation, nextState)) throw new Error('INVALID_TRANSITION');
   const deps = dependencies(options);
+  const evidence = makeEvidence(`STATE_${nextState}`, actor, meta, deps);
   operation.state = nextState;
   operation.version += 1;
-  operation.evidence.push(makeEvidence(`STATE_${nextState}`, actor, meta, deps));
+  operation.evidence.push(evidence);
   return operation;
 }
 
 export function setOperationCondition(operation, name, value, actor, options = {}) {
+  if (terminal.has(operation.state)) throw new Error('TERMINAL_OPERATION');
   if (!(name in operation.conditions)) throw new Error('UNKNOWN_CONDITION');
+  if (typeof value !== 'boolean') throw new Error('INVALID_CONDITION_VALUE');
   const deps = dependencies(options);
-  operation.conditions[name] = Boolean(value);
+  const evidence = makeEvidence(`CONDITION_${name.toUpperCase()}`, actor, { value }, deps);
+  operation.conditions[name] = value;
   operation.version += 1;
-  operation.evidence.push(makeEvidence(`CONDITION_${name.toUpperCase()}`, actor, { value: Boolean(value) }, deps));
+  operation.evidence.push(evidence);
   return operation;
 }
 
@@ -123,16 +140,23 @@ export function canRequestRelease(operation) {
 
 export function requestRelease(operation, actor = 'system', options = {}) {
   if (!canRequestRelease(operation)) throw new Error('RELEASE_NOT_ALLOWED');
-  moveOperation(operation, 'READY_FOR_RELEASE', actor, {}, options);
-  operation.releaseRequested = true;
-  moveOperation(operation, 'RELEASE_REQUESTED', actor, { instruction: 'PSP_ONLY' }, options);
+  const candidate = snapshotOperation(operation);
+  moveOperation(candidate, 'READY_FOR_RELEASE', actor, {}, options);
+  candidate.releaseRequested = true;
+  moveOperation(candidate, 'RELEASE_REQUESTED', actor, { instruction: 'PSP_ONLY' }, options);
+  Object.assign(operation, candidate);
   return operation;
 }
 
 export function disputeOperation(operation, actor, reason = '', options = {}) {
   if (terminal.has(operation.state)) throw new Error('TERMINAL_OPERATION');
+  if (!isTransitionAllowed(operation, 'DISPUTED')) throw new Error('INVALID_TRANSITION');
+  const evidence = makeEvidence('STATE_DISPUTED', actor, { reason: cleanText(reason, 160) }, dependencies(options));
   operation.conditions.noOpenDispute = false;
-  return moveOperation(operation, 'DISPUTED', actor, { reason: cleanText(reason, 160) }, options);
+  operation.state = 'DISPUTED';
+  operation.version += 1;
+  operation.evidence.push(evidence);
+  return operation;
 }
 
 export function snapshotOperation(operation) {

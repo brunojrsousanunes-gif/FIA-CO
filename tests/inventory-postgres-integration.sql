@@ -1,6 +1,6 @@
 \set ON_ERROR_STOP on
--- Seed two real organizations and one accepted operation participant after
--- applying the complete repository migration chain.
+-- Seed seller, buyer and carrier organizations plus their authenticated members
+-- after applying the complete repository migration chain.
 insert into auth.users(id) values
  ('10000000-0000-0000-0000-000000000001'),
  ('10000000-0000-0000-0000-000000000002'),
@@ -9,21 +9,340 @@ insert into auth.users(id) values
 
 insert into public.organizations(id,name,status) values
  ('20000000-0000-0000-0000-000000000001','Empresa Uno','active'),
- ('20000000-0000-0000-0000-000000000002','Empresa Dos','active');
+ ('20000000-0000-0000-0000-000000000002','Empresa Dos','active'),
+ ('20000000-0000-0000-0000-000000000005','Empresa Transportista','active');
 
 insert into public.organization_members(organization_id,user_id,member_role,status) values
  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','ceo','active'),
- ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active');
+ ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','manager','active'),
+ ('20000000-0000-0000-0000-000000000005','10000000-0000-0000-0000-000000000003','manager','active');
 
-insert into public.operations(id,reference,title,status,created_by) values
- ('30000000-0000-0000-0000-000000000001','FIA-INV-0001','Operación inventario','accepted','10000000-0000-0000-0000-000000000001');
+insert into public.operations(id,reference,title,status,created_by,owner_organization_id) values
+ ('30000000-0000-0000-0000-000000000001','FIA-INV-0001','Operación inventario','accepted','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001'),
+ ('30000000-0000-0000-0000-000000000009','FIA-QUOTE-0001','Operación de ofertas logísticas','accepted','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
 
 insert into public.operation_participants(operation_id,organization_id,participant_role,status,invited_by,accepted_by,accepted_at)
-values ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','seller','accepted',
- '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now());
+values
+ ('30000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','seller','accepted',
+  '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now()),
+ ('30000000-0000-0000-0000-000000000009','20000000-0000-0000-0000-000000000001','seller','accepted',
+  '10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',now()),
+ ('30000000-0000-0000-0000-000000000009','20000000-0000-0000-0000-000000000005','carrier','invited',
+  '10000000-0000-0000-0000-000000000001',null,null);
 
+-- An invited carrier cannot submit an offer until the invitation is accepted.
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+do $logistics_quote_invited_carrier_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
+    values
+      ('41000000-0000-0000-0000-000000000099','30000000-0000-0000-0000-000000000009',
+       '20000000-0000-0000-0000-000000000005','Oferta antes de aceptar',10000,'EUR',2,'offered',
+       '10000000-0000-0000-0000-000000000003');
+    raise exception 'INVITED_CARRIER_SUBMITTED_LOGISTICS_QUOTE';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_invited_carrier_guard$;
+reset role;
+update public.operation_participants
+set status='accepted',accepted_by='10000000-0000-0000-0000-000000000003',accepted_at=now()
+where operation_id='30000000-0000-0000-0000-000000000009'
+  and organization_id='20000000-0000-0000-0000-000000000005'
+  and participant_role='carrier';
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set role authenticated;
+
+-- Logistics quote selection is serialized and idempotent. The same key may
+-- replay only the same quote; reusing it for another quote must fail.
+insert into public.logistics_quotes
+ (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
+values
+ ('41000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000009',
+  '20000000-0000-0000-0000-000000000005','Oferta uno',12000,'EUR',3,'offered',
+  '10000000-0000-0000-0000-000000000003'),
+ ('41000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000009',
+  '20000000-0000-0000-0000-000000000005','Oferta dos',15000,'EUR',2,'offered',
+  '10000000-0000-0000-0000-000000000003'),
+ ('41000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000009',
+  '20000000-0000-0000-0000-000000000005','Oferta tres',17000,'EUR',4,'offered',
+  '10000000-0000-0000-0000-000000000003'),
+ ('41000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000009',
+  '20000000-0000-0000-0000-000000000005','Oferta cuatro',19000,'EUR',5,'offered',
+  '10000000-0000-0000-0000-000000000003');
+
+do $logistics_quote_insert_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,eta_days,status,created_by)
+    values
+      ('41000000-0000-0000-0000-000000000005','30000000-0000-0000-0000-000000000009',
+       '20000000-0000-0000-0000-000000000005','Oferta no autorizada',18000,'EUR',1,'selected',
+       '10000000-0000-0000-0000-000000000003');
+    raise exception 'LOGISTICS_QUOTE_DIRECT_SELECTED_INSERT_WAS_ALLOWED';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_insert_guard$;
+
+do $logistics_quote_carrier_identity_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000008','30000000-0000-0000-0000-000000000009',
+      '20000000-0000-0000-0000-000000000001','Proveedor no transportista',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000003');
+    raise exception 'CARRIER_SUBMITTED_QUOTE_FOR_WRONG_ORGANIZATION';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000009','30000000-0000-0000-0000-000000000009',
+      '20000000-0000-0000-0000-000000000005','Identidad de creador falsificada',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000001');
+    raise exception 'CARRIER_FORGED_LOGISTICS_QUOTE_CREATOR';
+  exception when insufficient_privilege then null;
+  end;
+end
+$logistics_quote_carrier_identity_guard$;
+
+reset role;
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
+do $logistics_quote_seller_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000006','30000000-0000-0000-0000-000000000009',
+      '20000000-0000-0000-0000-000000000005','Oferta suplantada por vendedor',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000001');
+    raise exception 'SELLER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
+  exception when insufficient_privilege then null;
+  end;
+end
+$logistics_quote_seller_guard$;
+reset role;
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $logistics_quote_noncarrier_member_guard$
+begin
+  begin
+    insert into public.logistics_quotes
+      (id,operation_id,provider_organization_id,label,amount_cents,currency,status,created_by)
+    values ('41000000-0000-0000-0000-000000000007','30000000-0000-0000-0000-000000000009',
+      '20000000-0000-0000-0000-000000000005','Oferta suplantada por otra empresa',10000,'EUR','offered',
+      '10000000-0000-0000-0000-000000000002');
+    raise exception 'NON_CARRIER_MEMBER_SUBMITTED_CARRIER_LOGISTICS_QUOTE';
+  exception when insufficient_privilege then null;
+  end;
+end
+$logistics_quote_noncarrier_member_guard$;
+reset role;
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+do $logistics_quote_policy_contract$
+declare
+  fn_config text;
+begin
+  if not has_function_privilege('authenticated','private.can_submit_logistics_quote(uuid,uuid)','EXECUTE')
+     or has_function_privilege('anon','private.can_submit_logistics_quote(uuid,uuid)','EXECUTE') then
+    raise exception 'CARRIER_QUOTE_AUTHORIZATION_HELPER_GRANTS_INCORRECT';
+  end if;
+  if not has_table_privilege('authenticated','public.logistics_quotes','INSERT') then
+    raise exception 'CARRIER_QUOTE_INSERT_TABLE_GRANT_MISSING';
+  end if;
+  if exists (select 1 from pg_policies
+             where schemaname='public' and tablename='logistics_quotes'
+               and policyname='logistics_quotes_creator_insert')
+     or not exists (select 1 from pg_policies
+                    where schemaname='public' and tablename='logistics_quotes'
+                      and policyname='logistics_quotes_carrier_submit'
+                      and cmd='INSERT') then
+    raise exception 'LOGISTICS_QUOTE_CARRIER_POLICY_NOT_INSTALLED';
+  end if;
+  select array_to_string(proconfig,',') into fn_config
+  from pg_proc where oid='private.can_submit_logistics_quote(uuid,uuid)'::regprocedure;
+  if fn_config not like '%search_path=""%' then
+    raise exception 'CARRIER_QUOTE_AUTHORIZATION_SEARCH_PATH_NOT_EMPTY';
+  end if;
+end
+$logistics_quote_policy_contract$;
+
+reset role;
+update public.logistics_quotes set status='rejected'
+where id='41000000-0000-0000-0000-000000000003';
+set role authenticated;
+do $logistics_quote_status_guard$
+begin
+  begin
+    perform public.select_logistics_quote(
+      '41000000-0000-0000-0000-000000000003',
+      '51000000-0000-0000-0000-000000000003');
+    raise exception 'LOGISTICS_QUOTE_REJECTED_STATE_WAS_SELECTABLE';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'QUOTE_NOT_SELECTABLE' then raise; end if;
+  end;
+end
+$logistics_quote_status_guard$;
+
+select public.select_logistics_quote(
+ '41000000-0000-0000-0000-000000000001',
+ '51000000-0000-0000-0000-000000000001');
+select public.select_logistics_quote(
+ '41000000-0000-0000-0000-000000000002',
+ '51000000-0000-0000-0000-000000000002');
+select public.select_logistics_quote(
+ '41000000-0000-0000-0000-000000000002',
+ '51000000-0000-0000-0000-000000000002');
+
+-- Audit rows are intentionally not directly readable by authenticated. Inspect the
+-- internal event count as the database owner while checking explicit grants below.
+reset role;
+do $logistics_quote_selection_idempotency$
+begin
+ if (select count(*) from public.operation_audit_events
+     where operation_id='30000000-0000-0000-0000-000000000009'
+       and request_id='51000000-0000-0000-0000-000000000002') <> 1 then
+   raise exception 'LOGISTICS_QUOTE_RETRY_DUPLICATED_AUDIT_EVENT';
+ end if;
+ if (select status from public.logistics_quotes
+     where id='41000000-0000-0000-0000-000000000002') <> 'selected'
+    or (select status from public.logistics_quotes
+     where id='41000000-0000-0000-0000-000000000001') <> 'offered' then
+   raise exception 'LOGISTICS_QUOTE_SELECTION_STATE_INCORRECT';
+ end if;
+
+ begin
+  perform public.select_logistics_quote(
+   '41000000-0000-0000-0000-000000000001',
+   '51000000-0000-0000-0000-000000000002');
+  raise exception 'LOGISTICS_QUOTE_IDEMPOTENCY_KEY_REUSED_FOR_OTHER_QUOTE';
+ exception when invalid_parameter_value then
+  if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+ end;
+
+ begin
+  perform public.select_logistics_quote(
+   '41000000-0000-0000-0000-000000000001',null);
+  raise exception 'LOGISTICS_QUOTE_ACCEPTED_NULL_REQUEST_KEY';
+ exception when sqlstate '22023' then
+  if sqlerrm <> 'REQUEST_KEY_REQUIRED' then raise; end if;
+ end;
+
+ if has_column_privilege('authenticated','public.logistics_quotes','amount_cents','UPDATE')
+    or has_column_privilege('authenticated','public.logistics_quotes','provider_organization_id','UPDATE')
+    or has_column_privilege('authenticated','public.logistics_quotes','operation_id','UPDATE') then
+   raise exception 'LOGISTICS_QUOTE_SENSITIVE_COLUMNS_DIRECTLY_UPDATABLE';
+ end if;
+ if has_any_column_privilege('authenticated','public.logistics_quotes','UPDATE') then
+   raise exception 'LOGISTICS_QUOTE_DIRECT_UPDATE_PRIVILEGE_REMAINS';
+ end if;
+end
+$logistics_quote_selection_idempotency$;
+reset role;
+
+-- Deletion is serialized before the quote row, audited and idempotent.
+set role authenticated;
+select public.delete_logistics_quote(
+ '41000000-0000-0000-0000-000000000001',
+ '52000000-0000-0000-0000-000000000001');
+select public.delete_logistics_quote(
+ '41000000-0000-0000-0000-000000000001',
+ '52000000-0000-0000-0000-000000000001');
+
+do $logistics_quote_delete_guards$
+begin
+  begin
+    perform public.delete_logistics_quote(
+      '41000000-0000-0000-0000-000000000004',
+      '52000000-0000-0000-0000-000000000001');
+    raise exception 'LOGISTICS_QUOTE_DELETE_KEY_REUSE_WAS_ALLOWED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_logistics_quote(
+      '41000000-0000-0000-0000-000000000002',
+      '52000000-0000-0000-0000-000000000002');
+    raise exception 'LOGISTICS_QUOTE_SELECTED_DELETE_WAS_ALLOWED';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'QUOTE_SELECTED_CANNOT_DELETE' then raise; end if;
+  end;
+
+  begin
+    delete from public.logistics_quotes
+    where id='41000000-0000-0000-0000-000000000004';
+    raise exception 'LOGISTICS_QUOTE_DIRECT_DELETE_WAS_ALLOWED';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_delete_guards$;
+
+reset role;
+do $logistics_quote_delete_audit$
+begin
+  if exists (select 1 from public.logistics_quotes
+             where id='41000000-0000-0000-0000-000000000001') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_DID_NOT_REMOVE_TARGET';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where operation_id='30000000-0000-0000-0000-000000000009'
+        and request_id='52000000-0000-0000-0000-000000000001'
+        and event_type='logistics.quote.deleted') <> 1 then
+    raise exception 'LOGISTICS_QUOTE_DELETE_AUDIT_NOT_IDEMPOTENT';
+  end if;
+  if not exists (select 1 from public.logistics_quotes
+                 where id='41000000-0000-0000-0000-000000000004') then
+    raise exception 'LOGISTICS_QUOTE_REUSED_KEY_DELETED_OTHER_QUOTE';
+  end if;
+  if has_table_privilege('authenticated','public.logistics_quotes','DELETE') then
+    raise exception 'LOGISTICS_QUOTE_DIRECT_DELETE_PRIVILEGE_REMAINS';
+  end if;
+  if not has_table_privilege('authenticated','public.operation_cost_items','DELETE') then
+    raise exception 'OPERATION_COST_ITEM_DELETE_PERMISSION_REMOVED';
+  end if;
+  if not has_function_privilege('authenticated','public.delete_logistics_quote(uuid,uuid)','EXECUTE')
+     or has_function_privilege('anon','public.delete_logistics_quote(uuid,uuid)','EXECUTE') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_RPC_GRANTS_INCORRECT';
+  end if;
+  if not exists (select 1 from pg_policies
+                 where schemaname='public' and tablename='logistics_quotes'
+                   and cmd='DELETE' and policyname='logistics_quotes_creator_delete') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_RLS_POLICY_REMOVED';
+  end if;
+end
+$logistics_quote_delete_audit$;
+
+-- A different organization member cannot delete a quote from this operation.
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
+set role authenticated;
+do $logistics_quote_delete_authorization$
+begin
+  begin
+    perform public.delete_logistics_quote(
+      '41000000-0000-0000-0000-000000000004',
+      '52000000-0000-0000-0000-000000000003');
+    raise exception 'LOGISTICS_QUOTE_CROSS_ORGANIZATION_DELETE_WAS_ALLOWED';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$logistics_quote_delete_authorization$;
+reset role;
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
 values ('40000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','SKU-1','Material de prueba','10000000-0000-0000-0000-000000000001');
 insert into public.inventory_items(id,organization_id,sku,description,created_by)
@@ -100,6 +419,10 @@ reset role;
 
 set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
 set role authenticated;
+select public.release_inventory_reservation(
+ (select id from public.inventory_reservations where request_key='50000000-0000-0000-0000-000000000002'),
+ 'fulfilled');
+-- Retrying the same terminal action is a no-op and must not create another stock movement.
 select public.release_inventory_reservation(
  (select id from public.inventory_reservations where request_key='50000000-0000-0000-0000-000000000002'),
  'fulfilled');
@@ -293,9 +616,9 @@ reset role;
 
 -- The creator can invite three L3 organizations before their users accept,
 -- and can still cancel an invitation if a trust check later expires.
-insert into public.operations(id,reference,title,status,created_by)
+insert into public.operations(id,reference,title,status,created_by,owner_organization_id)
 values ('30000000-0000-0000-0000-000000000002','FIA-INV-0002','Operación de invitación','draft',
-        '10000000-0000-0000-0000-000000000001');
+        '10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
 insert into public.operation_participants
  (operation_id,organization_id,participant_role,status,invited_by)
 values
@@ -541,6 +864,120 @@ begin
 end $completion_result$;
 reset role;
 
+
+-- Idempotency regression coverage for real three-party drafts and synthetic
+-- part recoveries. These are isolated fixtures; no remote production data.
+reset role;
+insert into public.operations
+ (id,reference,title,status,operation_type,is_synthetic,created_by,owner_organization_id)
+values
+ ('30000000-0000-0000-0000-000000000010','FIA-REC-PARENT-01','Tractor sintético para recuperación',
+  'accepted','machinery_purchase',true,
+  '10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001');
+insert into public.operation_participants
+ (operation_id,organization_id,participant_role,status,invited_by,responsibility)
+select '30000000-0000-0000-0000-000000000010',o.id,'buyer','accepted',
+       '10000000-0000-0000-0000-000000000001','Recibir la pieza de sustitución'
+from public.organizations o where o.demo_code='SYN-NARINO';
+
+set request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set role authenticated;
+
+-- Draft retries must return the same row only for an identical payload.
+do $draft_idempotency_regression$
+declare first_id uuid; retry_id uuid;
+begin
+  first_id := public.create_operation_draft(
+    'Borrador idempotente de prueba','standard',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000005',
+    '20000000-0000-0000-0000-000000000002',
+    '53000000-0000-0000-0000-000000000002');
+  retry_id := public.create_operation_draft(
+    'Borrador idempotente de prueba','standard',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000005',
+    '20000000-0000-0000-0000-000000000002',
+    '53000000-0000-0000-0000-000000000002');
+  if retry_id is distinct from first_id then
+    raise exception 'DRAFT_IDEMPOTENT_RETRY_CREATED_ANOTHER_OPERATION';
+  end if;
+  begin
+    perform public.create_operation_draft(
+      'Título manipulado','standard',
+      '20000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000005',
+      '20000000-0000-0000-0000-000000000002',
+      '53000000-0000-0000-0000-000000000002');
+    raise exception 'DRAFT_IDEMPOTENCY_KEY_ACCEPTED_DIFFERENT_PAYLOAD';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$draft_idempotency_regression$;
+
+-- Opening the blocking incident moves the synthetic parent to blocked.
+insert into public.operation_incidents
+ (id,operation_id,incident_type,description,status,blocks_progress,opened_by)
+values
+ ('60000000-0000-0000-0000-000000000010',
+  '30000000-0000-0000-0000-000000000010',
+  'logistics','Fallo de una pieza del tractor','open',true,
+  '10000000-0000-0000-0000-000000000001');
+
+-- Recovery retries must reuse the same sub-operation and audit pair; changing
+-- the payload with the same key must fail rather than create a second recovery.
+do $synthetic_recovery_idempotency_regression$
+declare first_recovery public.operations; retry_recovery public.operations;
+begin
+  first_recovery := public.create_synthetic_part_recovery(
+    '30000000-0000-0000-0000-000000000010',
+    'SYN-FRAN','SYN-GSM','Bomba hidráulica',
+    '53000000-0000-0000-0000-000000000001');
+  retry_recovery := public.create_synthetic_part_recovery(
+    '30000000-0000-0000-0000-000000000010',
+    'SYN-FRAN','SYN-GSM','Bomba hidráulica',
+    '53000000-0000-0000-0000-000000000001');
+  if retry_recovery.id is distinct from first_recovery.id then
+    raise exception 'SYNTHETIC_RECOVERY_RETRY_CREATED_ANOTHER_OPERATION';
+  end if;
+  begin
+    perform public.create_synthetic_part_recovery(
+      '30000000-0000-0000-0000-000000000010',
+      'SYN-FRAN','SYN-GSM','Alternador',
+      '53000000-0000-0000-0000-000000000001');
+    raise exception 'SYNTHETIC_RECOVERY_IDEMPOTENCY_KEY_ACCEPTED_DIFFERENT_PAYLOAD';
+  exception when invalid_parameter_value then
+    if sqlerrm <> 'IDEMPOTENCY_KEY_REUSED' then raise; end if;
+  end;
+end
+$synthetic_recovery_idempotency_regression$;
+reset role;
+
+do $synthetic_recovery_idempotency_audit$
+begin
+  if (select count(*) from public.operations
+      where parent_operation_id='30000000-0000-0000-0000-000000000010'
+        and operation_type='repair_part_delivery') <> 1 then
+    raise exception 'SYNTHETIC_RECOVERY_RETRY_DUPLICATED_SUB_OPERATION';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where actor_id='10000000-0000-0000-0000-000000000001'
+        and request_id='53000000-0000-0000-0000-000000000001') <> 2 then
+    raise exception 'SYNTHETIC_RECOVERY_RETRY_DUPLICATED_OR_MISSED_AUDIT';
+  end if;
+  if (select count(*) from public.operation_audit_events
+      where operation_id='30000000-0000-0000-0000-000000000010'
+        and request_id='53000000-0000-0000-0000-000000000001'
+        and event_type='recovery.linked') <> 1 then
+    raise exception 'SYNTHETIC_RECOVERY_PARENT_LINK_NOT_IDEMPOTENT';
+  end if;
+end
+$synthetic_recovery_idempotency_audit$;
+
 -- Private role helper is an internal authorization primitive, not a client API.
 do $private_role_helper_boundary$
 begin
@@ -632,14 +1069,19 @@ begin
     end if;
 
     if has_table_privilege('authenticated',table_row.oid,'DELETE')
-       and table_row.relname not in ('logistics_quotes','operation_cost_items') then
+       and table_row.relname <> 'operation_cost_items' then
       raise exception 'AUTHENTICATED_DELETE_WITHOUT_DELETE_POLICY:%',table_row.relname;
     end if;
   end loop;
 
-  if not has_table_privilege('authenticated','public.logistics_quotes','DELETE')
+  if has_table_privilege('authenticated','public.logistics_quotes','DELETE')
      or not has_table_privilege('authenticated','public.operation_cost_items','DELETE') then
-    raise exception 'LEGITIMATE_QUOTE_OR_COST_DELETE_PERMISSION_REMOVED';
+    raise exception 'LOGISTICS_QUOTE_OR_COST_DELETE_PRIVILEGES_INCORRECT';
+  end if;
+  if not exists (select 1 from pg_policies
+                 where schemaname='public' and tablename='logistics_quotes'
+                   and cmd='DELETE' and policyname='logistics_quotes_creator_delete') then
+    raise exception 'LOGISTICS_QUOTE_DELETE_RLS_POLICY_MISSING';
   end if;
 
   if exists (
@@ -705,7 +1147,83 @@ begin
   ) then
     raise exception 'UNSAFE_PUBLIC_TABLE_DEFAULT_PRIVILEGES_REMAIN';
   end if;
+
+  if not exists (
+    select 1 from pg_default_acl d
+    where d.defaclrole='postgres'::regrole
+      and d.defaclobjtype='f'
+      and d.defaclnamespace=0
+  ) then
+    raise exception 'GLOBAL_FUNCTION_DEFAULT_ACL_OVERRIDE_MISSING';
+  end if;
+
+  if exists (
+    select 1
+    from pg_default_acl d
+    cross join lateral aclexplode(d.defaclacl) a
+    where d.defaclrole='postgres'::regrole
+      and d.defaclobjtype='f'
+      and d.defaclnamespace=0
+      and a.grantee=0 and a.privilege_type='EXECUTE'
+  ) then
+    raise exception 'UNSAFE_GLOBAL_FUNCTION_DEFAULT_PUBLIC_EXECUTE_REMAINS';
+  end if;
+
+  if exists (
+    select 1
+    from pg_default_acl d
+    cross join lateral aclexplode(d.defaclacl) a
+    where d.defaclrole='postgres'::regrole
+      and d.defaclobjtype='f'
+      and d.defaclnamespace='public'::regnamespace
+      and a.grantee in ('anon'::regrole,'authenticated'::regrole)
+      and a.privilege_type='EXECUTE'
+  ) then
+    raise exception 'UNSAFE_PUBLIC_FUNCTION_DEFAULT_CLIENT_EXECUTE_REMAINS';
+  end if;
+
+  if exists (
+    select 1
+    from pg_default_acl d
+    cross join lateral aclexplode(d.defaclacl) a
+    where d.defaclrole='postgres'::regrole
+      and d.defaclnamespace='public'::regnamespace
+      and d.defaclobjtype in ('r','S')
+      and a.grantee in ('anon'::regrole,'authenticated'::regrole)
+  ) then
+    raise exception 'UNSAFE_PUBLIC_TABLE_OR_SEQUENCE_DEFAULT_CLIENT_PRIVILEGES_REMAIN';
+  end if;
+
 end
 $least_privilege_table_grants$;
 
 select 'FULL MIGRATION CHAIN + INCIDENT + TRUST + PRIVATE PROFILE TESTS: PASS' as result;
+
+
+-- Authorization must be evaluated before acquiring inventory item row locks.
+-- This guards against avoidable lock contention from authenticated non-managers.
+do $inventory_authorization_precedes_item_locks$
+declare
+  movement_definition text;
+  reservation_definition text;
+begin
+  movement_definition := pg_get_functiondef(
+    'public.record_inventory_movement(uuid,text,numeric,text,uuid,uuid)'::regprocedure
+  );
+  reservation_definition := pg_get_functiondef(
+    'public.reserve_inventory_item(uuid,uuid,numeric,uuid)'::regprocedure
+  );
+
+  if position('private.is_inventory_manager' in movement_definition) = 0
+     or position('private.is_inventory_manager' in movement_definition)
+        > position('for update' in movement_definition) then
+    raise exception 'INVENTORY_MOVEMENT_LOCK_PRECEDES_AUTHORIZATION';
+  end if;
+
+  if position('private.is_inventory_manager' in reservation_definition) = 0
+     or position('private.is_inventory_manager' in reservation_definition)
+        > position('for update' in reservation_definition) then
+    raise exception 'INVENTORY_RESERVATION_LOCK_PRECEDES_AUTHORIZATION';
+  end if;
+end
+$inventory_authorization_precedes_item_locks$;

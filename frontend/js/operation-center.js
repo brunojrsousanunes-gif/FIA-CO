@@ -21,5 +21,171 @@ function reset(){state={created:false,index:0,reference:'',incident:false,closed
 function summary(){const lines=['FIA&CO · RESUMEN DE OPERACIÓN SINTÉTICA',`Referencia: ${state.reference}`,'Estado: CERRADA','Datos reales: NO','Fondos movidos por FIA&CO: NO','',...state.events.slice().reverse().map(x=>`${x.at} · ${x.text}`),'','Documento de demostración sin efectos jurídicos.'];const url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`${state.reference}-resumen.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $$('[data-action]').forEach(button=>button.addEventListener('click',()=>{const action=button.dataset.action;if(action==='create')create();else if(action==='incident')incident();else if(action==='resolve')resolve();else advance(action);}));
 $('[data-reset]').addEventListener('click',reset);download.addEventListener('click',summary);$('[data-field="type"]').addEventListener('change',event=>{const type=event.target.value;$('[data-model-link]').href=`form-models.html?model=${encodeURIComponent(type)}`;});
+
+ // Authenticated backend connection. Only a publishable key is present in the
+ // browser; all data access is governed by Supabase RLS and column privileges.
+ const SB_URL='https://etttredbkbcgqwciipls.supabase.co';
+ const SB_PUBLIC_KEY='sb_publishable_xds7pTBOHvywaLIpg4W3eA_d_guZbA9';
+ const loginForm=$('[data-backend-login]');
+ const backendState=$('[data-backend-state]');
+ const backendMessage=$('[data-backend-message]');
+ const backendActions=$('[data-backend-actions]');
+ const backendResults=$('[data-backend-results]');
+ const backendList=$('[data-backend-list]');
+ const backendCreateForm=$('[data-backend-create]');
+ const backendOwnerSelect=$('[data-backend-owner]');
+ let backendSession=null,backendRefreshPromise=null;
+ let backendBusy=false;
+ let activeMemberships=[];
+ const pendingBackendRequestKeys=new Map();
+ async function pendingBackendRequestKey(scope,payload){
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({userId:backendSession?.user?.id||null,payload})));
+  const fingerprint=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+  const storageKey=`fia_pending_request:${scope}:${fingerprint}`;
+  let key=pendingBackendRequestKeys.get(storageKey)||'';
+  if(!key){try{key=sessionStorage.getItem(storageKey)||'';}catch{}}
+  if(!key)key=crypto.randomUUID();
+  pendingBackendRequestKeys.set(storageKey,key);
+  try{sessionStorage.setItem(storageKey,key);}catch{}
+  return {key,storageKey};
+ }
+ function clearBackendRequestKey(storageKey){
+  pendingBackendRequestKeys.delete(storageKey);
+  try{sessionStorage.removeItem(storageKey);}catch{}
+ }
+ function backendStatus(text,kind=''){backendMessage.textContent=text;backendMessage.className=`backend-message ${kind}`;}
+ function backendStateText(text){backendState.textContent=text;}
+ async function authCall(path,body){
+  const response=await fetch(`${SB_URL}/auth/v1/${path}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_PUBLIC_KEY},body:JSON.stringify(body),cache:'no-store',credentials:'omit'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.msg||data.message||data.error_description||'No se pudo completar la autenticación.');
+  return data;
+ }
+ async function ensureBackendSession(){
+  const session=backendSession;
+  if(!session)throw new Error('Inicia sesión para consultar tus operaciones.');
+  if(session.expiresAt-Date.now()/1000<60){
+   if(!backendRefreshPromise){
+    backendRefreshPromise=(async()=>{
+     const refreshed=await authCall('token?grant_type=refresh_token',{refresh_token:session.refreshToken});
+     if(backendSession!==session)throw new Error('La sesión se ha cerrado.');
+     backendSession={accessToken:refreshed.access_token,refreshToken:refreshed.refresh_token,expiresAt:Date.now()/1000+Number(refreshed.expires_in||3600),user:refreshed.user};
+    })();
+   }
+   const pending=backendRefreshPromise;
+   try{await pending;}finally{if(backendRefreshPromise===pending)backendRefreshPromise=null;}
+  }
+  if(!backendSession)throw new Error('La sesión se ha cerrado.');
+  return backendSession;
+ }
+ async function backendGet(path){
+  const current=await ensureBackendSession();
+  const response=await fetch(`${SB_URL}/rest/v1/${path}`,{method:'GET',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`,'Accept':'application/json'},cache:'no-store',credentials:'omit'});
+  const data=await response.json().catch(()=>[]);
+  if(!response.ok)throw new Error(data.message||data.details||'No se pudieron consultar los datos autorizados.');
+  return data;
+ }
+ async function backendPost(path,body){
+  const current=await ensureBackendSession();
+  const response=await fetch(`${SB_URL}/rest/v1/${path}`,{method:'POST',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:JSON.stringify(body),cache:'no-store',credentials:'omit'});
+  const data=await response.json().catch(()=>null);
+  if(!response.ok)throw new Error(data?.message||data?.details||'No se pudo crear el borrador.');
+  return data;
+ }
+ function renderBackendRows(rows){
+  backendList.replaceChildren();
+  if(!rows.length){const li=document.createElement('li');li.className='backend-empty';li.textContent='No hay operaciones visibles para esta cuenta.';backendList.append(li);return;}
+  for(const op of rows){
+   const li=document.createElement('li'),title=document.createElement('strong'),meta=document.createElement('span'),ref=document.createElement('small');
+   title.textContent=op.title||'Operación sin título';ref.textContent=op.reference||'Sin referencia';
+   meta.textContent=`${String(op.status||'').toUpperCase()} · ${op.operation_type||'operación'} · v${op.version||1}`;
+   li.append(ref,title,meta);backendList.append(li);
+  }
+ }
+ async function loadBackend(){
+  if(backendBusy||!backendSession)return;
+  backendBusy=true;backendStateText('CONSULTANDO');backendStatus('Comprobando permisos de tu cuenta…');
+  try{
+   await ensureBackendSession();
+   const members=await backendGet(`organization_members?select=organization_id,member_role&user_id=eq.${encodeURIComponent(backendSession.user.id)}&status=eq.active`);
+   const memberOrgIds=members.map(member=>member.organization_id);
+   const [organizations,operations]=await Promise.all([
+    memberOrgIds.length
+     ? backendGet(`organizations?select=id,status,is_synthetic&id=in.(${memberOrgIds.join(',')})&status=eq.active&is_synthetic=eq.false`)
+     : Promise.resolve([]),
+    backendGet('operations?select=id,reference,title,status,operation_type,version,created_at&is_synthetic=eq.false&order=created_at.desc&limit=50')
+   ]);
+   const realActiveOrganizationIds=new Set(organizations.map(org=>org.id));
+   activeMemberships=members.filter(member=>realActiveOrganizationIds.has(member.organization_id));
+   backendOwnerSelect.replaceChildren();
+   const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Selecciona una empresa real tuya';backendOwnerSelect.append(placeholder);
+   for(const member of activeMemberships){const option=document.createElement('option');option.value=member.organization_id;option.textContent=`${member.member_role} · ${member.organization_id}`;backendOwnerSelect.append(option);}
+   backendCreateForm.hidden=activeMemberships.length===0;
+   $('[data-backend-memberships]').textContent=`Empresas reales activas: ${activeMemberships.length} · Pertenencias activas: ${members.length}`;
+   $('[data-backend-count]').textContent=`Operaciones reales visibles: ${operations.length}`;
+   renderBackendRows(operations);backendResults.hidden=false;backendStateText('CONECTADO');
+   backendStatus(activeMemberships.length
+    ? 'Conexión autenticada. Se muestran solo empresas y operaciones reales autorizadas.'
+    : 'Conexión autenticada, pero esta cuenta solo tiene pertenencias sintéticas o ninguna empresa real activa. El alta de borradores reales permanece bloqueada.','success');
+  }catch(error){
+   backendStateText('ERROR DE ACCESO');backendStatus(error.message||'No se pudo consultar el backend.','error');
+   if(/JWT|refresh token|session/i.test(error.message||''))logoutBackend(false);
+  }finally{backendBusy=false;}
+ }
+ function logoutBackend(notify=true){
+  backendSession=null;backendRefreshPromise=null;activeMemberships=[];backendResults.hidden=true;backendActions.hidden=true;backendCreateForm.hidden=true;loginForm.hidden=false;
+  loginForm.reset();backendCreateForm.reset();backendOwnerSelect.replaceChildren();backendList.replaceChildren();backendStateText('DESCONECTADO');
+  if(notify)backendStatus('Sesión cerrada. No se ha guardado la contraseña ni la sesión.');
+ }
+ loginForm.addEventListener('submit',async event=>{
+  event.preventDefault();if(backendBusy)return;
+  const email=loginForm.elements.email.value.trim(),password=loginForm.elements.password.value;
+  if(!email||!password){backendStatus('Introduce el correo y la contraseña de una cuenta habilitada.','error');return;}
+  backendBusy=true;backendStateText('AUTENTICANDO');backendStatus('Verificando la cuenta…');
+  try{
+   const result=await authCall('token?grant_type=password',{email,password});
+   if(!result.access_token||!result.refresh_token||!result.user?.id)throw new Error('La respuesta de autenticación está incompleta.');
+   backendSession={accessToken:result.access_token,refreshToken:result.refresh_token,expiresAt:Date.now()/1000+Number(result.expires_in||3600),user:result.user};
+   loginForm.reset();loginForm.hidden=true;backendActions.hidden=false;
+   $('[data-backend-user]').textContent='Cuenta autenticada · sesión solo en memoria';
+   backendBusy=false;await loadBackend();
+  }catch(error){loginForm.elements.password.value='';backendStateText('DESCONECTADO');backendStatus(error.message||'No se pudo iniciar sesión.','error');}
+  finally{backendBusy=false;}
+ });
+
+ backendCreateForm.addEventListener('submit',async event=>{
+  event.preventDefault();if(backendBusy||!backendSession)return;
+  const form=backendCreateForm;
+  const title=form.elements.title.value.trim(),operationType=form.elements.operationType.value;
+  const ownerOrg=form.elements.ownerOrg.value,sellerOrg=form.elements.sellerOrg.value.trim(),carrierOrg=form.elements.carrierOrg.value.trim(),buyerOrg=form.elements.buyerOrg.value.trim();
+  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if(title.length<3||title.length>180||![sellerOrg,carrierOrg,buyerOrg,ownerOrg].every(value=>uuid.test(value))){backendStatus('Revisa el título y los cuatro identificadores UUID.','error');return;}
+  if(new Set([sellerOrg,carrierOrg,buyerOrg]).size!==3){backendStatus('Vendedor, transportista y comprador deben ser tres empresas distintas.','error');return;}
+  if(!activeMemberships.some(member=>member.organization_id===ownerOrg)||![sellerOrg,carrierOrg,buyerOrg].includes(ownerOrg)){backendStatus('La empresa propietaria debe ser una de tus empresas activas y participar en la operación.','error');return;}
+  backendBusy=true;backendStateText('CREANDO');backendStatus('Validando las tres empresas y creando el borrador…');
+  try{
+   const payload={
+    target_title:title,target_operation_type:operationType,target_owner_organization:ownerOrg,
+    target_seller_organization:sellerOrg,target_carrier_organization:carrierOrg,target_buyer_organization:buyerOrg
+   };
+   const pending=await pendingBackendRequestKey('create_operation_draft',payload);
+   const result=await backendPost('rpc/create_operation_draft',{...payload,request_key:pending.key});
+   clearBackendRequestKey(pending.storageKey);
+   const operationId=Array.isArray(result)?result[0]:result;
+   backendStatus(`Borrador creado correctamente · identificador ${String(operationId||'registrado')}. No se han enviado invitaciones por correo.`,'success');
+   form.elements.title.value='';form.elements.sellerOrg.value='';form.elements.carrierOrg.value='';form.elements.buyerOrg.value='';
+   backendBusy=false;await loadBackend();
+  }catch(error){backendStateText('ERROR DE CREACIÓN');backendStatus(error.message||'No se pudo crear el borrador.','error');}
+  finally{backendBusy=false;}
+ });
+
+ $('[data-backend-refresh]').addEventListener('click',loadBackend);
+ $('[data-backend-logout]').addEventListener('click',()=>{
+  const current=backendSession;
+  logoutBackend();
+  if(current)fetch(`${SB_URL}/auth/v1/logout`,{method:'POST',headers:{'apikey':SB_PUBLIC_KEY,'Authorization':`Bearer ${current.accessToken}`},cache:'no-store',credentials:'omit'}).catch(()=>{});
+ });
+ window.addEventListener('pagehide',()=>{backendSession=null;backendRefreshPromise=null;});
+
 window.addEventListener('pagehide',()=>{state.events=[];});show(0);
 })();
