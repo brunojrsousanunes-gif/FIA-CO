@@ -2,7 +2,7 @@
 
 **Proyecto inspeccionado:** FIA-CO (`etttredbkbcgqwciipls`, eu-west-1, PostgreSQL 17.6.1)  
 **Tipo de actuación realizada en esta revisión:** solo lectura.  
-**Estado:** BLOQUEADO PARA BORRADO REMOTO HASTA DISPONER DE BACKUP/RESTAURACIÓN VERIFICADOS Y PROCEDIMIENTO AUDITABLE.
+**Estado:** DATOS DE EMPRESAS/OPERACIONES SINTÉTICAS ELIMINADOS Y VERIFICADOS EL 18-11-2026. Las dos cuentas Auth se conservaron; no se borró ninguna identidad.
 
 ## 1. Recuento observado
 
@@ -87,3 +87,40 @@ La rutina:
 - comprueba postcondiciones antes de confirmar la transacción; cualquier discrepancia provoca rollback.
 
 **No ejecutar todavía en Supabase remoto.** Sigue siendo obligatorio comprobar backup restaurable y ensayar el mismo script en una copia aislada. El archivo es un procedimiento de mantenimiento manual, no una migración automática ni una acción ejecutada. El test actual valida el contrato estático, no sustituye una prueba real de PostgreSQL.
+
+
+## 7. Ejecución remota y verificación (18-11-2026)
+
+La rutina se ejecutó en el proyecto remoto `etttredbkbcgqwciipls` en una única transacción. Resultado de la consulta posterior:
+
+| Comprobación | Resultado |
+|---|---:|
+| Organizaciones restantes | 0 |
+| Organizaciones sintéticas restantes | 0 |
+| Operaciones restantes | 0 |
+| Operaciones sintéticas restantes | 0 |
+| Pertenencias restantes | 0 |
+| Solicitudes piloto restantes | 0 |
+| Eventos de auditoría de operaciones restantes | 0 |
+| Costes restantes | 0 |
+| Ofertas logísticas restantes | 0 |
+| Participantes restantes | 0 |
+| Registros financieros restantes | 0 |
+| Confirmaciones / incidencias / notificaciones / evidencias | 0 / 0 / 0 / 0 |
+| Cualificaciones / verificaciones / perfiles de seguridad | 0 / 0 / 0 |
+| Verificaciones y eventos L3 | 0 / 0 |
+| Cuentas `auth.users` conservadas | 2 |
+| Registros privados de auditoría de limpieza | 1 |
+
+Registro de la intervención:
+- run_id: `3fdc8e44-dafd-448c-b301-9a1cbf4e9854`
+- actor_type: `system`
+- actor_label: `FIA&CO authorized maintenance`
+- actor_user_id: `NULL` deliberadamente; no se atribuyó la acción a una persona.
+- estado: `completed`
+- alcance registrado: 6 organizaciones y 3 operaciones.
+- recuentos retirados: 1 pertenencia, 1 solicitud piloto, 13 eventos de auditoría, 3 costes, 2 ofertas, 9 participantes y 3 registros financieros.
+
+Las cuentas Auth no se tocaron: siguen existiendo 2. Una de ellas no tiene inicio de sesión, pertenencias ni referencias de auditoría; no se eliminó porque no existe evidencia suficiente para asegurar que no sea una cuenta personal. La cuenta que tenía pertenencia también se conservó, aunque su pertenencia de prueba ya no existe.
+
+**Conclusión:** limpieza de empresas, operaciones y datos asociados **COMPROBADA**. Eliminación de cuentas Auth de prueba **PENDIENTE** de identificación inequívoca. No se verificó una restauración de backup; la limpieza se confirmó mediante transacción y consultas posteriores, pero no existe prueba de recuperación desde backup.
