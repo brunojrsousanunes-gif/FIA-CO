@@ -76,6 +76,15 @@ Este documento registra una revisión estática y de solo lectura. No es una pru
 - **Impacto:** no debe presentarse esta interfaz como gestión de operaciones reales de clientes ni como flujo productivo de creación de operaciones.
 - **Acción:** diseñar la conexión real solo después de cerrar la reconciliación de permisos y seguridad.
 
+### F-07 — Endurecimientos de idempotencia y concurrencia aún ausentes del remoto
+
+- **Severidad:** Media.
+- **Confianza:** Alta sobre la diferencia de versiones; impacto potencial no explotado en esta revisión.
+- **Estado:** Las versiones endurecidas están en PR #192, pero las migraciones correspondientes no figuran en el historial remoto.
+- **Evidencia:** las definiciones remotas de `create_operation_draft`, `accept_operation_invitation`, `transition_operation`, `revoke_organization_l3_authorization` y `release_inventory_reservation` son anteriores a las versiones de PR #192. Las migraciones `20261115010000`, `20261115020000` y `20261115040000` añaden vinculación de claves de petición al payload/actor/versión, serialización y comprobaciones de autorización tras esperas de bloqueo. La batería de tres empresas contiene pruebas negativas específicas para reutilización de claves, aceptación por identidad incorrecta, revocación y carreras de concurrencia.
+- **Impacto posible:** reintentos concurrentes o claves reutilizadas podrían producir respuestas inconsistentes, aceptar una repetición no equivalente o mantener una autorización que cambió mientras la operación esperaba un bloqueo.
+- **Acción:** incorporar estas migraciones a la reconciliación F-01 y validar la cadena completa con una copia/entorno aislado antes de cualquier cambio remoto.
+
 ## Controles positivos comprobados
 
 1. Las tablas públicas examinadas tienen RLS habilitado.
