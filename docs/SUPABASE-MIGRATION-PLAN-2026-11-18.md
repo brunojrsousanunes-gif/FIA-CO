@@ -164,8 +164,8 @@ No se aplicaron migraciones ni se modificaron Auth, datos, grants, políticas, f
 
 ### Hallazgos de autorización y privilegios confirmados en remoto
 
-1. `private.can_access_operation(uuid)` permite acceso por `created_by` sin exigir que el creador siga siendo miembro activo de la organización propietaria. El acceso alternativo por participante sí comprueba pertenencia activa.
-2. `private.can_manage_operation(uuid)` permite gestión por `created_by` y estado de operación, sin exigir pertenencia activa al propietario.
+1. `private.can_access_operation(uuid)` permite acceso por `created_by` sin exigir que el creador siga siendo miembro activo de la organización propietaria. El acceso alternativo por participante sí comprueba pertenencia activa. Su `search_path` remoto sigue siendo `pg_catalog, public`, no vacío.
+2. `private.can_manage_operation(uuid)` permite gestión por `created_by` y estado de operación, sin exigir pertenencia activa al propietario. Su `search_path` remoto también sigue siendo `pg_catalog, public`.
 3. La política remota `operations_creator_draft_update` no exige pertenencia activa en `USING`; su `WITH CHECK` permite `owner_organization_id IS NULL` o pertenencia activa. Esto difiere de la política endurecida de PR #192.
 4. La política remota de visibilidad de organizaciones solo contempla organización sintética o pertenencia directa; no incorpora todavía la visibilidad limitada de contrapartes participantes preparada en PR #192.
 5. `authenticated` conserva SELECT sobre `operations.amount_cents` y `operations.currency`, pese a que PR #192 revoca expresamente esas columnas heredadas.
@@ -177,8 +177,8 @@ Estos son defectos estructurales de autorización/privilegios que deben cerrarse
 ### Elementos que no son bloqueos en esta fase
 
 - Protección de Auth contra contraseñas filtradas: permanece desactivada por decisión expresa del usuario para esta fase sin datos sensibles. No modificar ahora; añadirla al gate de auditoría oficial/preproducción.
-- El asesor de seguridad enumera nueve funciones `SECURITY DEFINER` ejecutables por `authenticated`; todas las consultadas usan `search_path` vacío y ninguna concede EXECUTE a `anon`. La mera presencia de nueve avisos no demuestra vulnerabilidad; se deben revisar autorizaciones individualmente.
-- Tres tablas privadas tienen RLS activado y no conceden SELECT/INSERT a `anon` ni `authenticated`; ese cierre de privilegios es intencionado y no debe abrirse para silenciar avisos.
+- Las nueve funciones `SECURITY DEFINER` del esquema `public` consultadas tienen `search_path` vacío, EXECUTE para `authenticated` y no para `anon`. Además, el inventario de funciones privadas detecta nueve helpers `SECURITY DEFINER` con `search_path` no vacío: `after_confirmation_insert`, `after_incident_change`, `after_participant_acceptance`, `append_operation_audit`, `can_access_operation`, `can_manage_operation`, `enqueue_operation_notice`, `is_org_member` y `validate_evidence_role`. Algunas se ejecutan desde políticas RLS o triggers; PR #192 programa su endurecimiento. La mera presencia de funciones `SECURITY DEFINER` no demuestra vulnerabilidad: hay que revisar sus permisos y cuerpos.
+- Todas las tablas base del esquema `public` comprobadas tienen RLS activado; no se detectaron grants de lectura/escritura a `anon` en el inventario consultado. Varias tablas conservan grants de escritura a `authenticated`, sujetos a RLS; la migración 150000 retira escrituras directas donde deben usarse RPC/flujo autorizado. Tres tablas privadas tienen RLS activado y no conceden SELECT/INSERT a `anon` ni `authenticated`; ese cierre de privilegios es intencionado y no debe abrirse para silenciar avisos.
 
 ### Estado de CI y límites
 
