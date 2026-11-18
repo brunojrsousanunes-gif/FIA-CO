@@ -162,6 +162,7 @@ Este addendum actualiza los hechos que cambiaron después de la revisión inicia
 - `authenticated` conserva SELECT sobre `public.operations.amount_cents` y `public.operations.currency`.
 - `authenticated` conserva INSERT y UPDATE sobre `public.organization_members` y `public.organizations`.
 - Las políticas RLS están activadas en las tablas base públicas comprobadas y no se observaron grants de lectura/escritura a `anon`. Sin embargo, estos privilegios de `authenticated` deben limitarse según el flujo autorizado.
+- Los privilegios por defecto de `postgres` en `public` también están abiertos para objetos futuros: nuevas funciones heredan EXECUTE para `anon`/`authenticated`; nuevas tablas heredan INSERT/SELECT/UPDATE para `authenticated`; nuevas secuencias heredan USAGE/SELECT/UPDATE. La migración 150000 de PR #192 revoca estos defaults. Los defaults de `storage` son propios de Supabase y quedan fuera del cambio.
 - La migración `20261115000000_owner_membership_access_hardening.sql` de PR #192 revoca las columnas financieras heredadas y las escrituras directas sobre organizaciones/pertenencias.
 - **Severidad:** Alta antes de datos reales. No hay evidencia de explotación o extracción en esta revisión.
 
