@@ -153,3 +153,19 @@ Se eliminó exactamente la cuenta secundaria identificada, dentro de una operaci
 La única cuenta Auth restante se preservó. No se modificaron sus credenciales, identidad ni sesiones. El recuento demuestra que queda una cuenta, pero esta revisión no vuelve a certificar por sí sola la titularidad de esa cuenta mediante sus datos personales.
 
 **Resultado:** eliminación de la cuenta secundaria Pepitogrillo **COMPROBADA**. Cuenta Auth restante **PRESERVADA**. No se borró ninguna otra cuenta. No se verificó backup restaurable ni PITR.
+
+
+## 9. Endurecimiento del registro interno de mantenimiento
+
+El inventario de tablas detectó que `private.synthetic_cleanup_runs` tiene RLS desactivado. Se verificaron directamente los privilegios antes de concluir:
+
+| Rol | USAGE en esquema private | SELECT/INSERT/UPDATE/DELETE sobre la tabla |
+|---|---|---|
+| anon | No | Ninguno |
+| authenticated | Sí | Ninguno |
+| service_role | No se concede por tabla | Ninguno |
+| postgres (owner) | Sí | Control de mantenimiento |
+
+**Conclusión:** el aviso de RLS desactivado no se traduce en acceso directo para `anon`/`authenticated`, porque faltan los grants y `anon` tampoco tiene USAGE del esquema. Sigue siendo una brecha de defensa en profundidad.
+
+El script de mantenimiento se ha actualizado en PR #194 para ejecutar `ALTER TABLE private.synthetic_cleanup_runs ENABLE ROW LEVEL SECURITY` y no crear políticas. Esta modificación está solo en GitHub; no se ha ejecutado en Supabase remoto. La tabla remota permanece sin RLS hasta autorización específica.
