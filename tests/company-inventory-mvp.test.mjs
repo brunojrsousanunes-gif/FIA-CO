@@ -277,7 +277,11 @@ assert.ok(privateOperationCenterJs.includes('async function refreshSession()'));
 assert.ok(privateOperationCenterJs.includes('Promise.allSettled(['));
 assert.ok(privateOperationCenterJs.includes("if(error.status!==401||!state.refreshToken)throw error;"));
 assert.ok(privateOperationCenterJs.includes("error.code==='SESSION_REFRESH_FAILED'"));
-assert.ok(privateOperationCenterJs.includes("if(token)fetch(\u0060\u0024{SUPABASE_URL}/auth/v1/logout\u0060"));
+assert.ok(privateOperationCenterJs.includes('await supabase.signOut()'), 'logout must await the shared Supabase client signOut request');
+assert.match(privateOperationCenterJs, /async function logout\(\)[\s\S]*?finally\{clearSession\(\);[\s\S]*?setMessage\(/,
+  'local session cleanup and the remote revocation result must be reported even when logout fails');
+assert.doesNotMatch(privateOperationCenterJs, /if\(token\)fetch\(/,
+  'logout must not bypass the shared Supabase browser client');
 assert.ok(privateOperationCenterJs.includes("finance?money(finance.amount_cents):'Solo visible para la empresa titular'"));
 assert.match(privateOperationCenterJs, /operations\?select=id,reference,title,status,version,operation_type/);
 assert.doesNotMatch(privateOperationCenterJs, /operations\?select=[^'\u0060]*amount_cents/,
