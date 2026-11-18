@@ -30,10 +30,12 @@ const line=(strong,small='')=>{const p=document.createElement('p'),b=document.cr
 
 function clearSession(){state.accessToken='';state.refreshToken='';state.expiresAt=0;refreshPromise=null;state.user=null;state.operations=[];state.selected=null;state.detail=null;state.memberships=[];state.accessRequests=[];inventory.items=[];inventory.reservations=[];if(inventoryHost)inventoryHost.hidden=true;ui.password.value='';render();}
 async function logout(){
- const hasSession=Boolean(state.accessToken);ui.logout.disabled=true;let remoteConfirmed=!hasSession;
- try{if(hasSession){await supabase.signOut();remoteConfirmed=true;}}
- catch{remoteConfirmed=false;}
- finally{clearSession();ui.logout.disabled=false;setMessage(remoteConfirmed?'Sesión cerrada; revocación remota confirmada.':'Sesión cerrada en este dispositivo; no se pudo confirmar la revocación remota.',remoteConfirmed?'success':'error');}
+ const hasSession=Boolean(state.accessToken),remoteRequest=hasSession?supabase.signOut():null;
+ clearSession();
+ if(!hasSession){setMessage('Sesión local cerrada.','success');return;}
+ setMessage('Sesión cerrada en este dispositivo; comprobando revocación remota…');
+ try{await remoteRequest;setMessage('Sesión cerrada; revocación remota confirmada.','success');}
+ catch{setMessage('Sesión cerrada en este dispositivo; no se pudo confirmar la revocación remota.','error');}
 }
 function saveSession(payload){
  if(!payload?.access_token||!payload?.refresh_token||!payload?.user?.id)throw new Error('AUTH_SESSION_INCOMPLETE');
