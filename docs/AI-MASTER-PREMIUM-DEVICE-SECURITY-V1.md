@@ -160,3 +160,27 @@ Antes de implementar:
 ## 12. Estado
 
 Este documento es una especificación de arquitectura. No demuestra que existan ya passkeys, dispositivos registrados, mTLS, cifrado de aplicación, acceso Premium móvil ni IA Maestra operativa. La siguiente etapa es auditar el código, Auth, políticas, permisos, sesiones y esquema de las PR activas y de `main`, y después diseñar el cambio mínimo compatible.
+
+## 13. Hallazgos iniciales de código revisado (18-11-2026)
+
+Esta revisión es parcial y está limitada a los archivos leídos en la rama de la PR #192 y a la documentación Premium consultada. No equivale a auditoría completa de Auth, RLS, despliegue ni Supabase remoto.
+
+### Base reutilizable observada
+
+- Existe un módulo de contexto de acceso por roles OWNER, ADMIN, OPERATOR y VIEWER en `core/identity/access-control.mjs`.
+- Existe una evaluación de capacidades y techo Trust por rol en `core/identity/hierarchy-security-access.mjs`; el módulo indica que el estado del cliente no eleva el acceso y que la evaluación de producción debe generarse en servidor.
+- Las migraciones revisadas aplican controles de pertenencia activa y revocación de autoridad CEO cuando termina la relación o el rol; también endurecen privilegios y funciones SECURITY DEFINER.
+- Existe un token firmado para preproducción en `core/identity/preprod-session-token.mjs`, con duración limitada y marca explícita `productionIdentityVerified: false`; sus pruebas cubren firma alterada y expiración.
+
+### Brechas que no se deben confundir con capacidades ya disponibles
+
+- El token anterior es expresamente de preproducción; en el archivo revisado no hay registro de dispositivos, vínculo a clave pública, passkey/WebAuthn ni revocación individual de credenciales.
+- El módulo de roles/capacidades revisado es una lógica de aplicación con roles estáticos; no demuestra por sí solo permisos configurables por departamento, dispositivo o tarea en producción.
+- En los documentos Premium consultados, `PREMIUM_AGENT_READY=false` y el pricing sigue siendo una hipótesis pendiente de costes, pilotos y revisiones externas.
+- En esta lectura inicial no se ha demostrado un derecho Premium validado en servidor, panel de dispositivos, automatizaciones Premium productivas ni medición real de ROI.
+- No se ha inspeccionado todavía el estado remoto de Supabase ni se ha probado un inicio de sesión real desde dispositivos.
+
+### Consecuencia de diseño
+
+Reutilizar identidad, pertenencia, jerarquía, Trust, RLS y auditoría existentes donde correspondan. Antes de proponer tablas nuevas, completar la inspección de migraciones, políticas, funciones, Auth, sesiones y consumidores. No reutilizar el token de preproducción como sesión Premium ni tratar el rol OWNER/CEO como sustituto automático del permiso para cada operación.
+
