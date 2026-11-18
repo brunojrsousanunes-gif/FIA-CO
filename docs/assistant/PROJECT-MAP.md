@@ -320,3 +320,8 @@ No asumir que dos archivos están relacionados por tener nombres parecidos. Conf
 ## 10. Mantenimiento del mapa
 
 Actualizar este documento solo cuando cambien rutas, módulos principales o relaciones entre áreas. Para el trabajo ordinario, actualizar el traspaso y el registro de tareas; no generar burocracia documental innecesaria.
+
+
+## K. Auditoría técnica actual
+
+- [Revisión técnica inicial de seguridad y Supabase remoto — 18-11-2026](../SECURITY-AUDIT-SUPABASE-2026-11-18.md) — diferencia entre PR #192 y el estado remoto, hallazgos, controles positivos, límites y próximos pasos.
