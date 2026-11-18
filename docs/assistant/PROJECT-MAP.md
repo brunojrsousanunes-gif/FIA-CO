@@ -325,3 +325,8 @@ Actualizar este documento solo cuando cambien rutas, módulos principales o rela
 ## K. Auditoría técnica actual
 
 - [Revisión técnica inicial de seguridad y Supabase remoto — 18-11-2026](../SECURITY-AUDIT-SUPABASE-2026-11-18.md) — diferencia entre PR #192 y el estado remoto, hallazgos, controles positivos, límites y próximos pasos.
+
+
+## L. Plan de migración y aceptación Supabase
+
+- [Plan de reconciliación y migración de seguridad Supabase — 18-11-2026](../SUPABASE-MIGRATION-PLAN-2026-11-18.md) — orden de diez migraciones, fotografía remota, riesgos, pruebas de aceptación y gates de autorización. No ejecutado.
