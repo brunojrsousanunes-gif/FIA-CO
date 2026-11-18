@@ -144,8 +144,7 @@ Este addendum actualiza los hechos que cambiaron después de la revisión inicia
 - PR #192 sigue abierta y sin fusionar, HEAD `0962ba6102ce341ef323d3c7a886d8ef82cbe000`.
 - CI #727 de PR #192 terminó `success` en PostgreSQL 16 y 17.6 efímero para la versión anterior del trabajo.
 - CI #780 de PR #192 terminó `success` en PostgreSQL 16 y 17.6 para el HEAD actual, incluyendo la batería automatizada, la cadena de migraciones y las pruebas de inventario. No se ejecutó contra Supabase remoto.
-- PR #194 sigue abierta, en borrador y sin fusionar. HEAD documental actual: `15e94029c842b7babf269314675e9f5f3957970a`.
-- CI #770 terminó `success` para un HEAD documental anterior y CI #785 terminó `success` para el HEAD actual, ambos en PostgreSQL 16 y 17.6.
+- PR #194 sigue abierta, en borrador y sin fusionar. CI #786 terminó `success` en PostgreSQL 16 y 17.6 para el commit `fd53a13a25c5b5b90a230415161f2ca31609db41`; CI #785 también había pasado para el HEAD anterior. Este cambio posterior solo registra el resultado de CI, sin modificar código.
 
 ### Estado de datos después de la limpieza
 
