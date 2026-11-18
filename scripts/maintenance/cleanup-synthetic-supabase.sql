@@ -1,4 +1,4 @@
--- ONE-OFF MAINTENANCE SCRIPT. DO NOT RUN AGAINST REMOTE UNTIL BACKUP RESTORE IS VERIFIED.
+-- ONE-OFF MAINTENANCE SCRIPT. Explicitly authorized synthetic-data removal; transactionally guarded.
 -- Scope is pinned to the six inspected synthetic organizations and three synthetic operations.
 -- Keeps every auth.users row. Writes a durable system-attributed cleanup record.
 -- Execute as a controlled database administrator, in one transaction.
