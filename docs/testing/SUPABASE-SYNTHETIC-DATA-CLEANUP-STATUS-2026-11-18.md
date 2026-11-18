@@ -2,7 +2,7 @@
 
 **Proyecto inspeccionado:** FIA-CO (`etttredbkbcgqwciipls`, eu-west-1, PostgreSQL 17.6.1)  
 **Tipo de actuación realizada en esta revisión:** solo lectura.  
-**Estado:** DATOS DE EMPRESAS/OPERACIONES SINTÉTICAS ELIMINADOS Y VERIFICADOS EL 18-11-2026. Las dos cuentas Auth se conservaron; no se borró ninguna identidad.
+**Estado:** DATOS DE EMPRESAS/OPERACIONES SINTÉTICAS ELIMINADOS Y VERIFICADOS EL 18-11-2026. Posteriormente, la cuenta secundaria identificada como Pepitogrillo fue eliminada y verificada. Queda una cuenta Auth preservada; no se ha vuelto a identificar de forma independiente en esta revisión.
 
 ## 1. Recuento observado
 
@@ -26,9 +26,9 @@ Consulta de solo lectura realizada el 18-11-2026:
 | Verificaciones L3 | 0 |
 | Eventos de autorización L3 | 0 |
 | Inventario, movimientos y reservas | 0 |
-| `auth.users` total en el proyecto | 2 |
+| `auth.users` total en el proyecto durante el inventario inicial | 2 |
 
-El usuario Auth vinculado a la pertenencia sintética no tiene otras pertenencias a organizaciones no sintéticas en la consulta actual. **No se debe borrar la cuenta Auth**: podría ser una cuenta personal legítima y no forma parte del alcance de limpieza de empresas/operaciones.
+En el inventario inicial, la cuenta Auth vinculada a la pertenencia sintética se conservó junto con todas las demás cuentas. La cuenta secundaria identificada después como Pepitogrillo se revisó por separado y se eliminó únicamente tras la autorización expresa del usuario y la comprobación de referencias; véase la sección 8. La cuenta restante no se modificó.
 
 Estos datos son registros sintéticos heredados. No son empresas, operaciones ni clientes reales y no deben emplearse como evidencia funcional o comercial.
 
@@ -44,7 +44,7 @@ Además, `operation_audit_events.operation_id` tiene FK `ON DELETE RESTRICT`; la
 
 ## 3. Límites de seguridad
 
-- No se ha borrado ni modificado ningún registro en esta revisión.
+- En la revisión inicial descrita en esta sección no se borró ni modificó ningún registro. La eliminación posterior de la cuenta secundaria se documenta separadamente en la sección 8.
 - No se ha modificado Auth, RLS, grants, triggers, funciones, migraciones ni historial.
 - No se ha verificado un backup restaurable ni PITR disponible.
 - Las herramientas conectadas disponibles no exponen una operación para listar/descargar y restaurar un backup bajo control de esta revisión.
@@ -109,7 +109,7 @@ La rutina se ejecutó en el proyecto remoto `etttredbkbcgqwciipls` en una única
 | Confirmaciones / incidencias / notificaciones / evidencias | 0 / 0 / 0 / 0 |
 | Cualificaciones / verificaciones / perfiles de seguridad | 0 / 0 / 0 |
 | Verificaciones y eventos L3 | 0 / 0 |
-| Cuentas `auth.users` conservadas | 2 |
+| Cuentas `auth.users` conservadas al finalizar la transacción de limpieza de empresas | 2 |
 | Registros privados de auditoría de limpieza | 1 |
 
 Registro de la intervención:
@@ -121,6 +121,35 @@ Registro de la intervención:
 - alcance registrado: 6 organizaciones y 3 operaciones.
 - recuentos retirados: 1 pertenencia, 1 solicitud piloto, 13 eventos de auditoría, 3 costes, 2 ofertas, 9 participantes y 3 registros financieros.
 
-Las cuentas Auth no se tocaron: siguen existiendo 2. Una de ellas no tiene inicio de sesión, pertenencias ni referencias de auditoría; no se eliminó porque no existe evidencia suficiente para asegurar que no sea una cuenta personal. La cuenta que tenía pertenencia también se conservó, aunque su pertenencia de prueba ya no existe.
+En el momento de cerrar la transacción de limpieza de empresas se conservaron las 2 cuentas Auth existentes. Después, por instrucción expresa del usuario, se identificó y eliminó la cuenta secundaria Pepitogrillo; el detalle y las verificaciones posteriores constan en la sección 8. La cuenta restante no fue objeto de modificación.
 
-**Conclusión:** limpieza de empresas, operaciones y datos asociados **COMPROBADA**. Eliminación de cuentas Auth de prueba **PENDIENTE** de identificación inequívoca. No se verificó una restauración de backup; la limpieza se confirmó mediante transacción y consultas posteriores, pero no existe prueba de recuperación desde backup.
+**Conclusión de esta fase:** limpieza de empresas, operaciones y datos asociados **COMPROBADA**. La eliminación de la cuenta secundaria de prueba se documenta como actuación posterior e independiente. No se verificó una restauración de backup; la limpieza se confirmó mediante transacción y consultas posteriores, pero no existe prueba de recuperación desde backup.
+
+
+## 8. Eliminación posterior de la cuenta secundaria Pepitogrillo (18-11-2026)
+
+Esta actuación fue independiente de la limpieza de empresas y se realizó después de recibir autorización expresa del usuario para eliminar la cuenta secundaria identificada como Pepitogrillo.
+
+### Comprobaciones previas
+
+- Se verificó la identidad de la cuenta mediante los metadatos de Auth indicados por el usuario; no se reproduce aquí el correo asociado.
+- La cuenta no tenía pertenencias, solicitudes piloto ni eventos de auditoría pendientes tras la limpieza de empresas.
+- No tenía objetos propios en Storage.
+- Se comprobaron todas las referencias de clave foránea restrictivas revisadas: recuento cero.
+- Se comprobó que las identidades, sesiones y tokens de renovación pertenecían a esa cuenta y que no había dependencias restrictivas que impidieran borrarla.
+
+### Ejecución y verificación posterior
+
+Se eliminó exactamente la cuenta secundaria identificada, dentro de una operación SQL con comprobaciones previas y exigencia de una única fila afectada.
+
+| Comprobación posterior | Resultado |
+|---|---:|
+| Cuenta Pepitogrillo en auth.users | 0 |
+| Identidades Auth asociadas | 0 |
+| Sesiones Auth asociadas | 0 |
+| Tokens de renovación asociados | 0 |
+| Total de cuentas auth.users restantes en el proyecto | 1 |
+
+La única cuenta Auth restante se preservó. No se modificaron sus credenciales, identidad ni sesiones. El recuento demuestra que queda una cuenta, pero esta revisión no vuelve a certificar por sí sola la titularidad de esa cuenta mediante sus datos personales.
+
+**Resultado:** eliminación de la cuenta secundaria Pepitogrillo **COMPROBADA**. Cuenta Auth restante **PRESERVADA**. No se borró ninguna otra cuenta. No se verificó backup restaurable ni PITR.
